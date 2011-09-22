@@ -13,6 +13,8 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.*;
+import org.lwjgl.util.glu.Sphere;
+import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.opengl.Texture;
@@ -35,6 +37,11 @@ public class Main {
 	private int num_points;
 	private DoubleBuffer point_positions;
 	private DoubleBuffer point_colors;
+	
+	private static Vector3f gun_direction;
+	final private static float gun_speed = 0.001f;
+	private static Vector3f pellet_pos;
+	Sphere pellet;
 
 	public static void main(String[] args) {
 		Main main = new Main();
@@ -106,6 +113,10 @@ public class Main {
 		pan_angle = 0;
 		System.out.println("Starting position: " + pos + " Starting velocity: "
 				+ vel);
+		
+		gun_direction = new Vector3f();
+		pellet_pos = new Vector3f();
+		pellet = new Sphere();
 	}
 
 	private void InitData() {
@@ -197,6 +208,14 @@ public class Main {
 			pan_angle -= 360;
 		if (pan_angle < -360)
 			pan_angle += 360;
+		
+		while (Mouse.next()){
+			if (Mouse.getEventButtonState()){
+				if ( Mouse.getEventButton() == 0){
+					ShootPelletGun();
+				}
+			}
+		}
 	}
 
 	private void DisplayLoop() {
@@ -211,7 +230,8 @@ public class Main {
 
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
 
-		Draw(); // draw the actual 3d things
+		DrawPoints(); // draw the actual 3d things
+		DrawPellet();
 
 		glPopMatrix();
 
@@ -220,7 +240,7 @@ public class Main {
 		Display.update();
 	}
 
-	private void Draw() {
+	private void DrawPoints() {
 		glPointSize(2);
 		glBegin(GL_POINTS);
 		for (int i = 0; i < num_points; i += 1) {
@@ -233,6 +253,16 @@ public class Main {
 					point_positions.get(2 * num_points + i));
 		}
 		glEnd();
+	}
+	
+	private void DrawPellet() {
+		Vector3f.add(pellet_pos, gun_direction, pellet_pos);
+		//System.out.println("drawing pellet at: " + pellet_pos);
+		glColor3f(1f, 0f, 0f);
+		glPushMatrix();
+		glTranslatef(pellet_pos.x, pellet_pos.y, pellet_pos.z);
+		pellet.draw(.0005f, 16, 16);
+		glPopMatrix();
 	}
 
 	private void DrawSkybox() {
@@ -342,6 +372,26 @@ public class Main {
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
 
+	}
+	
+	private void ShootPelletGun(){
+		System.out.println("shooting gun");
+		
+		// do all this extra stuff with horizontal angle so that shooting up in the air
+		// makes the pellet go up in the air
+		Vector2f horiz = new Vector2f();
+		horiz.x = (float) Math.sin(pan_angle * 3.14159 / 180f);
+		horiz.y = -1 *(float) Math.cos(pan_angle * 3.14159 / 180f);
+		horiz.normalise();
+		horiz.scale((float) Math.cos(tilt_angle * 3.14159 / 180f));
+		gun_direction.x = horiz.x;
+		gun_direction.z = horiz.y;
+		
+		gun_direction.y = -1 *(float) Math.sin(tilt_angle * 3.14159 / 180f);
+		
+		gun_direction.normalise();
+		gun_direction.scale(gun_speed);
+		pellet_pos.set(pos);
 	}
 
 }
