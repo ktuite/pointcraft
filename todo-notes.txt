@@ -1,0 +1,10 @@
+cool things to do:
+    jumping
+    ground plane that you can walk on
+    shoot things into space (w/o checking pt intersection)
+    shooting the points (w checking pt intersection)
+    changing the size of your gun
+    sheet gun or blobby gun (like shoot at the hand rail)
+    if your new geom is near some other geom, do something
+    hecka threads
+    vbos 
