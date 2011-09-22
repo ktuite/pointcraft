@@ -1,0 +1,26 @@
+LIBDIR = -L/usr/X11R6/lib -L/Users/ktuite/Library/ann_1.1.2/lib -L/usr/local/lib/
+INCDIR = -I/opt/local/include -I/Users/ktuite/Library/ann_1.1.2/include -I/usr/local/include/
+
+APPLIBS = -framework OpenGL -framework GLUT -framework Cocoa \
+	-lgsl -lgslcblas -lX11 -lANN -lglut
+
+SQLDIR = -L/Users/ktuite/Desktop/sketchymodeler/server_code/libspatialite-osx-x86-2.4.0/lib -I/Users/ktuite/Desktop/sketchymodeler/server_code/libspatialite-osx-x86-2.4.0/include
+SQLLIBS = /Users/ktuite/Desktop/sketchymodeler/server_code/libspatialite-osx-x86-2.4.0/lib/libspatialite.a #-lspatialite -lsqlite3 
+
+XFORMLIBS = -lgsl -lgslcblas -lX11
+
+IMGLIBS = -lX11
+
+CC = g++
+
+CFLAGS = -g -Wall -w
+
+libpointcloud.dylib: LibPointCloud.cpp PointCloud.cpp GeometricComponent.cpp
+	$(CC) $(CFLAGS) $(INCDIR) $(LIBDIR) -dynamiclib -o $@ LibPointCloud.cpp PointCloud.cpp GeometricComponent.cpp $(APPLIBS)
+
+ALL: libfunstuff.dylib 
+
+clean:
+	rm -f *.o *.dylib
+
+

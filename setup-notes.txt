@@ -1,0 +1,20 @@
+new java project
+
+make package thing in src
+    edu.washington.cs.games.stuff
+    
+make lib folder, add:
+    jna.jar (java native stuff)
+    TWL.jar (the gui library)
+    xpp3-1.1.4c.jar (i think this is for parsing xml)
+    lwjgl folder
+    
+add jars to build path
+    the above ones and at least lwjgl and the lqjgl_util 
+    
+also add native library stuff
+    project properties, lwjgl, native... link to the macosx stuff in the lwjgl folder
+    
+hot-swapping:
+    must run in debug mode
+    must have a function that you re-enter
