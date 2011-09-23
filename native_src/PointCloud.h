@@ -150,7 +150,7 @@ public:
     
     void SetBasePointIndices();
     
-    int m_num_points; 
+    int m_num_points;
     bool m_has_normals; 
     
     gsl_matrix *m_gsl_points;	// basic storage of points 3xN
@@ -175,6 +175,16 @@ public:
     
     int m_point_budget_base;
     int m_point_budget_extra;
+    
+    ANNpointArray m_ann_points;
+    ANNkd_tree* m_kd_3d;
+    ANNpoint m_query_pt;
+    
+    void MakeKdTree();
+    int QueryKdTree(float x, float y, float z, float radius);
+    void MakeSplat(float x, float y, float z, float radius);
+    int CountVerticesOfLastGeometry();
+    float* GetVerticesOfLastGeometry();
     
 	// all this below is crap
     /*

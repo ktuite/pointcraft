@@ -22,4 +22,24 @@ extern "C" {
     double* getPointColors(){
         return gsl_matrix_ptr(m_point_cloud->m_gsl_colors, 0, 0);
     }
+    
+    void makeKdTree(){
+        m_point_cloud->MakeKdTree();
+    }
+    
+    void queryKdTree(float x, float y, float z, float radius){
+        m_point_cloud->QueryKdTree(x,y,z,radius);
+    }
+    
+    void makeSplat(float x, float y, float z, float radius){
+        m_point_cloud->MakeSplat(x,y,z,radius);
+    }
+    
+    int getVertexCount(){
+        return m_point_cloud->CountVerticesOfLastGeometry();
+    }
+    
+    float* getVertices(){
+        return m_point_cloud->GetVerticesOfLastGeometry();
+    }
 }

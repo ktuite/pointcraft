@@ -8,26 +8,30 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.*;
-import org.lwjgl.util.glu.Sphere;
+import org.lwjgl.util.Timer;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.newdawn.slick.Color;
+import org.newdawn.slick.openal.Audio;
+import org.newdawn.slick.openal.AudioLoader;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
 
 public class Main {
 
-	private static float FOG_COLOR[] = new float[] { .89f, .89f, .89f, 1.0f };
-	private static Vector3f pos;
-	private static Vector3f vel;
-	private static float tilt_angle;
-	private static float pan_angle;
+	private float FOG_COLOR[] = new float[] { .89f, .89f, .89f, 1.0f };
+	private Vector3f pos;
+	private Vector3f vel;
+	private float tilt_angle;
+	private float pan_angle;
 	final private static float walkforce = 1 / 4000f;
 	final private double max_speed = 1;
 	final private float veldecay = .90f;
@@ -37,19 +41,26 @@ public class Main {
 	private int num_points;
 	private DoubleBuffer point_positions;
 	private DoubleBuffer point_colors;
+
+	private Vector3f gun_direction;
+	final private float gun_speed = 0.001f;
+	private List<Pellet> pellets;
+	private List<Pellet> dead_pellets;
 	
-	private static Vector3f gun_direction;
-	final private static float gun_speed = 0.001f;
-	private static Vector3f pellet_pos;
-	Sphere pellet;
+	public static List<Geometry> geometry;
+
+	public static Timer timer = new Timer();
+	
+	public static Audio launch_effect;
+	public static Audio attach_effect;
 
 	public static void main(String[] args) {
 		Main main = new Main();
 
 		main.InitDisplay();
 		main.InitGraphics();
-		main.InitGameVariables();
 		main.InitData();
+		main.InitGameVariables();
 		main.Start();
 	}
 
@@ -88,6 +99,9 @@ public class Main {
 		// getting the ordering of the points right
 		glEnable(GL_DEPTH_TEST);
 
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		
 		// skybox texture loaded
 		try {
 			skybox = TextureLoader.getTexture("JPG",
@@ -113,10 +127,20 @@ public class Main {
 		pan_angle = 0;
 		System.out.println("Starting position: " + pos + " Starting velocity: "
 				+ vel);
-		
+
 		gun_direction = new Vector3f();
-		pellet_pos = new Vector3f();
-		pellet = new Sphere();
+		pellets = new LinkedList<Pellet>();
+		dead_pellets = new LinkedList<Pellet>();
+		geometry = new LinkedList<Geometry>();
+		
+		try {
+			launch_effect = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("assets/launch.wav"));
+			attach_effect = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("assets/attach.wav"));
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.out.println("couldn't load sounds");
+			System.exit(1);
+		}
 	}
 
 	private void InitData() {
@@ -134,10 +158,13 @@ public class Main {
 
 		System.out.println("first point: " + point_positions.get(0));
 		System.out.println("first color: " + point_colors.get(0));
+
+		LibPointCloud.makeKdTree();
 	}
 
 	private void Start() {
 		while (!Display.isCloseRequested()) {
+			Timer.tick();
 			EventLoop(); // input like mouse and keyboard
 			DisplayLoop(); // draw things on the screen
 		}
@@ -208,10 +235,10 @@ public class Main {
 			pan_angle -= 360;
 		if (pan_angle < -360)
 			pan_angle += 360;
-		
-		while (Mouse.next()){
-			if (Mouse.getEventButtonState()){
-				if ( Mouse.getEventButton() == 0){
+
+		while (Mouse.next()) {
+			if (Mouse.getEventButtonState()) {
+				if (Mouse.getEventButton() == 0) {
 					ShootPelletGun();
 				}
 			}
@@ -231,8 +258,12 @@ public class Main {
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
 
 		DrawPoints(); // draw the actual 3d things
-		DrawPellet();
+		DrawPellets();
 
+		for (Geometry geom : geometry) {
+			geom.draw();
+		}
+		
 		glPopMatrix();
 
 		DrawHud();
@@ -254,15 +285,23 @@ public class Main {
 		}
 		glEnd();
 	}
-	
-	private void DrawPellet() {
-		Vector3f.add(pellet_pos, gun_direction, pellet_pos);
-		//System.out.println("drawing pellet at: " + pellet_pos);
-		glColor3f(1f, 0f, 0f);
-		glPushMatrix();
-		glTranslatef(pellet_pos.x, pellet_pos.y, pellet_pos.z);
-		pellet.draw(.0005f, 16, 16);
-		glPopMatrix();
+
+	private void DrawPellets() {
+		for (Pellet pellet : pellets) {
+			pellet.update();
+			if (pellet.alive) {
+				glPushMatrix();
+				glTranslatef(pellet.pos.x, pellet.pos.y, pellet.pos.z);
+				pellet.draw();
+				glPopMatrix();
+			} else {
+				dead_pellets.add(pellet);
+			}
+		}
+		for (Pellet pellet : dead_pellets) {
+			pellets.remove(pellet);
+		}
+		dead_pellets.clear();
 	}
 
 	private void DrawSkybox() {
@@ -301,7 +340,6 @@ public class Main {
 		// two side....
 		glTexCoord2f(.25f, .5f);
 		glVertex3f(-s, s, s);
-		glTexCoord2f(.5f, .5f);
 		glVertex3f(-s, s, -s);
 		glTexCoord2f(.5f, .99f);
 		glVertex3f(-s, -s, -s);
@@ -373,25 +411,33 @@ public class Main {
 		glMatrixMode(GL_MODELVIEW);
 
 	}
-	
-	private void ShootPelletGun(){
+
+	private void ShootPelletGun() {
 		System.out.println("shooting gun");
-		
-		// do all this extra stuff with horizontal angle so that shooting up in the air
+
+		// do all this extra stuff with horizontal angle so that shooting up in
+		// the air
 		// makes the pellet go up in the air
 		Vector2f horiz = new Vector2f();
 		horiz.x = (float) Math.sin(pan_angle * 3.14159 / 180f);
-		horiz.y = -1 *(float) Math.cos(pan_angle * 3.14159 / 180f);
+		horiz.y = -1 * (float) Math.cos(pan_angle * 3.14159 / 180f);
 		horiz.normalise();
 		horiz.scale((float) Math.cos(tilt_angle * 3.14159 / 180f));
 		gun_direction.x = horiz.x;
 		gun_direction.z = horiz.y;
-		
-		gun_direction.y = -1 *(float) Math.sin(tilt_angle * 3.14159 / 180f);
-		
+
+		gun_direction.y = -1 * (float) Math.sin(tilt_angle * 3.14159 / 180f);
+
 		gun_direction.normalise();
-		gun_direction.scale(gun_speed);
-		pellet_pos.set(pos);
+		Pellet pellet = new Pellet();
+		pellet.vel.set(gun_direction);
+		pellet.vel.scale(gun_speed);
+		pellet.pos.set(pos);
+		pellets.add(pellet);
+		
+		launch_effect.playAsSoundEffect(1.0f, 1.0f, false);
+
+		// pellet.StartLoop();
 	}
 
 }

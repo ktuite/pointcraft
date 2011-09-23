@@ -307,6 +307,88 @@ int compare_double_floats(const void *an, const void *bn){
         return 0;
 }
 
+void PointCloud::MakeKdTree(){
+    printf("[PointCloud::MakeKdTree] \n");
+    
+    int old_time = clock();
+    float time_diff = 0;
+    
+    m_query_pt = annAllocPt(3);
+    
+    int num_points = m_num_points;
+    m_ann_points = annAllocPts(num_points, 3); 
+    for (int i = 0; i < num_points; i++){
+        for (int k = 0; k < 3; k++){
+            m_ann_points[i][k] = gsl_matrix_get(m_gsl_points, k, i);
+        }
+    }
+    
+    time_diff = (clock() - old_time) / 1000000.0;
+    old_time = clock();
+    printf("     Time to copy points into ann array: %f\n", time_diff);
+    
+    m_kd_3d = new ANNkd_tree(m_ann_points, num_points, 3);
+    time_diff = (clock() - old_time) / 1000000.0;
+    old_time = clock();
+    printf("     Time to build ann tree: %f\n", time_diff);
+    fflush(stdout);
+}
+
+int PointCloud::QueryKdTree(float x, float y, float z, float radius){
+    m_query_pt[0] = x;
+    m_query_pt[1] = y;
+    m_query_pt[2] = z;
+    int neighbors = m_kd_3d->annkFRSearch(m_query_pt, radius*radius, 0);
+    return neighbors;
+}
+
+void PointCloud::MakeSplat(float x, float y, float z, float radius){
+    m_query_pt[0] = x;
+    m_query_pt[1] = y;
+    m_query_pt[2] = z;
+    
+    m_user_marked_points.clear();
+    int max_neighbors = 10000;
+    ANNidxArray nnIdx = new ANNidx[max_neighbors];
+    ANNdistArray dists = new ANNdist[max_neighbors];
+    
+    int neighbors = m_kd_3d->annkFRSearch(m_query_pt, radius*radius, max_neighbors, nnIdx, dists, 0);
+
+    for (int j = 0; j < min(neighbors, max_neighbors); j++){
+        m_user_marked_points.push_back(nnIdx[j]);
+    }
+    printf("%d points marked\n", m_user_marked_points.size());
+    fflush(stdout);
+    PlaneFloodFillConnected(true);
+    GhettoTriangulateMarkedPoints();
+}
+
+int PointCloud::CountVerticesOfLastGeometry(){ 
+    if(m_geometry.size() == 0)
+        return 0;   
+    
+    GeometricComponent* geom = m_geometry.back();
+    int num_verts = int( geom->m_triangle_vertices.size() );
+    //printf("number of vertices: %d\n", num_verts);
+    fflush(stdout);
+    
+    return num_verts;
+}
+
+float* PointCloud::GetVerticesOfLastGeometry(){  
+     
+    GeometricComponent* geom = m_geometry.back();
+    int num_verts = geom->m_triangle_vertices.size();
+    
+    float* tri = (float*)malloc(num_verts*sizeof(float)*3);
+    for (int i = 0; i < num_verts; i++){
+       for(int k = 0; k < 3; k++)
+            tri[i*3 + k] = geom->m_triangle_vertices[i].pos[k];
+    }
+    
+    return tri;
+}
+
 void PointCloud::ClusterPoints(){
     printf("[PointCloud::ClusterPoints] \n");
     
@@ -1255,14 +1337,15 @@ void PointCloud::PlaneFloodFillConnected(bool boundedByStroke){
     double b = gsl_matrix_get(V, 1, 2);
     double c = gsl_matrix_get(V, 2, 2);
     
-    //printf("plane normal: %f %f %f\n", a,b,c);
+    printf("plane normal: %f %f %f\n", a,b,c);
+    fflush(stdout);
     
     // hessian normal form for doing pt distance stuff 
     double x = marked_points_mean[0];
     double y = marked_points_mean[1];
     double z = marked_points_mean[2];
     
-    //printf("plane centroid: %f %f %f\n", x,y,z);
+    printf("plane centroid: %f %f %f\n", x,y,z);
     
     double d = -1 * (a * x + b * y + c * z);
     SetMarkedPointPlane(a, b, c, d);
@@ -1275,7 +1358,11 @@ void PointCloud::PlaneFloodFillConnected(bool boundedByStroke){
     double dist;
     int kd_budget = 10000;
     for (int h = 0; h < m_num_points; h++){
-        int i = m_cluster_tree[h].pt_idx;
+        int i = h;
+        //printf("int i: %d\n", i);
+        //fflush(stdout);
+        if (m_cluster_tree)
+            i = m_cluster_tree[h].pt_idx;
         if (!m_delete[i]){
             dist = 0;
             for (int k = 0; k < 3; k++){
@@ -3723,6 +3810,9 @@ void PointCloud::ReflectPoint(float *x, float *y, double line_m, double line_b){
 void PointCloud::GhettoTriangulateMarkedPoints(){
     // looks at points marked as PT_MARK2
     // put things into m_triangle_points
+    if (m_marked_points.size() == 0){
+        return;
+    }
     
     double mean_pos[3];
     int num_marked_points = 0;
@@ -3789,8 +3879,8 @@ void PointCloud::GhettoTriangulateMarkedPoints(){
     
     printf("max and min: %f %f %f %f\n", min_x, max_x, min_y, max_y);
     float ratio = (max_x - min_x) / (max_y - min_y);
-    int samp1 = sqrt(num_marked_points * ratio) / 2.0;
-    int samp2 = sqrt(num_marked_points / ratio) / 2.0;
+    int samp1 = 10; //sqrt(num_marked_points * ratio) / 2.0;
+    int samp2 = 10; //sqrt(num_marked_points / ratio) / 2.0;
     printf("sample number: %d %d\n", samp1, samp2);
     gsl_matrix *svd_space = gsl_matrix_calloc(samp1*samp2, 3);
     gsl_matrix *real_space = gsl_matrix_calloc(samp1*samp2, 3);
@@ -3868,9 +3958,9 @@ void PointCloud::GhettoTriangulateMarkedPoints(){
         gsl_matrix_set(new_colors, i, 1, g);
         gsl_matrix_set(new_colors, i, 2, b);
         
-        gsl_matrix_set(svd_space, i, 0, x);
-        gsl_matrix_set(svd_space, i, 1, y);
-        gsl_matrix_set(svd_space, i, 2, z);
+        //gsl_matrix_set(svd_space, i, 0, x);
+        //gsl_matrix_set(svd_space, i, 1, y);
+        //gsl_matrix_set(svd_space, i, 2, z);
         
     }
     
@@ -3900,7 +3990,7 @@ void PointCloud::GhettoTriangulateMarkedPoints(){
             
             int the_j = i%samp2;
             int the_i = (i - the_j)/samp2;
-            printf("ghetto geom, %f %f\n", the_i, the_j);
+            //printf("ghetto geom, %f %f\n", the_i, the_j);
             vert.tex[0] = float(the_i)/samp1;
             vert.tex[1] = float(the_j)/samp2;
         
