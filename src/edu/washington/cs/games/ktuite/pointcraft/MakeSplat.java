@@ -4,13 +4,13 @@ import java.nio.FloatBuffer;
 
 import org.lwjgl.util.vector.Vector3f;
 
-public class SplatGeometry implements Runnable  {
+public class MakeSplat implements Runnable  {
 
 	public Vector3f pos;
 	public float radius;
 	public Pellet pellet;
 	
-	public SplatGeometry(Vector3f _pos, float _radius, Pellet _pellet){
+	public MakeSplat(Vector3f _pos, float _radius, Pellet _pellet){
 		pos = _pos;
 		radius = _radius;
 		pellet = _pellet;

@@ -81,7 +81,7 @@ public class Main {
 		// view matrix
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		gluPerspective(60, 800 / 600, .001f, 1000.0f);
+		gluPerspective(60, 800.0f / 600.0f, .001f, 1000.0f);
 		glMatrixMode(GL_MODELVIEW);
 
 		// fog
@@ -145,7 +145,6 @@ public class Main {
 
 	private void InitData() {
 		// data of the point cloud itself, loaded in from C++
-		System.out.println("the number four: " + LibPointCloud.getFour());
 		LibPointCloud
 				.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
 		System.out.println("number of points: " + LibPointCloud.getNumPoints());
@@ -416,8 +415,7 @@ public class Main {
 		System.out.println("shooting gun");
 
 		// do all this extra stuff with horizontal angle so that shooting up in
-		// the air
-		// makes the pellet go up in the air
+		// the air makes the pellet go up in the air
 		Vector2f horiz = new Vector2f();
 		horiz.x = (float) Math.sin(pan_angle * 3.14159 / 180f);
 		horiz.y = -1 * (float) Math.cos(pan_angle * 3.14159 / 180f);
@@ -425,19 +423,14 @@ public class Main {
 		horiz.scale((float) Math.cos(tilt_angle * 3.14159 / 180f));
 		gun_direction.x = horiz.x;
 		gun_direction.z = horiz.y;
-
 		gun_direction.y = -1 * (float) Math.sin(tilt_angle * 3.14159 / 180f);
-
 		gun_direction.normalise();
-		Pellet pellet = new Pellet();
+		
+		Pellet pellet = new Pellet(pellets);
 		pellet.vel.set(gun_direction);
 		pellet.vel.scale(gun_speed);
 		pellet.pos.set(pos);
 		pellets.add(pellet);
-		
-		launch_effect.playAsSoundEffect(1.0f, 1.0f, false);
-
-		// pellet.StartLoop();
 	}
 
 }
