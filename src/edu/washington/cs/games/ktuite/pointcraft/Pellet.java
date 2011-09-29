@@ -1,5 +1,6 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.lwjgl.util.glu.Sphere;
@@ -18,7 +19,8 @@ public class Pellet {
 	public float birthday;
 	private List<Pellet> main_pellets;
 
-	public static boolean MAKE_SPLAT = false;
+	public static boolean CONNECT_TO_PREVIOUS = true;
+	public static List<Pellet> current_cycle = new LinkedList<Pellet>();
 
 	/*
 	 * A Pellet is a magical thing that you can shoot out of a gun that will
@@ -54,14 +56,24 @@ public class Pellet {
 			if (Main.timer.getTime() - birthday > 5) {
 				alive = false;
 			} else {
+
 				// if it's not dead yet, see if this pellet was shot at an
 				// existing pellet
-				boolean neighbor_pellet = queryOtherPellets();
-				if (neighbor_pellet) {
-					System.out.println("shot at another pellet");
+				Pellet neighbor_pellet = queryOtherPellets();
+				if (neighbor_pellet != null) {
 					alive = false;
+					current_cycle.add(neighbor_pellet);
+					if (current_cycle.size() > 1)
+						makeLine();
+
+					if (current_cycle.size() > 2
+							&& current_cycle.get(0) == current_cycle
+									.get(current_cycle.size() - 1))
+						makePolygon();
+
 				} else {
-					// if it's not dead yet, look for nearby points in model
+					// if it's not dead yet and also didn't hit a neighboring
+					// pellet, look for nearby points in model
 					int neighbors = LibPointCloud.queryKdTree(pos.x, pos.y,
 							pos.z, radius);
 
@@ -70,13 +82,12 @@ public class Pellet {
 						constructing = true;
 						Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
 
-						// build something at the pellet?
-						if (MAKE_SPLAT) {
-							(new Thread(
-									new MakeSplat(pos, max_radius, this)))
-									.start();
-						}
+						if (CONNECT_TO_PREVIOUS)
+							current_cycle.add(this);
 
+						if (CONNECT_TO_PREVIOUS && current_cycle.size() > 1) {
+							makeLine();
+						}
 					}
 				}
 			}
@@ -89,20 +100,40 @@ public class Pellet {
 		}
 	}
 
-	public boolean queryOtherPellets() {
+	public Pellet queryOtherPellets() {
 		for (Pellet pellet : main_pellets) {
 			if (pellet != this) {
 				Vector3f dist = new Vector3f();
 				Vector3f.sub(pos, pellet.pos, dist);
 				if (dist.length() < radius * 2) {
 					System.out.println("yes, i hit another pellet");
-					return true;
+					return pellet;
 				}
 			}
 		}
-		return false;
+		return null;
 	}
 
+	public void makeLine() {
+		// make a line between 2 pellets
+		List<Vector3f> last_two = new LinkedList<Vector3f>();
+		last_two.add(current_cycle.get(current_cycle.size() - 2).pos);
+		last_two.add(current_cycle.get(current_cycle.size() - 1).pos);
+		Main.geometry.add(new Primitive(GL_LINES, last_two));
+	}
+
+	public void makePolygon() {
+		// make the polygon
+		List<Vector3f> cycle = new LinkedList<Vector3f>();
+		for (Pellet p : current_cycle) {
+			cycle.add(p.pos);
+		}
+		cycle.add(this.pos);
+		Main.geometry.add(new Primitive(GL_POLYGON, cycle));
+
+		current_cycle.clear();
+	}
+	
 	public void draw() {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;

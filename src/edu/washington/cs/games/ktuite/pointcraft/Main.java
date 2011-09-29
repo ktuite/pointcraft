@@ -44,13 +44,13 @@ public class Main {
 
 	private Vector3f gun_direction;
 	final private float gun_speed = 0.001f;
-	private List<Pellet> pellets;
+	private static List<Pellet> pellets;
 	private List<Pellet> dead_pellets;
-	
-	public static List<Geometry> geometry;
+
+	public static List<Primitive> geometry;
 
 	public static Timer timer = new Timer();
-	
+
 	public static Audio launch_effect;
 	public static Audio attach_effect;
 
@@ -101,7 +101,7 @@ public class Main {
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		
+
 		// skybox texture loaded
 		try {
 			skybox = TextureLoader.getTexture("JPG",
@@ -131,11 +131,13 @@ public class Main {
 		gun_direction = new Vector3f();
 		pellets = new LinkedList<Pellet>();
 		dead_pellets = new LinkedList<Pellet>();
-		geometry = new LinkedList<Geometry>();
-		
+		geometry = new LinkedList<Primitive>();
+
 		try {
-			launch_effect = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("assets/launch.wav"));
-			attach_effect = AudioLoader.getAudio("WAV", ResourceLoader.getResourceAsStream("assets/attach.wav"));
+			launch_effect = AudioLoader.getAudio("WAV",
+					ResourceLoader.getResourceAsStream("assets/launch.wav"));
+			attach_effect = AudioLoader.getAudio("WAV",
+					ResourceLoader.getResourceAsStream("assets/attach.wav"));
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("couldn't load sounds");
@@ -171,7 +173,29 @@ public class Main {
 		Display.destroy();
 	}
 
+	private static void undoLastPellet() {
+		if (Pellet.current_cycle.size() > 0) {
+			Pellet.current_cycle.remove(Pellet.current_cycle.size() - 1);
+			if (pellets.size() > 0) {
+				pellets.remove(pellets.size() - 1);
+			}
+			if (geometry.size() > 0) {
+				geometry.remove(geometry.size() - 1);
+			}
+		}
+
+	}
+
 	private void EventLoop() {
+		// undoing actions
+		if (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29)) {
+			if (Keyboard.next() && Keyboard.getEventKeyState()
+					&& Keyboard.getEventKey() == Keyboard.KEY_Z) {
+				System.out.println("UNDO!");
+				undoLastPellet();
+			}
+		}
+
 		// WASD key motion, with a little bit of gliding
 		if (Keyboard.isKeyDown(Keyboard.KEY_W)
 				|| Keyboard.isKeyDown(Keyboard.KEY_UP)) {
@@ -259,10 +283,10 @@ public class Main {
 		DrawPoints(); // draw the actual 3d things
 		DrawPellets();
 
-		for (Geometry geom : geometry) {
+		for (Primitive geom : geometry) {
 			geom.draw();
 		}
-		
+
 		glPopMatrix();
 
 		DrawHud();
@@ -389,6 +413,8 @@ public class Main {
 		glOrtho(-1, 1, 1, -1, -1, 1);
 		glColor3f(1f, 1f, 1f);
 		float f = 0.05f;
+
+		glLineWidth(1f);
 		glBegin(GL_LINES);
 		glVertex2f(0, f);
 		glVertex2f(0, -f);
@@ -425,7 +451,7 @@ public class Main {
 		gun_direction.z = horiz.y;
 		gun_direction.y = -1 * (float) Math.sin(tilt_angle * 3.14159 / 180f);
 		gun_direction.normalise();
-		
+
 		Pellet pellet = new Pellet(pellets);
 		pellet.vel.set(gun_direction);
 		pellet.vel.scale(gun_speed);
