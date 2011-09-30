@@ -116,19 +116,25 @@ public class Pellet {
 
 	public void makeLine() {
 		// make a line between 2 pellets
+		/*
 		List<Vector3f> last_two = new LinkedList<Vector3f>();
 		last_two.add(current_cycle.get(current_cycle.size() - 2).pos);
 		last_two.add(current_cycle.get(current_cycle.size() - 1).pos);
+		Main.geometry.add(new Primitive(GL_LINES, last_two));
+		*/
+		List<Pellet> last_two = new LinkedList<Pellet>();
+		last_two.add(current_cycle.get(current_cycle.size() - 2));
+		last_two.add(current_cycle.get(current_cycle.size() - 1));
 		Main.geometry.add(new Primitive(GL_LINES, last_two));
 	}
 
 	public void makePolygon() {
 		// make the polygon
-		List<Vector3f> cycle = new LinkedList<Vector3f>();
+		List<Pellet> cycle = new LinkedList<Pellet>();
 		for (Pellet p : current_cycle) {
-			cycle.add(p.pos);
+			cycle.add(p);
 		}
-		cycle.add(this.pos);
+		cycle.add(this);
 		Main.geometry.add(new Primitive(GL_POLYGON, cycle));
 
 		current_cycle.clear();

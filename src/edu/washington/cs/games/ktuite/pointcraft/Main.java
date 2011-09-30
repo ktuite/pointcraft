@@ -44,7 +44,7 @@ public class Main {
 
 	private Vector3f gun_direction;
 	final private float gun_speed = 0.001f;
-	private static List<Pellet> pellets;
+	public static List<Pellet> pellets;
 	private List<Pellet> dead_pellets;
 
 	public static List<Primitive> geometry;
@@ -189,10 +189,17 @@ public class Main {
 	private void EventLoop() {
 		// undoing actions
 		if (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29)) {
-			if (Keyboard.next() && Keyboard.getEventKeyState()
-					&& Keyboard.getEventKey() == Keyboard.KEY_Z) {
-				System.out.println("UNDO!");
-				undoLastPellet();
+			while (Keyboard.next()) {
+				if (Keyboard.getEventKeyState()
+						&& Keyboard.getEventKey() == Keyboard.KEY_Z) {
+					System.out.println("UNDO!");
+					undoLastPellet();
+				}
+				if (Keyboard.getEventKeyState()
+						&& Keyboard.getEventKey() == Keyboard.KEY_S) {
+					System.out.println("SAVE!");
+					Save.attemptToSave();
+				}
 			}
 		}
 
