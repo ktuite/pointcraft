@@ -26,34 +26,42 @@ import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
 
 public class Main {
-
-	final public static float world_scale = 1f; //40f;
+	// stuff about the atmosphere
 	private float FOG_COLOR[] = new float[] { .89f, .89f, .89f, 1.0f };
+	public static Audio launch_effect;
+	public static Audio attach_effect;
+
+	// stuff about the world and how you move around
+	public static float world_scale = 1f; // 40f;
 	private Vector3f pos;
 	private Vector3f vel;
 	private float tilt_angle;
 	private float pan_angle;
-	final private static float walkforce = 1 / 4000f * world_scale;
-	final private double max_speed = 1 * world_scale;
-	final private float veldecay = .90f;
-	final private float stilts = 0.01f * world_scale;
+	private float veldecay = .90f;
+	private static float walkforce = 1 / 4000f * world_scale;
+	private double max_speed = 1 * world_scale;
+	private float stilts = 0.01f * world_scale;
 	private Texture skybox = null;
 
+	// stuff about the point cloud
 	private int num_points;
 	private DoubleBuffer point_positions;
 	private DoubleBuffer point_colors;
 
+	// stuff about general guns and general list of pellets/things shot
 	private Vector3f gun_direction;
 	final private float gun_speed = 0.001f * world_scale;
-	public static List<Pellet> pellets;
-	private List<Pellet> dead_pellets;
-
-	public static List<Primitive> geometry;
-
 	public static Timer timer = new Timer();
+	public static List<Pellet> all_pellets_in_world;
+	private List<Pellet> all_dead_pellets_in_world;
 
-	public static Audio launch_effect;
-	public static Audio attach_effect;
+	// TODO: WHICH GUN... temporary
+	private static boolean plane_gun = true;
+
+	// TODO: move out of here and put somewhere else since this is a certain
+	// kind of geometry
+	public static List<Primitive> geometry;
+	public static List<PrimitiveVertex> geometry_v;
 
 	public static void main(String[] args) {
 		Main main = new Main();
@@ -95,7 +103,7 @@ public class Main {
 		glFogf(GL_FOG_END, 3.0f);
 		glFogf(GL_FOG_START, .15f);
 		glFogf(GL_FOG_DENSITY, 5.0f);
-		//glEnable(GL_FOG);
+		// glEnable(GL_FOG);
 
 		// getting the ordering of the points right
 		glEnable(GL_DEPTH_TEST);
@@ -120,6 +128,12 @@ public class Main {
 			System.exit(1);
 		}
 	}
+	
+	private void SetGameVariablesFromWorldScale(){
+		walkforce = 1 / 4000f * world_scale;
+		max_speed = 1 * world_scale;
+		stilts = 0.01f * world_scale;
+	}
 
 	private void InitGameVariables() {
 		pos = new Vector3f();
@@ -130,9 +144,13 @@ public class Main {
 				+ vel);
 
 		gun_direction = new Vector3f();
-		pellets = new LinkedList<Pellet>();
-		dead_pellets = new LinkedList<Pellet>();
+		all_pellets_in_world = new LinkedList<Pellet>();
+		all_dead_pellets_in_world = new LinkedList<Pellet>();
+
+		// TODO: Move this crap elsewhere... init the different geometry
+		// containers individually
 		geometry = new LinkedList<Primitive>();
+		geometry_v = new LinkedList<PrimitiveVertex>();
 
 		try {
 			launch_effect = AudioLoader.getAudio("WAV",
@@ -150,8 +168,8 @@ public class Main {
 		// data of the point cloud itself, loaded in from C++
 		LibPointCloud
 				.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
-		//LibPointCloud
-		//	.loadBundle("/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out");
+		// LibPointCloud
+		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out");
 		System.out.println("number of points: " + LibPointCloud.getNumPoints());
 
 		num_points = LibPointCloud.getNumPoints();
@@ -162,8 +180,33 @@ public class Main {
 
 		System.out.println("first point: " + point_positions.get(0));
 		System.out.println("first color: " + point_colors.get(0));
+		
+		FindMinMaxOfWorld();
+		SetGameVariablesFromWorldScale();
 
 		LibPointCloud.makeKdTree();
+	}
+	
+	private void FindMinMaxOfWorld(){
+		float[] min_point = new float[3];
+		float[] max_point = new float[3];
+		for (int k = 0; k < 3; k++) {
+			min_point[k] = Float.MAX_VALUE;
+			max_point[k] = Float.MIN_VALUE;
+		}
+
+		for (int i = 0; i < num_points; i++) {
+			for (int k = 0; k < 3; k++) {
+				float p = (float) point_positions.get(k * num_points + i);
+				if (p < min_point[k])
+					min_point[k] = p;
+				if (p > max_point[k])
+					max_point[k] = p;
+			}
+		}
+		
+		world_scale = (float) (((max_point[1] - min_point[1])) / 0.071716); // lewis hall height for scale ref... 
+		System.out.println("world scale: " + world_scale);
 	}
 
 	private void Start() {
@@ -177,15 +220,18 @@ public class Main {
 	}
 
 	private static void undoLastPellet() {
-		if (Pellet.current_cycle.size() > 0) {
-			Pellet.current_cycle.remove(Pellet.current_cycle.size() - 1);
-			if (pellets.size() > 0) {
-				pellets.remove(pellets.size() - 1);
-			}
-			if (geometry.size() > 0) {
-				geometry.remove(geometry.size() - 1);
-			}
+		if (all_pellets_in_world.size() > 0) {
+			all_pellets_in_world.remove(all_pellets_in_world.size() - 1);
 		}
+		// TODO: horribly broke undoing for making cycles except it wasnt that
+		// great to begin with
+		/*
+		 * if (Pellet.current_cycle.size() > 0) {
+		 * Pellet.current_cycle.remove(Pellet.current_cycle.size() - 1); if
+		 * (all_pellets_in_world.size() > 0) {
+		 * all_pellets_in_world.remove(all_pellets_in_world.size() - 1); } if
+		 * (geometry.size() > 0) { geometry.remove(geometry.size() - 1); } }
+		 */
 
 	}
 
@@ -272,7 +318,7 @@ public class Main {
 		while (Mouse.next()) {
 			if (Mouse.getEventButtonState()) {
 				if (Mouse.getEventButton() == 0) {
-					ShootPelletGun();
+					ShootGun();
 				}
 			}
 		}
@@ -294,6 +340,9 @@ public class Main {
 		DrawPellets();
 
 		for (Primitive geom : geometry) {
+			geom.draw();
+		}
+		for (PrimitiveVertex geom : geometry_v) {
 			geom.draw();
 		}
 
@@ -320,7 +369,7 @@ public class Main {
 	}
 
 	private void DrawPellets() {
-		for (Pellet pellet : pellets) {
+		for (Pellet pellet : all_pellets_in_world) {
 			pellet.update();
 			if (pellet.alive) {
 				glPushMatrix();
@@ -328,13 +377,13 @@ public class Main {
 				pellet.draw();
 				glPopMatrix();
 			} else {
-				dead_pellets.add(pellet);
+				all_dead_pellets_in_world.add(pellet);
 			}
 		}
-		for (Pellet pellet : dead_pellets) {
-			pellets.remove(pellet);
+		for (Pellet pellet : all_dead_pellets_in_world) {
+			all_pellets_in_world.remove(pellet);
 		}
-		dead_pellets.clear();
+		all_dead_pellets_in_world.clear();
 	}
 
 	private void DrawSkybox() {
@@ -411,7 +460,7 @@ public class Main {
 		glEnd();
 
 		glDisable(GL_TEXTURE_2D);
-		//glEnable(GL_FOG);
+		// glEnable(GL_FOG);
 		glEnable(GL_DEPTH_TEST);
 	}
 
@@ -424,29 +473,38 @@ public class Main {
 		glColor3f(1f, 1f, 1f);
 		float f = 0.05f;
 
-		glLineWidth(1f);
-		glBegin(GL_LINES);
-		glVertex2f(0, f);
-		glVertex2f(0, -f);
-		glVertex2f(f * 600 / 800, 0);
-		glVertex2f(-f * 600 / 800, 0);
-		glEnd();
+		if (plane_gun) {
+			glBegin(GL_LINE_LOOP);
+			glVertex2f(0, f);
+			glVertex2f(f * 600 / 800, 0);
+			glVertex2f(0, -f);
+			glVertex2f(-f * 600 / 800, 0);
+			glEnd();
+		} else {
+			glLineWidth(1f);
+			glBegin(GL_LINES);
+			glVertex2f(0, f);
+			glVertex2f(0, -f);
+			glVertex2f(f * 600 / 800, 0);
+			glVertex2f(-f * 600 / 800, 0);
+			glEnd();
 
-		glBegin(GL_LINE_LOOP);
-		int n = 30;
-		for (int i = 0; i < n; i++) {
-			float angle = (float) (Math.PI * 2 * i / n);
-			float x = (float) (Math.cos(angle) * f * 0.75 * 600 / 800);
-			float y = (float) (Math.sin(angle) * f * 0.75);
-			glVertex2f(x, y);
+			glBegin(GL_LINE_LOOP);
+			int n = 30;
+			for (int i = 0; i < n; i++) {
+				float angle = (float) (Math.PI * 2 * i / n);
+				float x = (float) (Math.cos(angle) * f * 0.75 * 600 / 800);
+				float y = (float) (Math.sin(angle) * f * 0.75);
+				glVertex2f(x, y);
+			}
+			glEnd();
 		}
-		glEnd();
-
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
 
 	}
 
+	@SuppressWarnings("unused")
 	private void ShootPelletGun() {
 		System.out.println("shooting gun");
 
@@ -462,11 +520,38 @@ public class Main {
 		gun_direction.y = -1 * (float) Math.sin(tilt_angle * 3.14159 / 180f);
 		gun_direction.normalise();
 
-		Pellet pellet = new Pellet(pellets);
+		Pellet pellet = new Pellet(all_pellets_in_world);
 		pellet.vel.set(gun_direction);
 		pellet.vel.scale(gun_speed);
 		pellet.pos.set(pos);
-		pellets.add(pellet);
+		all_pellets_in_world.add(pellet);
+	}
+
+	private void ShootGun() {
+		System.out.println("shooting gun");
+
+		// do all this extra stuff with horizontal angle so that shooting up in
+		// the air makes the pellet go up in the air
+		Vector2f horiz = new Vector2f();
+		horiz.x = (float) Math.sin(pan_angle * 3.14159 / 180f);
+		horiz.y = -1 * (float) Math.cos(pan_angle * 3.14159 / 180f);
+		horiz.normalise();
+		horiz.scale((float) Math.cos(tilt_angle * 3.14159 / 180f));
+		gun_direction.x = horiz.x;
+		gun_direction.z = horiz.y;
+		gun_direction.y = -1 * (float) Math.sin(tilt_angle * 3.14159 / 180f);
+		gun_direction.normalise();
+
+		Pellet pellet = null;
+		if (plane_gun) {
+			pellet = new PlanePellet(all_pellets_in_world);
+		} else {
+			pellet = new PolygonPellet(all_pellets_in_world);
+		}
+		pellet.vel.set(gun_direction);
+		pellet.vel.scale(gun_speed);
+		pellet.pos.set(pos);
+		all_pellets_in_world.add(pellet);
 	}
 
 }

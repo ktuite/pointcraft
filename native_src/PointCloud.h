@@ -186,6 +186,7 @@ public:
     void MakeSplat(float x, float y, float z, float radius);
     int CountVerticesOfLastGeometry();
     float* GetVerticesOfLastGeometry();
+    double* FitPlaneToPoints(int n, double *pts);
     
 	// all this below is crap
     /*

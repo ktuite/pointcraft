@@ -1,0 +1,204 @@
+package edu.washington.cs.games.ktuite.pointcraft;
+
+import java.nio.DoubleBuffer;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.lwjgl.BufferUtils;
+import org.lwjgl.util.vector.Vector3f;
+
+import com.sun.jna.Native;
+import com.sun.jna.Pointer;
+
+import static org.lwjgl.opengl.GL11.*;
+
+public class PlanePellet extends Pellet {
+
+	public static List<PlanePellet> current_plane = new LinkedList<PlanePellet>();
+
+	/*
+	 * A Pellet is a magical thing that you can shoot out of a gun that will
+	 * travel towards the model and stick to the first point it intersects.
+	 * 
+	 * Soon it will even stick to other pellets.
+	 */
+	public PlanePellet(List<Pellet> _pellets) {
+		super(_pellets);
+	}
+
+	public void update() {
+		// constructing means the pellet has triggered something to be built at
+		// its sticking location
+		if (!constructing) {
+			// not constructing means the pellet is still traveling through
+			// space
+
+			// move the pellet
+			Vector3f.add(pos, vel, pos);
+
+			// if it's too old, kill it
+			if (Main.timer.getTime() - birthday > 5) {
+				alive = false;
+			} else {
+
+				// if it's not dead yet, see if this pellet was shot at an
+				// existing pellet
+				Pellet neighbor_pellet = queryOtherPellets();
+				if (neighbor_pellet != null) {
+					alive = false;
+				} else {
+					// if it's not dead yet and also didn't hit a neighboring
+					// pellet, look for nearby points in model
+					int neighbors = LibPointCloud.queryKdTree(pos.x, pos.y,
+							pos.z, radius);
+
+					// is it near some points?!
+					if (neighbors > 0) {
+						constructing = true;
+						Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
+						current_plane.add(this);
+						fitPlane();
+					}
+				}
+
+			}
+		} else {
+			// the pellet has stuck... here we just give it a nice growing
+			// bubble animation
+			if (radius < max_radius) {
+				radius *= 1.1;
+			}
+		}
+	}
+
+	public void draw() {
+		if (constructing) {
+			float alpha = 1 - radius / max_radius * .2f;
+			glColor4f(.2f, .1f, .7f, alpha);
+			sphere.draw(radius, 32, 32);
+		} else {
+			glColor4f(.2f, .2f, .7f, 1f);
+			sphere.draw(radius, 32, 32);
+		}
+	}
+
+	private void fitPlane() {
+		int n = current_plane.size();
+		if (n < 3)
+			return;
+
+		DoubleBuffer plane_points = BufferUtils.createDoubleBuffer(n * 3);
+		for (Pellet pellet : current_plane) {
+			plane_points.put(pellet.pos.x);
+			plane_points.put(pellet.pos.y);
+			plane_points.put(pellet.pos.z);
+		}
+
+		Pointer point_buffer = Native.getDirectBufferPointer(plane_points);
+		DoubleBuffer output = LibPointCloud.fitPlane(n, point_buffer)
+				.getByteBuffer(0, 4 * 8).asDoubleBuffer();
+
+		/*
+		 * for (int i = 0; i < 4; i++) { System.out.println("magical output: " +
+		 * output.get(i)); }
+		 */
+		
+		float a = (float) output.get(0);
+		float b = (float) output.get(1);
+		float c = (float) output.get(2);
+		float d = (float) output.get(3);
+
+		float pts[] = new float[12];
+		float f = 0.14f;
+		
+		Vector3f interp[] = new Vector3f[3];
+		
+		if (Math.abs(a) > Math.abs(b) && Math.abs(a) > Math.abs(c)){
+			// set y and z
+			pts[0*3 + 1] = 1*f;
+			pts[0*3 + 2] = 1*f;
+			pts[0*3 + 0] = -1 * (pts[0*3 + 1] * b + pts[0*3 + 2] * c + d)/a;
+			
+			pts[1*3 + 1] = 1*f;
+			pts[1*3 + 2] = -1*f;
+			pts[1*3 + 0] = -1 * (pts[1*3 + 1] * b + pts[1*3 + 2] * c + d)/a;
+			
+			pts[2*3 + 1] = -1*f;
+			pts[2*3 + 2] = -1*f;
+			pts[1*3 + 0] = -1 * (pts[2*3 + 1] * b + pts[2*3 + 2] * c + d)/a;
+			
+			pts[3*3 + 1] = -1*f;
+			pts[3*3 + 2] = 1*f;
+			pts[1*3 + 0] = -1 * (pts[3*3 + 1] * b + pts[3*3 + 2] * c + d)/a;
+		}
+		else if (Math.abs(b) > Math.abs(a) && Math.abs(b) > Math.abs(c)){
+			// horizontal plane! set x and z
+			pts[0*3 + 0] = 1*f;
+			pts[0*3 + 2] = 1*f;
+			pts[0*3 + 1] = -1 * (pts[0*3 + 0] * a + pts[0*3 + 2] * c + d)/b;
+			
+			pts[1*3 + 0] = 1*f;
+			pts[1*3 + 2] = -1*f;
+			pts[1*3 + 1] = -1 * (pts[1*3 + 0] * a + pts[1*3 + 2] * c + d)/b;
+			
+			pts[2*3 + 0] = -1*f;
+			pts[2*3 + 2] = -1*f;
+			pts[2*3 + 1] = -1 * (pts[2*3 + 0] * a + pts[2*3 + 2] * c + d)/b;
+			
+			pts[3*3 + 0] = -1*f;
+			pts[3*3 + 2] = 1*f;
+			pts[3*3 + 1] = -1 * (pts[3*3 + 0] * a + pts[3*3 + 2] * c + d)/b;
+		}
+		else {
+			// set x and y
+			pts[0*3 + 0] = 1*f;
+			pts[0*3 + 1] = 1*f;
+			pts[0*3 + 2] = -1 * (pts[0*3 + 0] * a + pts[0*3 + 1] * b + d)/c;
+			
+			pts[1*3 + 0] = 1*f;
+			pts[1*3 + 1] = -1*f;
+			pts[1*3 + 2] = -1 * (pts[1*3 + 0] * a + pts[1*3 + 1] * b + d)/c;
+			
+			pts[2*3 + 0] = -1*f;
+			pts[2*3 + 1] = -1*f;
+			pts[2*3 + 2] = -1 * (pts[2*3 + 0] * a + pts[2*3 + 1] * b + d)/c;
+			
+			pts[3*3 + 0] = -1*f;
+			pts[3*3 + 1] = 1*f;
+			pts[3*3 + 2] = -1 * (pts[3*3 + 0] * a + pts[3*3 + 1] * b + d)/c;
+		}
+		
+		List<Vector3f> boundary_pellets = new LinkedList<Vector3f>();
+
+		float grid = 40;
+		for (int i = 0; i <= grid; i++){
+			Vector3f begin = new Vector3f();
+			Vector3f end = new Vector3f();
+			begin.x = pts[0*3 + 0] * i/grid + pts[1*3 + 0] * (1-i/grid);
+			begin.y = pts[0*3 + 1] * i/grid + pts[1*3 + 1] * (1-i/grid);
+			begin.z = pts[0*3 + 2] * i/grid + pts[1*3 + 2] * (1-i/grid);
+			end.x = pts[3*3 + 0] * i/grid + pts[2*3 + 0] * (1-i/grid);
+			end.y = pts[3*3 + 1] * i/grid + pts[2*3 + 1] * (1-i/grid);
+			end.z = pts[3*3 + 2] * i/grid + pts[2*3 + 2] * (1-i/grid);
+			boundary_pellets.add(begin);
+			boundary_pellets.add(end);
+		}
+		for (int i = 0; i <= grid; i++){
+			Vector3f begin = new Vector3f();
+			Vector3f end = new Vector3f();
+			begin.x = pts[0*3 + 0] * i/grid + pts[3*3 + 0] * (1-i/grid);
+			begin.y = pts[0*3 + 1] * i/grid + pts[3*3 + 1] * (1-i/grid);
+			begin.z = pts[0*3 + 2] * i/grid + pts[3*3 + 2] * (1-i/grid);
+			end.x = pts[1*3 + 0] * i/grid + pts[2*3 + 0] * (1-i/grid);
+			end.y = pts[1*3 + 1] * i/grid + pts[2*3 + 1] * (1-i/grid);
+			end.z = pts[1*3 + 2] * i/grid + pts[2*3 + 2] * (1-i/grid);
+			boundary_pellets.add(begin);
+			boundary_pellets.add(end);
+		}
+		
+		if (Main.geometry_v.size() == 1)
+			Main.geometry_v.remove(0);
+		Main.geometry_v.add(new PrimitiveVertex(GL_LINES, boundary_pellets, 1));
+		
+	}
+}

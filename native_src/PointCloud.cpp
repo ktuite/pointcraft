@@ -498,6 +498,58 @@ float* PointCloud::GetVerticesOfLastGeometry(){
     return tri;
 }
 
+double* PointCloud::FitPlaneToPoints(int n, double *pts){
+    // fit a plane to the points made by some pellets in java
+    gsl_matrix *sample_points = gsl_matrix_calloc(n, 3);
+    
+    double mean[3];
+    for (int k = 0; k < 3; k++)
+		mean[k] = 0;
+		
+    for (int i = 0; i < n; i++){
+        for (int k = 0; k < 3; k++){
+            gsl_matrix_set(sample_points, i, k, pts[i*3 + k]);
+            mean[k] += pts[i*3 + k];
+        }
+    }
+    
+    for (int k = 0; k < 3; k++)
+		mean[k] /= n;
+		
+    for (int i = 0; i < n; i++){
+        for (int k = 0; k < 3; k++){
+            gsl_matrix_set(sample_points, i, k, gsl_matrix_get(sample_points, i, k) - mean[k]);
+        }
+    }
+
+    printf("about to run SVD\n");
+    fflush(stdout);
+    
+    gsl_vector *S = gsl_vector_calloc(3);
+    gsl_matrix *V = gsl_matrix_calloc(3,3);
+    gsl_vector *work = gsl_vector_calloc(3);
+
+    // run SVD!!! singular value decomposition! 
+    int res = gsl_linalg_SV_decomp(sample_points, V, S, work);
+    
+    // now that we have SVD, let's get the plane normal and do some plane math
+    double a = gsl_matrix_get(V, 0, 2);
+    double b = gsl_matrix_get(V, 1, 2);
+    double c = gsl_matrix_get(V, 2, 2);
+    
+    printf("plane normal: %f %f %f\n", a,b,c);
+    double d = -1 * (a * mean[0] + b * mean[1] + c * mean[2]);
+    fflush(stdout);
+    
+    double* plane = (double*)malloc(4 * sizeof(double));
+    plane[0] = a;
+    plane[1] = b;
+    plane[2] = c;
+    plane[3] = d;
+    
+    return plane;
+}
+
 void PointCloud::ClusterPoints(){
     printf("[PointCloud::ClusterPoints] \n");
     

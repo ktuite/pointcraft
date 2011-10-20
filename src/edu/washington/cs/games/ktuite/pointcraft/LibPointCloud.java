@@ -20,4 +20,6 @@ public class LibPointCloud {
 	public static native void makeSplat(float x, float y, float z, float radius);
 	public static native int getVertexCount();
 	public static native Pointer getVertices();
+	
+	public static native Pointer fitPlane(int n, Pointer points);
 }

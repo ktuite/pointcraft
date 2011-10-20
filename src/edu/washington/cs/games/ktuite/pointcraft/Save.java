@@ -33,7 +33,7 @@ public class Save {
 		try {
 			Writer output = new BufferedWriter(new FileWriter(file));
 
-			int VERTEX_COUNT = Main.pellets.size();
+			int VERTEX_COUNT = Main.all_pellets_in_world.size();
 			int FACE_COUNT = 0;
 			for (Primitive geom : Main.geometry) {
 				if (geom.isPolygon())
@@ -49,7 +49,7 @@ public class Save {
 					+ "property list uchar int vertex_index\n" + "end_header\n";
 			output.write(header);
 
-			for (Pellet pellet : Main.pellets) {
+			for (Pellet pellet : Main.all_pellets_in_world) {
 				output.write(pellet.pos.x + " " + pellet.pos.y + " "
 						+ pellet.pos.z + " ");
 				output.write("150 150 150\n");

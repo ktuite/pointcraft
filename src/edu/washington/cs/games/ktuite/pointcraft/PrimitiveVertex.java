@@ -9,17 +9,17 @@ import org.lwjgl.util.vector.Vector3f;
 /* these primitives built out of pellets...
  * keep a list of pellets and then draw lines or polygons between them.
  */
-public class Primitive {
+public class PrimitiveVertex {
 	private int gl_type;
-	private List<Pellet> vertices;
+	private List<Vector3f> vertices;
 	private float line_width = 5f;
 
-	public Primitive(int _gl_type, List<Pellet> _vertices) {
+	public PrimitiveVertex(int _gl_type, List<Vector3f> _vertices) {
 		gl_type = _gl_type;
 		vertices = _vertices;
 	}
 	
-	public Primitive(int _gl_type, List<Pellet> _vertices, float _line_width) {
+	public PrimitiveVertex(int _gl_type, List<Vector3f> _vertices, float _line_width) {
 		gl_type = _gl_type;
 		vertices = _vertices;
 		line_width = _line_width;
@@ -34,36 +34,17 @@ public class Primitive {
 	
 	public void draw() {
 		if (gl_type == GL_LINES) {
-			glColor3f(0, 0, 0);
+			glColor3f(.5f, .5f, .5f);
 			glLineWidth(line_width);
 		} else if (gl_type == GL_POLYGON) {
 			glColor4f(.9f, .9f, 0, .5f);
 		}
 
 		glBegin(gl_type);
-		for (Pellet pellet : vertices) {
-			Vector3f vertex = pellet.pos;
+		for (Vector3f vertex : vertices) {
 			glVertex3f(vertex.x, vertex.y, vertex.z);
 		}
 		glEnd();
 	}
 	
-	public String plyFace(){
-		String s = vertices.size() - 2 + "";
-		for (int i = 0; i < vertices.size() - 2; i++){
-			Pellet pellet = vertices.get(i);
-			s += " " + Main.all_pellets_in_world.indexOf(pellet);
-		}
-		s += "\n";
-		System.out.println("PLYFACE:" + s);
-		return s;
-	}
-	
-	public void printTriangleVertices(){
-		for (int i = 0; i < vertices.size() - 2; i++){
-			Pellet pellet = vertices.get(i);
-			System.out.println(pellet.pos.x + " " + pellet.pos.y + " " + pellet.pos.z);
-		}
-		System.out.println("");
-	}
 }

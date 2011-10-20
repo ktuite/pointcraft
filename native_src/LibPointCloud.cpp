@@ -46,4 +46,8 @@ extern "C" {
     float* getVertices(){
         return m_point_cloud->GetVerticesOfLastGeometry();
     }
+    
+    double* fitPlane(int n, double *pts){
+        return m_point_cloud->FitPlaneToPoints(n, pts);
+    }
 }
