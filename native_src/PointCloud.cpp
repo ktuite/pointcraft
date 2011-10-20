@@ -13,12 +13,17 @@
 #include <fstream>
 
 
-PointCloud::PointCloud(char *filename, bool from_binary){
+PointCloud::PointCloud(char *filename, bool from_binary, bool from_bundle){
     printf("[PointCloud] Creating a new Point Cloud from file %s\n", filename);
     
     if (from_binary){
         printf("[PointCloud] Loading from BINARY file\n");
         LoadBinaryPointCloud(filename);
+        return;
+    }
+    else if (from_bundle){
+        printf("[PointCloud] Loading from TEXT BUNDLE File\n");
+        ReadBundleFile(filename);
         return;
     }
     else {
@@ -194,8 +199,8 @@ PointCloud::PointCloud(char *filename, bool from_binary){
 
 void PointCloud::LoadBinaryPointCloud(char *filename){
     m_num_points = 0; 
-    bool has_normals = true; 
-    int num_fields = 9; // position and color and normal
+    bool has_normals = false; 
+    int num_fields = 6; // position and color and normal
     
     FILE *fp;
     fp = fopen(filename, "r");
@@ -227,6 +232,110 @@ void PointCloud::LoadBinaryPointCloud(char *filename){
 	}
 
     fclose(fp);
+}
+
+void PointCloud::ReadBundleFile(char *filename){
+    m_num_points = 0; 
+    bool has_normals = false; 
+    int num_fields = 6; // position and color and normal
+    
+    printf("[ReadBundleFile] Reading file...\n");
+    
+    FILE *f;
+    f = fopen(filename, "r");
+    
+    int num_images, num_points;
+
+    char first_line[256];
+    fgets(first_line, 256, f);
+    if (first_line[0] == '#') {
+        double version;
+        sscanf(first_line, "# Bundle file v%lf", &version);
+        printf("[ReadBundleFile] Bundle version: %0.3f\n", version);
+
+        fscanf(f, "%d %d\n", &num_images, &num_points);
+    } else if (first_line[0] == 'v') {
+        double version;
+        sscanf(first_line, "v%lf", &version);
+        printf("[ReadBundleFile] Bundle version: %0.3f\n", version);
+        fscanf(f, "%d %d\n", &num_images, &num_points);
+    } else {
+        sscanf(first_line, "%d %d\n", &num_images, &num_points);
+    }
+
+    printf("[ReadBundleFile] Reading %d images and %d points...\n",
+        num_images, num_points);
+    
+    m_num_points = num_points;
+
+    /* Read cameras */
+    for (int i = 0; i < num_images; i++) {
+        double focal_length;
+        double R[9];
+        double t[3];
+        double k[2] = { 0.0, 0.0 };
+
+        /* Focal length */
+        fscanf(f, "%lf %lf %lf\n", &focal_length, k+0, k+1);
+
+        /* Rotation */
+        fscanf(f, "%lf %lf %lf\n%lf %lf %lf\n%lf %lf %lf\n",
+            R+0, R+1, R+2, R+3, R+4, R+5, R+6, R+7, R+8);
+        /* Translation */
+        fscanf(f, "%lf %lf %lf\n", t+0, t+1, t+2);
+
+        /*
+        Camera cd;
+        cd.m_focal = focal_length;
+        cd.m_k[0] = k[0];
+        cd.m_k[1] = k[1];
+        memcpy(cd.m_R, R, sizeof(double) * 9);
+        memcpy(cd.m_t, t, sizeof(double) * 3);
+        */
+
+        //m_cameras.push_back(cd); // there is no m_cameras here to add this to
+    }
+    
+    m_gsl_points = gsl_matrix_calloc(3, m_num_points);
+    m_gsl_colors = gsl_matrix_calloc(3, m_num_points);
+    
+    /* Read points */
+    int num_min_views_points = 0;
+    for (int i = 0; i < num_points; i++) {
+        double pos[3];
+        int color[3];
+
+        /* Position */
+        fscanf(f, "%lf %lf %lf\n",
+            pos + 0, pos + 1, pos + 2);
+
+        /* Color */
+        fscanf(f, "%d %d %d\n",
+            color + 0, color + 1, color + 2);
+        
+        for (int k = 0; k < 3; k++){ 
+            gsl_matrix_set(m_gsl_points, k, i, pos[k]);
+            gsl_matrix_set(m_gsl_colors, k, i, double(color[k]));
+        }
+
+        int num_visible;
+        fscanf(f, "%d", &num_visible);
+        if (num_visible >=3)            num_min_views_points++;
+
+        // pt.m_views.resize(num_visible);
+        for (int j = 0; j < num_visible; j++) {
+            int view, key;
+            fscanf(f, "%d %d", &view, &key);
+
+            double x, y;
+            fscanf(f, "%lf %lf", &x, &y);
+        }
+    }
+
+
+    printf("[ReadBundleFile] %d / %d points visible to more than 2 cameras!\n",
+        num_min_views_points, num_points);
+    
 }
 
 void PointCloud::SetBasePointIndices(){

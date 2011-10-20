@@ -27,15 +27,16 @@ import org.newdawn.slick.util.ResourceLoader;
 
 public class Main {
 
+	final public static float world_scale = 1f; //40f;
 	private float FOG_COLOR[] = new float[] { .89f, .89f, .89f, 1.0f };
 	private Vector3f pos;
 	private Vector3f vel;
 	private float tilt_angle;
 	private float pan_angle;
-	final private static float walkforce = 1 / 4000f;
-	final private double max_speed = 1;
+	final private static float walkforce = 1 / 4000f * world_scale;
+	final private double max_speed = 1 * world_scale;
 	final private float veldecay = .90f;
-	final private float stilts = 0.01f;
+	final private float stilts = 0.01f * world_scale;
 	private Texture skybox = null;
 
 	private int num_points;
@@ -43,7 +44,7 @@ public class Main {
 	private DoubleBuffer point_colors;
 
 	private Vector3f gun_direction;
-	final private float gun_speed = 0.001f;
+	final private float gun_speed = 0.001f * world_scale;
 	public static List<Pellet> pellets;
 	private List<Pellet> dead_pellets;
 
@@ -94,7 +95,7 @@ public class Main {
 		glFogf(GL_FOG_END, 3.0f);
 		glFogf(GL_FOG_START, .15f);
 		glFogf(GL_FOG_DENSITY, 5.0f);
-		glEnable(GL_FOG);
+		//glEnable(GL_FOG);
 
 		// getting the ordering of the points right
 		glEnable(GL_DEPTH_TEST);
@@ -149,6 +150,8 @@ public class Main {
 		// data of the point cloud itself, loaded in from C++
 		LibPointCloud
 				.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
+		//LibPointCloud
+		//	.loadBundle("/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out");
 		System.out.println("number of points: " + LibPointCloud.getNumPoints());
 
 		num_points = LibPointCloud.getNumPoints();
@@ -408,7 +411,7 @@ public class Main {
 		glEnd();
 
 		glDisable(GL_TEXTURE_2D);
-		glEnable(GL_FOG);
+		//glEnable(GL_FOG);
 		glEnable(GL_DEPTH_TEST);
 	}
 

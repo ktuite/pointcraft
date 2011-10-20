@@ -32,7 +32,7 @@ public class Pellet {
 		pos = new Vector3f();
 		sphere = new Sphere();
 		vel = new Vector3f();
-		radius = .0005f;
+		radius = .0005f * Main.world_scale;
 		max_radius = radius * 1.5f;
 		birthday = Main.timer.getTime();
 		alive = true;

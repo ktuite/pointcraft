@@ -65,9 +65,10 @@ int compare_adaptive_nodes(const adaptive_node *a, const adaptive_node *b);
 class PointCloud
 {
 public:
-    PointCloud(char *filename, bool from_binary = 0); 
+    PointCloud(char *filename, bool from_binary = 0, bool from_bundle = 0); 
     
     void LoadBinaryPointCloud(char *filename);
+    void ReadBundleFile(char *filename);
     void WriteBinaryPointCloud(char *filename);
     void LoadLevels(char *filename);
     void WriteLevels(char *filename);

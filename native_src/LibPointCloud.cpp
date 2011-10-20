@@ -11,6 +11,10 @@ extern "C" {
         m_point_cloud = new PointCloud(filename, true); // true = load from binary
     }
     
+    void loadBundle(char* filename){
+         m_point_cloud = new PointCloud(filename, false, true); // false,true = load from TEXT BUNDLE file
+    }
+    
     int getNumPoints(){
         return m_point_cloud->m_num_points;
     }

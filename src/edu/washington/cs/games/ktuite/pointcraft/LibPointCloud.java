@@ -10,6 +10,7 @@ public class LibPointCloud {
 	
 	public static native int getFour();
 	public static native void load(String filename);
+	public static native void loadBundle(String filename);
 	public static native int getNumPoints();
 	public static native Pointer getPointPositions();
 	public static native Pointer getPointColors();

@@ -51,4 +51,12 @@ public class Primitive {
 		System.out.println("PLYFACE:" + s);
 		return s;
 	}
+	
+	public void printTriangleVertices(){
+		for (int i = 0; i < vertices.size() - 2; i++){
+			Pellet pellet = vertices.get(i);
+			System.out.println(pellet.pos.x + " " + pellet.pos.y + " " + pellet.pos.z);
+		}
+		System.out.println("");
+	}
 }
