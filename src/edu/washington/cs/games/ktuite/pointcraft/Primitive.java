@@ -2,6 +2,9 @@ package edu.washington.cs.games.ktuite.pointcraft;
 
 import static org.lwjgl.opengl.GL11.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
@@ -18,6 +21,7 @@ public class Primitive {
 	private int gl_type;
 	private List<Pellet> vertices;
 	private float line_width = 5f;
+	private byte[] textureData = null;
 	private Texture texture = null;
 
 	public Primitive(int _gl_type, List<Pellet> _vertices) {
@@ -41,7 +45,7 @@ public class Primitive {
 		else
 			return false;
 	}
-	
+
 	public int numVertices() {
 		return vertices.size();
 	}
@@ -62,14 +66,23 @@ public class Primitive {
 					texture.bind();
 				} else {
 					glDisable(GL_TEXTURE_2D);
+					if(textureData != null) {
+						try {
+							texture = TextureLoader.getTexture("JPEG", new ByteArrayInputStream(textureData));
+							textureData = null;
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
 				}
 			}
 		}
 
-		Vector2f[] tex_coords = new Vector2f[]{ new Vector2f(0,0), new Vector2f(1, 0), new Vector2f(1,1), new Vector2f(0,1) };
-		
+		Vector2f[] tex_coords = new Vector2f[] { new Vector2f(0, 0),
+				new Vector2f(1, 0), new Vector2f(1, 1), new Vector2f(0, 1) };
+
 		glBegin(gl_type);
-		for (int i = 0; i < vertices.size() && i < tex_coords.length; i++){
+		for (int i = 0; i < vertices.size() && i < tex_coords.length; i++) {
 			Pellet pellet = vertices.get(i);
 			Vector3f vertex = pellet.pos;
 			glTexCoord2f(tex_coords[i].x, tex_coords[i].y);
@@ -79,15 +92,25 @@ public class Primitive {
 	}
 
 	public void startDownloadingTexture() {
-		try {
-			URL url = new URL(
-					"http://www.windowtreatments-ideas.com/wp-content/uploads/2011/09/Curtain-And-Drapery.jpg");
-			InputStream inStream = url.openStream();
-			texture = TextureLoader.getTexture("png", inStream);
+		new Thread() {
+			public void run() {
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+				try {
+					URL url = new URL(
+							"http://www.windowtreatments-ideas.com/wp-content/uploads/2011/09/Curtain-And-Drapery.jpg");
+					InputStream is = url.openStream();
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					byte[] bytes = new byte[4096];
+					int n;
+					while((n = is.read(bytes)) != -1) {
+						baos.write(bytes, 0, n);
+					}
+					textureData = baos.toByteArray();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}.start();
 	}
 
 	public String plyFace() {
