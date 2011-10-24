@@ -56,7 +56,7 @@ public class Main {
 	private List<Pellet> all_dead_pellets_in_world;
 
 	// TODO: WHICH GUN... temporary
-	private static boolean plane_gun = true;
+	private static boolean plane_gun = false;
 
 	// TODO: move out of here and put somewhere else since this is a certain
 	// kind of geometry
