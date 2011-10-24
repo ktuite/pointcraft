@@ -2,13 +2,14 @@ package edu.washington.cs.games.ktuite.pointcraft;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 
 import org.lwjgl.util.vector.Vector3f;
 import static org.lwjgl.opengl.GL11.*;
 
 public class PolygonPellet extends Pellet {
 
-	public static List<PolygonPellet> current_cycle = new LinkedList<PolygonPellet>();
+	public static Stack<PolygonPellet> current_cycle = new Stack<PolygonPellet>();
 	
 	/*
 	 * A Pellet is a magical thing that you can shoot out of a gun that will

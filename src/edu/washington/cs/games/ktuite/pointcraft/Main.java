@@ -10,6 +10,7 @@ import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
@@ -52,16 +53,16 @@ public class Main {
 	private Vector3f gun_direction;
 	final private float gun_speed = 0.001f * world_scale;
 	public static Timer timer = new Timer();
-	public static List<Pellet> all_pellets_in_world;
-	private List<Pellet> all_dead_pellets_in_world;
+	public static Stack<Pellet> all_pellets_in_world;
+	private Stack<Pellet> all_dead_pellets_in_world;
 
 	// TODO: WHICH GUN... temporary
 	private static boolean plane_gun = false;
 
 	// TODO: move out of here and put somewhere else since this is a certain
 	// kind of geometry
-	public static List<Primitive> geometry;
-	public static List<PrimitiveVertex> geometry_v;
+	public static Stack<Primitive> geometry;
+	public static Stack<PrimitiveVertex> geometry_v;
 
 	public static void main(String[] args) {
 		Main main = new Main();
@@ -144,13 +145,13 @@ public class Main {
 				+ vel);
 
 		gun_direction = new Vector3f();
-		all_pellets_in_world = new LinkedList<Pellet>();
-		all_dead_pellets_in_world = new LinkedList<Pellet>();
+		all_pellets_in_world = new Stack<Pellet>();
+		all_dead_pellets_in_world = new Stack<Pellet>();
 
 		// TODO: Move this crap elsewhere... init the different geometry
 		// containers individually
-		geometry = new LinkedList<Primitive>();
-		geometry_v = new LinkedList<PrimitiveVertex>();
+		geometry = new Stack<Primitive>();
+		geometry_v = new Stack<PrimitiveVertex>();
 
 		try {
 			launch_effect = AudioLoader.getAudio("WAV",
@@ -220,8 +221,20 @@ public class Main {
 	}
 
 	private static void undoLastPellet() {
-		if (all_pellets_in_world.size() > 0) {
-			all_pellets_in_world.remove(all_pellets_in_world.size() - 1);
+		if (PolygonPellet.current_cycle.size() > 0) {
+			PolygonPellet.current_cycle.pop();
+			all_pellets_in_world.pop();
+		}
+		if (geometry.peek().isPolygon()){
+			Primitive last_poly = geometry.pop();
+			for (int i = 0; i < last_poly.numVertices()-2; i++){
+				geometry.pop();
+				all_pellets_in_world.pop();
+			}
+			PolygonPellet.current_cycle.clear();
+		}
+		else if (geometry.size() > 0){
+			geometry.pop();
 		}
 		// TODO: horribly broke undoing for making cycles except it wasnt that
 		// great to begin with

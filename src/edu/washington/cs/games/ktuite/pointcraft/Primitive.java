@@ -41,6 +41,10 @@ public class Primitive {
 		else
 			return false;
 	}
+	
+	public int numVertices() {
+		return vertices.size();
+	}
 
 	public void draw() {
 		if (gl_type == GL_LINES) {
