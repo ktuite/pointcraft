@@ -33,7 +33,7 @@ public class Main {
 	public static Audio attach_effect;
 
 	// stuff about the world and how you move around
-	public static float world_scale = 1f; // 40f;
+	public static float world_scale =  40f;
 	private Vector3f pos;
 	private Vector3f vel;
 	private float tilt_angle;
@@ -63,6 +63,8 @@ public class Main {
 	// kind of geometry
 	public static Stack<Primitive> geometry;
 	public static Stack<PrimitiveVertex> geometry_v;
+	
+	private boolean draw_points = true;
 
 	public static void main(String[] args) {
 		Main main = new Main();
@@ -167,10 +169,12 @@ public class Main {
 
 	private void InitData() {
 		// data of the point cloud itself, loaded in from C++
-		LibPointCloud
-				.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
-		// LibPointCloud
-		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out");
+		//LibPointCloud.loadBundle("/Users/ktuite/Desktop/texviewer/lewis.bundle3");
+		//LibPointCloud
+				//.load("/Users/ktuite/Desktop/sketchymodeler/server_code/SageChapel.bin");
+				//.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
+		 LibPointCloud
+		 .loadBundle("/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out");
 		System.out.println("number of points: " + LibPointCloud.getNumPoints());
 
 		num_points = LibPointCloud.getNumPoints();
@@ -183,7 +187,7 @@ public class Main {
 		System.out.println("first color: " + point_colors.get(0));
 		
 		FindMinMaxOfWorld();
-		SetGameVariablesFromWorldScale();
+		//SetGameVariablesFromWorldScale();
 
 		LibPointCloud.makeKdTree();
 	}
@@ -225,7 +229,7 @@ public class Main {
 			PolygonPellet.current_cycle.pop();
 			all_pellets_in_world.pop();
 		}
-		if (geometry.peek().isPolygon()){
+		if (geometry.size() > 0 && geometry.peek().isPolygon()){
 			Primitive last_poly = geometry.pop();
 			for (int i = 0; i < last_poly.numVertices()-2; i++){
 				geometry.pop();
@@ -286,6 +290,7 @@ public class Main {
 			vel.x += Math.cos(pan_angle * 3.14159 / 180f) * walkforce / 2;
 			vel.z += Math.sin(pan_angle * 3.14159 / 180f) * walkforce / 2;
 		}
+		
 
 		// this is like putting on or taking off some stilts
 		// (numerous pairs of stilts)
@@ -297,6 +302,9 @@ public class Main {
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_E) {
 					pos.y += stilts;
+				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_P) {
+					draw_points = !draw_points;
 				}
 			}
 		}
@@ -349,7 +357,8 @@ public class Main {
 
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
 
-		DrawPoints(); // draw the actual 3d things
+		if (draw_points)
+			DrawPoints(); // draw the actual 3d things
 		DrawPellets();
 
 		for (Primitive geom : geometry) {

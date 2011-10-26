@@ -60,7 +60,7 @@ public class Primitive {
 				glColor3f(.5f, .5f, .5f);
 				glLineWidth(line_width);
 			} else if (gl_type == GL_POLYGON) {
-				glColor4f(.9f, .9f, 0, .5f);
+				glColor4f(.9f, .9f, .9f, .5f);
 				if (texture != null) {
 					glEnable(GL_TEXTURE_2D);
 					texture.bind();
@@ -92,12 +92,18 @@ public class Primitive {
 	}
 
 	public void startDownloadingTexture() {
+		String url_string = "http://mazagran.cs.washington.edu:9999/texture.png?&v=";
+		for (Pellet p : vertices){
+			Vector3f v = p.pos;
+			url_string += v.x + "," + v.y + "," + v.z + ",";
+		}
+		url_string += "garbage,&w=128,&h=128";
+		final String final_url_string = url_string;
 		new Thread() {
 			public void run() {
 
 				try {
-					URL url = new URL(
-							"http://www.windowtreatments-ideas.com/wp-content/uploads/2011/09/Curtain-And-Drapery.jpg");
+					URL url = new URL(final_url_string);
 					InputStream is = url.openStream();
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					byte[] bytes = new byte[4096];

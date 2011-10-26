@@ -1,6 +1,7 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
 import com.sun.jna.Native;
+import com.sun.jna.NativeLibrary;
 import com.sun.jna.Pointer;
 
 public class LibPointCloud {

@@ -173,6 +173,7 @@ public:
     
     adaptive_node *m_cluster_tree;
     adaptive_structure *m_cluster_structure;
+    double m_bundle_version;
     
     int m_point_budget_base;
     int m_point_budget_extra;

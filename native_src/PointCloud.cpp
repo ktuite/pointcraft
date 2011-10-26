@@ -234,39 +234,86 @@ void PointCloud::LoadBinaryPointCloud(char *filename){
     fclose(fp);
 }
 
-void PointCloud::ReadBundleFile(char *filename){
-    m_num_points = 0; 
-    bool has_normals = false; 
-    int num_fields = 6; // position and color and normal
-    
-    printf("[ReadBundleFile] Reading file...\n");
-    
+void PointCloud::ReadBundleFile(char *filename)
+{
     FILE *f;
     f = fopen(filename, "r");
     
+    printf("[TexViewerApp::ReadBundleFile] Reading file...\n");
+
+    if (f == NULL) {
+        printf("Error opening file for reading\n");
+        return;
+    }
+
     int num_images, num_points;
+    bool binary = false;
+    int include_obs = 1;
+    bool features_coalesced = false;
 
     char first_line[256];
     fgets(first_line, 256, f);
     if (first_line[0] == '#') {
         double version;
         sscanf(first_line, "# Bundle file v%lf", &version);
+
+        m_bundle_version = version;
         printf("[ReadBundleFile] Bundle version: %0.3f\n", version);
 
-        fscanf(f, "%d %d\n", &num_images, &num_points);
+        /* Check if the file is in binary format */
+        int len = strlen(first_line);
+        int start = len - strlen("(binary)\n");
+        if (strcmp(first_line + start, "(binary)\n") == 0) {
+            binary = true;
+            printf("[ReadBundleFile] File is in binary format\n");
+        }
+        
+        if (m_bundle_version >= 0.4) {
+            int coalesced = 0;
+            include_obs = 1;
+
+            if (!binary) {
+                fscanf(f, "%d %d %d", &num_images, &num_points, &coalesced);
+            } else {
+                fread(&num_images, sizeof(int), 1, f);
+                fread(&num_points, sizeof(int), 1, f);
+                fread(&coalesced, sizeof(int), 1, f);
+            }
+            
+            if (m_bundle_version >= 0.5) {
+                if (!binary) {
+                    fscanf(f, "%d", &include_obs);
+                } else {
+                    fread(&include_obs, sizeof(int), 1, f);
+                }
+            }
+
+            if (coalesced)
+                features_coalesced = true;
+        } else {
+            if (!binary) {
+                fscanf(f, "%d %d\n", &num_images, &num_points);
+            } else {
+                fread(&num_images, sizeof(int), 1, f);
+                fread(&num_points, sizeof(int), 1, f);
+            }
+        }
     } else if (first_line[0] == 'v') {
         double version;
         sscanf(first_line, "v%lf", &version);
+        m_bundle_version = version;
         printf("[ReadBundleFile] Bundle version: %0.3f\n", version);
+
         fscanf(f, "%d %d\n", &num_images, &num_points);
     } else {
+        m_bundle_version = 0.1;
+        printf("[ReadBundleFile] Bundle version: %0.3f\n", m_bundle_version);
         sscanf(first_line, "%d %d\n", &num_images, &num_points);
     }
 
-    printf("[ReadBundleFile] Reading %d images and %d points...\n",
-        num_images, num_points);
-    
+    printf("[ReadBundleFile::ReadBundleFile] Reading %d images and %d points...\n", num_images, num_points);
     m_num_points = num_points;
+    fflush(stdout);
 
     /* Read cameras */
     for (int i = 0; i < num_images; i++) {
@@ -274,69 +321,160 @@ void PointCloud::ReadBundleFile(char *filename){
         double R[9];
         double t[3];
         double k[2] = { 0.0, 0.0 };
+        int player_id = -1;
+        int w, h;
+              
+                    printf("CAMERA %d, %f\n", i, m_bundle_version);
+            fflush(stdout);
+                    
+        if (m_bundle_version >= 0.4) {
+            char name[512];
+            double focal_est;
+            
 
+
+            if (!binary) {
+                fscanf(f, "%s %d %d %lf %d\n", 
+                       name, &w, &h, &focal_est, &player_id); // &w, &h);
+            } else {
+                // fscanf(f, "%s %d %d %lf %d\n", 
+                //        name, &w, &h, &focal_est, &player_id); // &w, &h);
+                
+                int name_len;
+                fread(&name_len, sizeof(int), 1, f);
+                fread(name, sizeof(char), name_len, f);
+                name[name_len] = 0;
+                fread(&w, sizeof(int), 1, f);
+                fread(&h, sizeof(int), 1, f);
+                fread(&focal_est, sizeof(double), 1, f);
+                fread(&player_id, sizeof(int), 1, f);
+            }
+
+        }
+        
         /* Focal length */
-        fscanf(f, "%lf %lf %lf\n", &focal_length, k+0, k+1);
+        if (m_bundle_version > 0.1) {
+            if (!binary) {
+                fscanf(f, "%lf %lf %lf\n", &focal_length, k+0, k+1);
+            } else {
+                fread(&focal_length, sizeof(double), 1, f);
+                fread(k, sizeof(double), 2, f);
+            }
+        } else {
+            fscanf(f, "%lf\n", &focal_length);
+        }
 
-        /* Rotation */
-        fscanf(f, "%lf %lf %lf\n%lf %lf %lf\n%lf %lf %lf\n",
-            R+0, R+1, R+2, R+3, R+4, R+5, R+6, R+7, R+8);
-        /* Translation */
-        fscanf(f, "%lf %lf %lf\n", t+0, t+1, t+2);
+        /* Rotation and translation */
+        if (!binary) {
+            fscanf(f, "%lf %lf %lf\n%lf %lf %lf\n%lf %lf %lf\n", 
+                   R+0, R+1, R+2, R+3, R+4, R+5, R+6, R+7, R+8);
+            fscanf(f, "%lf %lf %lf\n", t+0, t+1, t+2);
+        } else {
+            fread(R, sizeof(double), 9, f);
+            fread(t, sizeof(double), 3, f);
+        }
 
-        /*
-        Camera cd;
-        cd.m_focal = focal_length;
-        cd.m_k[0] = k[0];
-        cd.m_k[1] = k[1];
-        memcpy(cd.m_R, R, sizeof(double) * 9);
-        memcpy(cd.m_t, t, sizeof(double) * 3);
-        */
+        if (focal_length > 100.0) {
+            /* only if camera info is good */
+            /*
+            Camera cd;
 
-        //m_cameras.push_back(cd); // there is no m_cameras here to add this to
+            cd.m_width = w;
+            cd.m_height = h;
+            cd.m_focal = focal_length;
+            cd.m_k[0] = k[0];
+            cd.m_k[1] = k[1];
+            memcpy(cd.m_R, R, sizeof(double) * 9);
+            memcpy(cd.m_t, t, sizeof(double) * 3);
+            */
+
+        }
     }
-    
+
     m_gsl_points = gsl_matrix_calloc(3, m_num_points);
     m_gsl_colors = gsl_matrix_calloc(3, m_num_points);
-    
-    /* Read points */
+
+
     int num_min_views_points = 0;
     for (int i = 0; i < num_points; i++) {
         double pos[3];
         int color[3];
+        if (i % 500 == 0){
+            printf("reading point %d\n", i);
+            fflush(stdout);
+        }
 
-        /* Position */
-        fscanf(f, "%lf %lf %lf\n",
-            pos + 0, pos + 1, pos + 2);
+        /* Player ID */
+        int player_id; // unused here
+        if (m_bundle_version >= 0.4) {
+            if (!binary)
+                fscanf(f, "%d\n", &(player_id));
+            else
+                fread(&(player_id), sizeof(int), 1, f);
+        }
 
-        /* Color */
-        fscanf(f, "%d %d %d\n",
-            color + 0, color + 1, color + 2);
-        
+        /* Position and color */
+        if (!binary) {
+            fscanf(f, "%lf %lf %lf\n", 
+                   pos + 0, pos + 1, pos + 2);
+            fscanf(f, "%d %d %d\n", 
+                   color + 0, color + 1, color + 2);
+        } else {
+            fread(pos, sizeof(double), 3, f);
+            // fread(pt.m_color, sizeof(float), 3, f);
+            fread(color, sizeof(unsigned char), 3, f);
+        }
+
         for (int k = 0; k < 3; k++){ 
             gsl_matrix_set(m_gsl_points, k, i, pos[k]);
             gsl_matrix_set(m_gsl_colors, k, i, double(color[k]));
         }
 
+
         int num_visible;
-        fscanf(f, "%d", &num_visible);
-        if (num_visible >=3)            num_min_views_points++;
+
+        if (!binary) {
+            fscanf(f, "%d", &num_visible);
+            // pt.m_num_vis = num_visible;
+        } else {
+            fread(&num_visible, sizeof(int), 1, f);
+        }
+        
+        if (num_visible >=3)
+            num_min_views_points++;
 
         // pt.m_views.resize(num_visible);
         for (int j = 0; j < num_visible; j++) {
             int view, key;
-            fscanf(f, "%d %d", &view, &key);
 
-            double x, y;
-            fscanf(f, "%lf %lf", &x, &y);
+            if (!binary) {
+                fscanf(f, "%d %d", &view, &key);
+            } else {
+                fread(&view, sizeof(int), 1, f);
+                fread(&key, sizeof(int), 1, f);
+            }
+            
+            //pt.m_views.push_back(ImageKey(view, key));
+            
+            if (m_bundle_version >= 0.3 && include_obs) {
+                float x, y;
+                if (!binary) {
+                    fscanf(f, "%f %f", &x, &y);
+                } else {
+                    fread(&x, sizeof(float), 1, f);
+                    fread(&y, sizeof(float), 1, f);
+                }
+            }
         }
+        
     }
 
 
-    printf("[ReadBundleFile] %d / %d points visible to more than 2 cameras!\n",
-        num_min_views_points, num_points);
-    
+    fclose(f);
+    printf("[ReadBundleFile] %d / %d points visible to more than 2 cameras\n", 
+           num_min_views_points, num_points);
 }
+
 
 void PointCloud::SetBasePointIndices(){
     for (int i = 0; i < m_num_points; i++){
