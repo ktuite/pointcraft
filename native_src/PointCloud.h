@@ -189,6 +189,8 @@ public:
     float* GetVerticesOfLastGeometry();
     double* FitPlaneToPoints(int n, double *pts);
     
+    void TransposePointsAndFixColors();
+    
 	// all this below is crap
     /*
 	std::vector<plane> m_vertical_planes;

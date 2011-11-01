@@ -476,6 +476,23 @@ void PointCloud::ReadBundleFile(char *filename)
 }
 
 
+void PointCloud::TransposePointsAndFixColors(){
+    // transpose points so instead of [xxx,yyy,zzz] its [xyz, xyz, xyz]
+    gsl_matrix *m_gsl_points_fixed = gsl_matrix_calloc(m_num_points,3);
+    gsl_matrix_transpose_memcpy(m_gsl_points_fixed, m_gsl_points);
+    gsl_matrix_free(m_gsl_points);
+    m_gsl_points = m_gsl_points_fixed;
+    
+    // make colors be in range 0-1 isntead of 0-255
+    gsl_matrix_scale(m_gsl_colors, 1/255.0);
+    
+    // transpose colors, too
+    gsl_matrix *m_gsl_colors_fixed = gsl_matrix_calloc(m_num_points,3);
+    gsl_matrix_transpose_memcpy(m_gsl_colors_fixed, m_gsl_colors);
+    gsl_matrix_free(m_gsl_colors);
+    m_gsl_colors = m_gsl_colors_fixed;
+}
+
 void PointCloud::SetBasePointIndices(){
     for (int i = 0; i < m_num_points; i++){
         m_point_lookup[i].flash_idx = -1;

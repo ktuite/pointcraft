@@ -9,10 +9,12 @@ extern "C" {
     
     void load(char* filename){
         m_point_cloud = new PointCloud(filename, true); // true = load from binary
+        m_point_cloud->TransposePointsAndFixColors();
     }
     
     void loadBundle(char* filename){
          m_point_cloud = new PointCloud(filename, false, true); // false,true = load from TEXT BUNDLE file
+         m_point_cloud->TransposePointsAndFixColors();
     }
     
     int getNumPoints(){
