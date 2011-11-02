@@ -28,7 +28,7 @@ public class Primitive {
 		gl_type = _gl_type;
 		vertices = _vertices;
 		if (gl_type == GL_POLYGON) {
-			startDownloadingTexture();
+			//startDownloadingTexture();
 			System.out.println("making new Primitive");
 		}
 	}
@@ -68,7 +68,7 @@ public class Primitive {
 					glDisable(GL_TEXTURE_2D);
 					if(textureData != null) {
 						try {
-							texture = TextureLoader.getTexture("JPEG", new ByteArrayInputStream(textureData));
+							texture = TextureLoader.getTexture("PNG", new ByteArrayInputStream(textureData));
 							textureData = null;
 						} catch (IOException e) {
 							e.printStackTrace();
@@ -98,6 +98,7 @@ public class Primitive {
 			url_string += v.x + "," + v.y + "," + v.z + ",";
 		}
 		url_string += "garbage,&w=128,&h=128";
+		System.out.println(url_string);
 		final String final_url_string = url_string;
 		new Thread() {
 			public void run() {

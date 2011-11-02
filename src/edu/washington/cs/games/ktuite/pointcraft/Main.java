@@ -33,7 +33,7 @@ public class Main {
 	public static Audio attach_effect;
 
 	// stuff about the world and how you move around
-	public static float world_scale =  40f;
+	public static float world_scale = 1; //40f;
 	private Vector3f pos;
 	private Vector3f vel;
 	private float tilt_angle;
@@ -63,7 +63,7 @@ public class Main {
 	// kind of geometry
 	public static Stack<Primitive> geometry;
 	public static Stack<PrimitiveVertex> geometry_v;
-	
+
 	private boolean draw_points = true;
 
 	public static void main(String[] args) {
@@ -131,8 +131,8 @@ public class Main {
 			System.exit(1);
 		}
 	}
-	
-	private void SetGameVariablesFromWorldScale(){
+
+	private void SetGameVariablesFromWorldScale() {
 		walkforce = 1 / 4000f * world_scale;
 		max_speed = 1 * world_scale;
 		stilts = 0.01f * world_scale;
@@ -169,12 +169,14 @@ public class Main {
 
 	private void InitData() {
 		// data of the point cloud itself, loaded in from C++
-		//LibPointCloud.loadBundle("/Users/ktuite/Desktop/texviewer/lewis.bundle3");
-		//LibPointCloud
-				//.load("/Users/ktuite/Desktop/sketchymodeler/server_code/SageChapel.bin");
-				//.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
-		 LibPointCloud
-		 .loadBundle("/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out");
+		// LibPointCloud.loadBundle("/Users/ktuite/Desktop/texviewer/lewis.bundle3");
+		// LibPointCloud
+		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/SageChapel.bin");
+		// .load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
+		LibPointCloud
+		.load("/Users/ktuite/Desktop/sketchymodeler/server_code/Uris.bin");
+		//.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
+				//.loadBundle("/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out");
 		System.out.println("number of points: " + LibPointCloud.getNumPoints());
 
 		num_points = LibPointCloud.getNumPoints();
@@ -185,14 +187,14 @@ public class Main {
 
 		System.out.println("first point: " + point_positions.get(0));
 		System.out.println("first color: " + point_colors.get(0));
-		
+
 		FindMinMaxOfWorld();
-		//SetGameVariablesFromWorldScale();
+		// SetGameVariablesFromWorldScale();
 
 		LibPointCloud.makeKdTree();
 	}
-	
-	private void FindMinMaxOfWorld(){
+
+	private void FindMinMaxOfWorld() {
 		float[] min_point = new float[3];
 		float[] max_point = new float[3];
 		for (int k = 0; k < 3; k++) {
@@ -209,8 +211,13 @@ public class Main {
 					max_point[k] = p;
 			}
 		}
-		
-		world_scale = (float) (((max_point[1] - min_point[1])) / 0.071716); // lewis hall height for scale ref... 
+
+		world_scale = (float) (((max_point[1] - min_point[1])) / 0.071716); // lewis
+																			// hall
+																			// height
+																			// for
+																			// scale
+																			// ref...
 		System.out.println("world scale: " + world_scale);
 	}
 
@@ -229,15 +236,16 @@ public class Main {
 			PolygonPellet.current_cycle.pop();
 			all_pellets_in_world.pop();
 		}
-		if (geometry.size() > 0 && geometry.peek().isPolygon()){
+		if (geometry.size() > 0 && geometry.peek().isPolygon()) {
 			Primitive last_poly = geometry.pop();
-			for (int i = 0; i < last_poly.numVertices()-2; i++){
+			for (int i = 0; i < last_poly.numVertices() - 2; i++) {
 				geometry.pop();
-				all_pellets_in_world.pop();
+				if (all_pellets_in_world.size() > 0) {
+					all_pellets_in_world.pop();
+				}
 			}
 			PolygonPellet.current_cycle.clear();
-		}
-		else if (geometry.size() > 0){
+		} else if (geometry.size() > 0) {
 			geometry.pop();
 		}
 		// TODO: horribly broke undoing for making cycles except it wasnt that
@@ -290,7 +298,6 @@ public class Main {
 			vel.x += Math.cos(pan_angle * 3.14159 / 180f) * walkforce / 2;
 			vel.z += Math.sin(pan_angle * 3.14159 / 180f) * walkforce / 2;
 		}
-		
 
 		// this is like putting on or taking off some stilts
 		// (numerous pairs of stilts)
@@ -357,9 +364,11 @@ public class Main {
 
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
 
+		glEnable(GL_FOG);
 		if (draw_points)
 			DrawPoints(); // draw the actual 3d things
 		DrawPellets();
+		
 
 		for (Primitive geom : geometry) {
 			geom.draw();
@@ -367,6 +376,7 @@ public class Main {
 		for (PrimitiveVertex geom : geometry_v) {
 			geom.draw();
 		}
+		glDisable(GL_FOG);
 
 		glPopMatrix();
 
@@ -378,7 +388,7 @@ public class Main {
 	private void DrawPoints() {
 		glPointSize(2);
 		glBegin(GL_POINTS);
-		for (int i = 0; i < num_points; i += 1) {
+		for (int i = 0; i < num_points; i += 10) {
 			float r = (float) (point_colors.get(0 * num_points + i) / 255.0f);
 			float g = (float) (point_colors.get(1 * num_points + i) / 255.0f);
 			float b = (float) (point_colors.get(2 * num_points + i) / 255.0f);
