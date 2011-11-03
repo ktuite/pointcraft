@@ -56,19 +56,18 @@ public class Main {
 	public static Stack<Pellet> all_pellets_in_world;
 	private Stack<Pellet> all_dead_pellets_in_world;
 
-	// TODO: WHICH GUN... temporary
-	private static boolean plane_gun = false;
-	private static boolean orb_gun = false;
-
-	// having to do with orb gun only
-	private OrbPellet orb_pellet;
-
 	// TODO: move out of here and put somewhere else since this is a certain
 	// kind of geometry
 	public static Stack<Primitive> geometry;
 	public static Stack<PrimitiveVertex> geometry_v;
 
 	private boolean draw_points = true;
+
+	public enum GunMode {
+		PELLET, ORB, LINE, PLANE, ARC, CIRCLE
+	}
+
+	public GunMode which_gun;
 
 	public static void main(String[] args) {
 		Main main = new Main();
@@ -156,7 +155,8 @@ public class Main {
 		all_pellets_in_world = new Stack<Pellet>();
 		all_dead_pellets_in_world = new Stack<Pellet>();
 
-		orb_pellet = new OrbPellet(all_pellets_in_world);
+		which_gun = GunMode.PELLET;
+		OrbPellet.orb_pellet = new OrbPellet(all_pellets_in_world);
 
 		// TODO: Move this crap elsewhere... init the different geometry
 		// containers individually
@@ -177,14 +177,12 @@ public class Main {
 
 	private void InitData() {
 		// data of the point cloud itself, loaded in from C++
-		// LibPointCloud.loadBundle("/Users/ktuite/Desktop/texviewer/lewis.bundle3");
-		// LibPointCloud
-		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/SageChapel.bin");
-		// .load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
+
 		LibPointCloud
-				//.load("/Users/ktuite/Desktop/sketchymodeler/server_code/Uris.bin");
-		 .load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
+				.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
+		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/Uris.bin");
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out");
+		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/SageChapel.bin");
 		System.out.println("number of points: " + LibPointCloud.getNumPoints());
 
 		num_points = LibPointCloud.getNumPoints();
@@ -220,18 +218,16 @@ public class Main {
 			}
 		}
 
-		world_scale = (float) (((max_point[1] - min_point[1])) / 0.071716); // lewis
-																			// hall
-																			// height
-																			// for
-																			// scale
-																			// ref...
+		world_scale = (float) (((max_point[1] - min_point[1])) / 0.071716);
+		// lewis hall height for scale ref...
+
 		System.out.println("world scale: " + world_scale);
 	}
 
 	private void Start() {
 		while (!Display.isCloseRequested()) {
 			Timer.tick();
+			UpdateGameObjects();
 			EventLoop(); // input like mouse and keyboard
 			DisplayLoop(); // draw things on the screen
 		}
@@ -258,14 +254,18 @@ public class Main {
 		}
 		// TODO: horribly broke undoing for making cycles except it wasnt that
 		// great to begin with
-		/*
-		 * if (Pellet.current_cycle.size() > 0) {
-		 * Pellet.current_cycle.remove(Pellet.current_cycle.size() - 1); if
-		 * (all_pellets_in_world.size() > 0) {
-		 * all_pellets_in_world.remove(all_pellets_in_world.size() - 1); } if
-		 * (geometry.size() > 0) { geometry.remove(geometry.size() - 1); } }
-		 */
 
+	}
+
+	private void UpdateGameObjects() {
+		for (Pellet pellet : all_pellets_in_world) {
+			pellet.update();
+		}
+
+		if (which_gun == GunMode.ORB) {
+			OrbPellet
+					.updateOrbPellet(pos, gun_direction, pan_angle, tilt_angle);
+		}
 	}
 
 	private void EventLoop() {
@@ -321,15 +321,26 @@ public class Main {
 				if (Keyboard.getEventKey() == Keyboard.KEY_P) {
 					draw_points = !draw_points;
 				}
+				
 				if (Keyboard.getEventKey() == Keyboard.KEY_1) {
-					orb_gun = false;
+					which_gun = GunMode.PELLET;
 					System.out.println("regular pellet gun selected");
 				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_2) {
-					orb_gun = true;
+				if (Keyboard.getEventKey() == Keyboard.KEY_3) {
+					which_gun = GunMode.PLANE;
+					System.out.println("plane fitting pellet gun selected");
+				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_0) {
+					which_gun = GunMode.ORB;
 					System.out
 							.println("orb gun (where you can just place pellets in space without them sticking to things) selected");
 				}
+				
+				if (Keyboard.getEventKey() == Keyboard.KEY_N) {
+					if (which_gun == GunMode.PLANE)
+						PlanePellet.startNewPlane();
+				}
+				
 			}
 		}
 
@@ -368,12 +379,14 @@ public class Main {
 			}
 		}
 
-		if (orb_gun) {
+		// use scroll wheel to change orb gun distance
+		// so far the only gun mode that uses extra stuff to determine its state
+		if (which_gun == GunMode.ORB) {
 			int wheel = Mouse.getDWheel();
 			if (wheel < 0) {
-				orb_pellet.decreaseDistance();
+				OrbPellet.orb_pellet.decreaseDistance();
 			} else if (wheel > 0) {
-				orb_pellet.increaseDistance();
+				OrbPellet.orb_pellet.increaseDistance();
 			}
 		}
 	}
@@ -393,7 +406,10 @@ public class Main {
 		glEnable(GL_FOG);
 		if (draw_points)
 			DrawPoints(); // draw the actual 3d things
+
 		DrawPellets();
+		if (which_gun == GunMode.ORB)
+			OrbPellet.drawOrbPellet();
 
 		for (Primitive geom : geometry) {
 			geom.draw();
@@ -427,7 +443,6 @@ public class Main {
 
 	private void DrawPellets() {
 		for (Pellet pellet : all_pellets_in_world) {
-			pellet.update();
 			if (pellet.alive) {
 				glPushMatrix();
 				glTranslatef(pellet.pos.x, pellet.pos.y, pellet.pos.z);
@@ -441,29 +456,6 @@ public class Main {
 			all_pellets_in_world.remove(pellet);
 		}
 		all_dead_pellets_in_world.clear();
-
-		if (orb_gun) {
-			updateOrbPellet();
-		}
-	}
-
-	private void updateOrbPellet() {
-		Vector2f horiz = new Vector2f();
-		horiz.x = (float) Math.sin(pan_angle * 3.14159 / 180f);
-		horiz.y = -1 * (float) Math.cos(pan_angle * 3.14159 / 180f);
-		horiz.normalise();
-		horiz.scale((float) Math.cos(tilt_angle * 3.14159 / 180f));
-		gun_direction.x = horiz.x;
-		gun_direction.z = horiz.y;
-		gun_direction.y = -1 * (float) Math.sin(tilt_angle * 3.14159 / 180f);
-		gun_direction.normalise();
-		orb_pellet.setGunDirection(gun_direction);
-		orb_pellet.setPlayerPosition(pos);
-		orb_pellet.update();
-		glPushMatrix();
-		glTranslatef(orb_pellet.pos.x, orb_pellet.pos.y, orb_pellet.pos.z);
-		orb_pellet.draw();
-		glPopMatrix();
 	}
 
 	private void DrawSkybox() {
@@ -553,16 +545,28 @@ public class Main {
 		glColor3f(1f, 1f, 1f);
 		float f = 0.05f;
 
-		if (plane_gun) {
-			glBegin(GL_LINE_LOOP);
+		glLineWidth(2);
+		int n = 30;
+		switch (which_gun) {
+		case PELLET:
+			glBegin(GL_LINES);
 			glVertex2f(0, f);
-			glVertex2f(f * 600 / 800, 0);
 			glVertex2f(0, -f);
+			glVertex2f(f * 600 / 800, 0);
 			glVertex2f(-f * 600 / 800, 0);
 			glEnd();
-		} else if (orb_gun) {
+
 			glBegin(GL_LINE_LOOP);
-			int n = 30;
+			for (int i = 0; i < n; i++) {
+				float angle = (float) (Math.PI * 2 * i / n);
+				float x = (float) (Math.cos(angle) * f * 0.75 * 600 / 800);
+				float y = (float) (Math.sin(angle) * f * 0.75);
+				glVertex2f(x, y);
+			}
+			glEnd();
+			break;
+		case ORB:
+			glBegin(GL_LINE_LOOP);
 			for (int i = 0; i < n; i++) {
 				float angle = (float) (Math.PI * 2 * i / n);
 				float x = (float) (Math.cos(angle) * f * 0.75 * 600 / 800);
@@ -578,25 +582,19 @@ public class Main {
 				glVertex2f(x, y);
 			}
 			glEnd();
-		} else {
-			glLineWidth(2f);
-			glBegin(GL_LINES);
+			break;
+		case PLANE:
+			glBegin(GL_LINE_LOOP);
 			glVertex2f(0, f);
-			glVertex2f(0, -f);
 			glVertex2f(f * 600 / 800, 0);
+			glVertex2f(0, -f);
 			glVertex2f(-f * 600 / 800, 0);
 			glEnd();
-
-			glBegin(GL_LINE_LOOP);
-			int n = 30;
-			for (int i = 0; i < n; i++) {
-				float angle = (float) (Math.PI * 2 * i / n);
-				float x = (float) (Math.cos(angle) * f * 0.75 * 600 / 800);
-				float y = (float) (Math.sin(angle) * f * 0.75);
-				glVertex2f(x, y);
-			}
-			glEnd();
+			break;
+		default:
+			break;
 		}
+
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
 		glEnable(GL_DEPTH_TEST);
@@ -626,13 +624,13 @@ public class Main {
 	}
 
 	private void ShootGun() {
-		if (orb_gun) {
+		if (which_gun == GunMode.ORB) {
 			OrbPellet new_pellet = new OrbPellet(all_pellets_in_world);
-			new_pellet.pos.set(orb_pellet.pos);
+			new_pellet.pos.set(OrbPellet.orb_pellet.pos);
 			new_pellet.constructing = true;
 			all_pellets_in_world.add(new_pellet);
 			System.out.println(all_pellets_in_world);
-		} else {
+		} else if (which_gun == GunMode.PELLET || which_gun == GunMode.PLANE) {
 			System.out.println("shooting gun");
 
 			// do all this extra stuff with horizontal angle so that shooting up
@@ -650,7 +648,7 @@ public class Main {
 			gun_direction.normalise();
 
 			Pellet pellet = null;
-			if (plane_gun) {
+			if (which_gun == GunMode.PLANE) {
 				pellet = new PlanePellet(all_pellets_in_world);
 			} else {
 				pellet = new PolygonPellet(all_pellets_in_world);

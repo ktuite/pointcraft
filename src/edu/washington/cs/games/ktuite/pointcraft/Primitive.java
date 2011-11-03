@@ -44,7 +44,7 @@ public class Primitive {
 		player_position = new Vector3f(pos);
 		player_viewing_direction = new Vector3f(view);
 		player_viewing_direction.normalise();
-		startDownloadingTexture();
+		//startDownloadingTexture();
 	}
 
 	public boolean isPolygon() {

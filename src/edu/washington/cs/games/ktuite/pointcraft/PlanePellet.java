@@ -99,10 +99,6 @@ public class PlanePellet extends Pellet {
 		DoubleBuffer output = LibPointCloud.fitPlane(n, point_buffer)
 				.getByteBuffer(0, 4 * 8).asDoubleBuffer();
 
-		/*
-		 * for (int i = 0; i < 4; i++) { System.out.println("magical output: " +
-		 * output.get(i)); }
-		 */
 		
 		float a = (float) output.get(0);
 		float b = (float) output.get(1);
@@ -110,62 +106,62 @@ public class PlanePellet extends Pellet {
 		float d = (float) output.get(3);
 
 		float pts[] = new float[12];
-		float f = 0.14f;
+		float f = findPlaneExtent();
 		
-		Vector3f interp[] = new Vector3f[3];
+		Vector3f center = findPlaneCenter();
 		
 		if (Math.abs(a) > Math.abs(b) && Math.abs(a) > Math.abs(c)){
 			// set y and z
-			pts[0*3 + 1] = 1*f;
-			pts[0*3 + 2] = 1*f;
+			pts[0*3 + 1] = 1*f + center.y;
+			pts[0*3 + 2] = 1*f + center.z;
 			pts[0*3 + 0] = -1 * (pts[0*3 + 1] * b + pts[0*3 + 2] * c + d)/a;
 			
-			pts[1*3 + 1] = 1*f;
-			pts[1*3 + 2] = -1*f;
+			pts[1*3 + 1] = 1*f + center.y;
+			pts[1*3 + 2] = -1*f + center.z;
 			pts[1*3 + 0] = -1 * (pts[1*3 + 1] * b + pts[1*3 + 2] * c + d)/a;
 			
-			pts[2*3 + 1] = -1*f;
-			pts[2*3 + 2] = -1*f;
-			pts[1*3 + 0] = -1 * (pts[2*3 + 1] * b + pts[2*3 + 2] * c + d)/a;
+			pts[2*3 + 1] = -1*f + center.y;
+			pts[2*3 + 2] = -1*f + center.z;
+			pts[2*3 + 0] = -1 * (pts[2*3 + 1] * b + pts[2*3 + 2] * c + d)/a;
 			
-			pts[3*3 + 1] = -1*f;
-			pts[3*3 + 2] = 1*f;
-			pts[1*3 + 0] = -1 * (pts[3*3 + 1] * b + pts[3*3 + 2] * c + d)/a;
+			pts[3*3 + 1] = -1*f + center.y;
+			pts[3*3 + 2] = 1*f + center.z;
+			pts[3*3 + 0] = -1 * (pts[3*3 + 1] * b + pts[3*3 + 2] * c + d)/a;
 		}
 		else if (Math.abs(b) > Math.abs(a) && Math.abs(b) > Math.abs(c)){
 			// horizontal plane! set x and z
-			pts[0*3 + 0] = 1*f;
-			pts[0*3 + 2] = 1*f;
+			pts[0*3 + 0] = 1*f + center.x;
+			pts[0*3 + 2] = 1*f + center.z;
 			pts[0*3 + 1] = -1 * (pts[0*3 + 0] * a + pts[0*3 + 2] * c + d)/b;
 			
-			pts[1*3 + 0] = 1*f;
-			pts[1*3 + 2] = -1*f;
+			pts[1*3 + 0] = 1*f + center.x;
+			pts[1*3 + 2] = -1*f + center.z;
 			pts[1*3 + 1] = -1 * (pts[1*3 + 0] * a + pts[1*3 + 2] * c + d)/b;
 			
-			pts[2*3 + 0] = -1*f;
-			pts[2*3 + 2] = -1*f;
+			pts[2*3 + 0] = -1*f + center.x;
+			pts[2*3 + 2] = -1*f + center.z;
 			pts[2*3 + 1] = -1 * (pts[2*3 + 0] * a + pts[2*3 + 2] * c + d)/b;
 			
-			pts[3*3 + 0] = -1*f;
-			pts[3*3 + 2] = 1*f;
+			pts[3*3 + 0] = -1*f + center.x;
+			pts[3*3 + 2] = 1*f + center.z;
 			pts[3*3 + 1] = -1 * (pts[3*3 + 0] * a + pts[3*3 + 2] * c + d)/b;
 		}
 		else {
 			// set x and y
-			pts[0*3 + 0] = 1*f;
-			pts[0*3 + 1] = 1*f;
+			pts[0*3 + 0] = 1*f + center.x;
+			pts[0*3 + 1] = 1*f + center.y;
 			pts[0*3 + 2] = -1 * (pts[0*3 + 0] * a + pts[0*3 + 1] * b + d)/c;
 			
-			pts[1*3 + 0] = 1*f;
-			pts[1*3 + 1] = -1*f;
+			pts[1*3 + 0] = 1*f + center.x;
+			pts[1*3 + 1] = -1*f + center.y;
 			pts[1*3 + 2] = -1 * (pts[1*3 + 0] * a + pts[1*3 + 1] * b + d)/c;
 			
-			pts[2*3 + 0] = -1*f;
-			pts[2*3 + 1] = -1*f;
+			pts[2*3 + 0] = -1*f + center.x;
+			pts[2*3 + 1] = -1*f + center.y;
 			pts[2*3 + 2] = -1 * (pts[2*3 + 0] * a + pts[2*3 + 1] * b + d)/c;
 			
-			pts[3*3 + 0] = -1*f;
-			pts[3*3 + 1] = 1*f;
+			pts[3*3 + 0] = -1*f + center.x;
+			pts[3*3 + 1] = 1*f + center.y;
 			pts[3*3 + 2] = -1 * (pts[3*3 + 0] * a + pts[3*3 + 1] * b + d)/c;
 		}
 		
@@ -197,9 +193,39 @@ public class PlanePellet extends Pellet {
 			boundary_pellets.add(end);
 		}
 		
-		if (Main.geometry_v.size() == 1)
-			Main.geometry_v.remove(0);
+		if (Main.geometry_v.size() > 0 && current_plane.size() > 3){
+			Main.geometry_v.remove(Main.geometry_v.size()-1);
+			System.out.println("removed some geometry");
+		}
 		Main.geometry_v.add(new PrimitiveVertex(GL_LINES, boundary_pellets, 1));
 		
+	}
+	
+	private float findPlaneExtent(){
+		float max_distance = 0;
+		Vector3f dist = new Vector3f();
+		for (Pellet a : current_plane) {
+			for (Pellet b : current_plane) {
+				Vector3f.sub(a.pos, b.pos, dist);
+				float d = dist.length();
+				if (d > max_distance)
+					max_distance = d;
+			}
+		}
+		return max_distance;
+	}
+	
+	private Vector3f findPlaneCenter(){
+		Vector3f center = new Vector3f();
+		for (Pellet p : current_plane) {
+			Vector3f.add(p.pos, center, center);
+		}
+		center.scale(1f/current_plane.size());
+		return center;
+	}
+	
+	public static void startNewPlane(){
+		current_plane.clear();
+		System.out.println("making new plane");
 	}
 }
