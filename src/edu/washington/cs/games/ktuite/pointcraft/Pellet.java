@@ -39,7 +39,8 @@ public class Pellet {
 		constructing = false;
 		main_pellets = _pellets;
 
-		Main.launch_effect.playAsSoundEffect(1.0f, 1.0f, false);
+		if (Main.launch_effect != null)
+			Main.launch_effect.playAsSoundEffect(1.0f, 1.0f, false);
 	}
 
 	public void update() {

@@ -25,7 +25,8 @@ public class PlanePellet extends Pellet {
 	public PlanePellet(List<Pellet> _pellets) {
 		super(_pellets);
 	}
-
+	
+	@Override
 	public void update() {
 		// constructing means the pellet has triggered something to be built at
 		// its sticking location

@@ -21,6 +21,7 @@ public class PolygonPellet extends Pellet {
 		super(_pellets);
 	}
 
+	@Override
 	public void update() {
 		// constructing means the pellet has triggered something to be built at
 		// its sticking location
@@ -94,7 +95,9 @@ public class PolygonPellet extends Pellet {
 			cycle.add(p);
 		}
 		cycle.add(this);
-		Main.geometry.add(new Primitive(GL_POLYGON, cycle));
+		Primitive polygon = new Primitive(GL_POLYGON, cycle);
+		polygon.setPlayerPositionAndViewingDirection(pos, vel);
+		Main.geometry.add(polygon);
 
 		current_cycle.clear();
 	}
