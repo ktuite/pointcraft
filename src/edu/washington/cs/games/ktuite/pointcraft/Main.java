@@ -69,7 +69,7 @@ public class Main {
 	private boolean draw_points = true;
 
 	public enum GunMode {
-		PELLET, ORB, LINE, PLANE, ARC, CIRCLE
+		PELLET, ORB, LINE, PLANE, ARC, CIRCLE, DESTRUCTOR
 	}
 
 	public GunMode which_gun;
@@ -338,10 +338,14 @@ public class Main {
 					which_gun = GunMode.PLANE;
 					System.out.println("plane fitting pellet gun selected");
 				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_0) {
+				if (Keyboard.getEventKey() == Keyboard.KEY_9) {
 					which_gun = GunMode.ORB;
 					System.out
 							.println("orb gun (where you can just place pellets in space without them sticking to things) selected");
+				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_0) {
+					which_gun = GunMode.DESTRUCTOR;
+					System.out.println("the gun that deletes things");
 				}
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_N) {
@@ -637,6 +641,23 @@ public class Main {
 			glVertex2f(f * .2f * 600 / 800, -f * .2f);
 			glEnd();
 			break;
+		case DESTRUCTOR:
+			glBegin(GL_LINES);
+			glVertex2f(f * 600 / 800, f);
+			glVertex2f(-f * 600 / 800, -f);
+			glVertex2f(-f * 600 / 800, f);
+			glVertex2f(f * 600 / 800, -f);
+			glEnd();
+
+			glBegin(GL_LINE_LOOP);
+			for (int i = 0; i < n; i++) {
+				float angle = (float) (Math.PI * 2 * i / n);
+				float x = (float) (Math.cos(angle) * f * 0.75 * 600 / 800);
+				float y = (float) (Math.sin(angle) * f * 0.75);
+				glVertex2f(x, y);
+			}
+			glEnd();
+			break;
 		default:
 			break;
 		}
@@ -676,8 +697,7 @@ public class Main {
 			new_pellet.constructing = true;
 			all_pellets_in_world.add(new_pellet);
 			System.out.println(all_pellets_in_world);
-		} else if (which_gun == GunMode.PELLET || which_gun == GunMode.PLANE
-				|| which_gun == GunMode.LINE) {
+		} else if (which_gun != GunMode.ORB) {
 			System.out.println("shooting gun");
 
 			// do all this extra stuff with horizontal angle so that shooting up
@@ -699,6 +719,8 @@ public class Main {
 				pellet = new PlanePellet(all_pellets_in_world);
 			} else if (which_gun == GunMode.LINE) {
 				pellet = new LinePellet(all_pellets_in_world);
+			} else if (which_gun == GunMode.DESTRUCTOR) {
+				pellet = new DestructorPellet(all_pellets_in_world);
 			} else {
 				pellet = new PolygonPellet(all_pellets_in_world);
 			}

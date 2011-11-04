@@ -44,6 +44,10 @@ public class Pellet {
 			Main.launch_effect.playAsSoundEffect(1.0f, 1.0f, false);
 	}
 
+	public void finalize(){
+		System.out.println("deletng this pellet");
+	}
+	
 	public void update() {
 		// constructing means the pellet has triggered something to be built at
 		// its sticking location

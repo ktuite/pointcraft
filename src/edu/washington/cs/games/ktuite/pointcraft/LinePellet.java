@@ -25,7 +25,7 @@ public class LinePellet extends Pellet {
 	public LinePellet(List<Pellet> _pellets) {
 		super(_pellets);
 	}
-	
+
 	@Override
 	public void update() {
 		// constructing means the pellet has triggered something to be built at
@@ -75,6 +75,15 @@ public class LinePellet extends Pellet {
 		}
 	}
 
+	public void finalize() {
+		if (current_line.size() == 2 || current_line.size() == 3)
+			Main.geometry_v.remove(Main.geometry_v.size() - 1);
+		if (current_line.contains(this)) {
+			current_line.remove(this);
+			fitLine();
+		}
+	}
+
 	public void draw() {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
@@ -101,10 +110,9 @@ public class LinePellet extends Pellet {
 		Pointer point_buffer = Native.getDirectBufferPointer(line_points);
 		DoubleBuffer output = LibPointCloud.fitLine(n, point_buffer)
 				.getByteBuffer(0, 6 * 8).asDoubleBuffer();
-		
-		
+
 		float f = findLineExtent();
-		
+
 		Vector3f line_direction = new Vector3f();
 		line_direction.x = (float) output.get(0);
 		line_direction.y = (float) output.get(1);
@@ -114,8 +122,8 @@ public class LinePellet extends Pellet {
 		Vector3f center = new Vector3f();
 		center.x = (float) output.get(3);
 		center.y = (float) output.get(4);
-		center.z = (float) output.get(5);	
-		
+		center.z = (float) output.get(5);
+
 		List<Vector3f> line_pellets = new LinkedList<Vector3f>();
 		line_direction.scale(f);
 		Vector3f.add(center, line_direction, center);
@@ -123,17 +131,16 @@ public class LinePellet extends Pellet {
 		line_direction.scale(-2);
 		Vector3f.add(center, line_direction, center);
 		line_pellets.add(new Vector3f(center));
-		
-		
-		if (Main.geometry_v.size() > 0 && current_line.size() > 2){
-			Main.geometry_v.remove(Main.geometry_v.size()-1);
+
+		if (Main.geometry_v.size() > 0 && current_line.size() > 2) {
+			Main.geometry_v.remove(Main.geometry_v.size() - 1);
 			System.out.println("removed some geometry");
 		}
 		Main.geometry_v.add(new PrimitiveVertex(GL_LINES, line_pellets, 3));
-		
+
 	}
-	
-	private float findLineExtent(){
+
+	private float findLineExtent() {
 		float max_distance = 0;
 		Vector3f dist = new Vector3f();
 		for (Pellet a : current_line) {
@@ -146,17 +153,17 @@ public class LinePellet extends Pellet {
 		}
 		return max_distance;
 	}
-	
-	private Vector3f findLineCenter(){
+
+	private Vector3f findLineCenter() {
 		Vector3f center = new Vector3f();
 		for (Pellet p : current_line) {
 			Vector3f.add(p.pos, center, center);
 		}
-		center.scale(1f/current_line.size());
+		center.scale(1f / current_line.size());
 		return center;
 	}
-	
-	public static void startNewLine(){
+
+	public static void startNewLine() {
 		current_line.clear();
 		System.out.println("making new line");
 	}

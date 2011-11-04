@@ -75,6 +75,15 @@ public class PlanePellet extends Pellet {
 			}
 		}
 	}
+	
+	public void finalize() {
+		if (current_plane.size() == 3 || current_plane.size() == 4)
+			Main.geometry_v.remove(Main.geometry_v.size() - 1);
+		if (current_plane.contains(this)) {
+			current_plane.remove(this);
+			fitPlane();
+		}
+	}
 
 	public void draw() {
 		if (constructing) {
