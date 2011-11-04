@@ -25,7 +25,7 @@ public class PlanePellet extends Pellet {
 	public PlanePellet(List<Pellet> _pellets) {
 		super(_pellets);
 	}
-	
+
 	@Override
 	public void update() {
 		// constructing means the pellet has triggered something to be built at
@@ -42,30 +42,38 @@ public class PlanePellet extends Pellet {
 				alive = false;
 			} else {
 
-				// if it's not dead yet, see if this pellet was shot at an
-				// existing pellet
-				Pellet neighbor_pellet = queryOtherPellets();
-				if (neighbor_pellet != null) {
-					alive = false;
+				if (queryScaffoldGeometry()) {
+					System.out.println("pellet stuck to some geometry");
+					constructing = true;
 					current_plane.add(this);
 					fitPlane();
 				} else {
-					// if it's not dead yet and also didn't hit a neighboring
-					// pellet, look for nearby points in model
-					int neighbors = LibPointCloud.queryKdTree(pos.x, pos.y,
-							pos.z, radius);
-
-					// is it near some points?!
-					if (neighbors > 0) {
-						snapToCenterOfPoints();
-						
-						constructing = true;
-						Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
+					// if it's not dead yet, see if this pellet was shot at an
+					// existing pellet
+					Pellet neighbor_pellet = queryOtherPellets();
+					if (neighbor_pellet != null) {
+						alive = false;
 						current_plane.add(this);
 						fitPlane();
+					} else {
+						// if it's not dead yet and also didn't hit a
+						// neighboring
+						// pellet, look for nearby points in model
+						int neighbors = LibPointCloud.queryKdTree(pos.x, pos.y,
+								pos.z, radius);
+
+						// is it near some points?!
+						if (neighbors > 0) {
+							snapToCenterOfPoints();
+
+							constructing = true;
+							Main.attach_effect.playAsSoundEffect(1.0f, 1.0f,
+									false);
+							current_plane.add(this);
+							fitPlane();
+						}
 					}
 				}
-
 			}
 		} else {
 			// the pellet has stuck... here we just give it a nice growing
@@ -75,7 +83,7 @@ public class PlanePellet extends Pellet {
 			}
 		}
 	}
-	
+
 	public void finalize() {
 		if (current_plane.size() == 3 || current_plane.size() == 4)
 			Main.geometry_v.remove(Main.geometry_v.size() - 1);
@@ -112,7 +120,6 @@ public class PlanePellet extends Pellet {
 		DoubleBuffer output = LibPointCloud.fitPlane(n, point_buffer)
 				.getByteBuffer(0, 4 * 8).asDoubleBuffer();
 
-		
 		float a = (float) output.get(0);
 		float b = (float) output.get(1);
 		float c = (float) output.get(2);
@@ -120,103 +127,119 @@ public class PlanePellet extends Pellet {
 
 		float pts[] = new float[12];
 		float f = findPlaneExtent();
-		
+
 		Vector3f center = findPlaneCenter();
-		
-		if (Math.abs(a) > Math.abs(b) && Math.abs(a) > Math.abs(c)){
+
+		if (Math.abs(a) > Math.abs(b) && Math.abs(a) > Math.abs(c)) {
 			// set y and z
-			pts[0*3 + 1] = 1*f + center.y;
-			pts[0*3 + 2] = 1*f + center.z;
-			pts[0*3 + 0] = -1 * (pts[0*3 + 1] * b + pts[0*3 + 2] * c + d)/a;
-			
-			pts[1*3 + 1] = 1*f + center.y;
-			pts[1*3 + 2] = -1*f + center.z;
-			pts[1*3 + 0] = -1 * (pts[1*3 + 1] * b + pts[1*3 + 2] * c + d)/a;
-			
-			pts[2*3 + 1] = -1*f + center.y;
-			pts[2*3 + 2] = -1*f + center.z;
-			pts[2*3 + 0] = -1 * (pts[2*3 + 1] * b + pts[2*3 + 2] * c + d)/a;
-			
-			pts[3*3 + 1] = -1*f + center.y;
-			pts[3*3 + 2] = 1*f + center.z;
-			pts[3*3 + 0] = -1 * (pts[3*3 + 1] * b + pts[3*3 + 2] * c + d)/a;
-		}
-		else if (Math.abs(b) > Math.abs(a) && Math.abs(b) > Math.abs(c)){
+			pts[0 * 3 + 1] = 1 * f + center.y;
+			pts[0 * 3 + 2] = 1 * f + center.z;
+			pts[0 * 3 + 0] = -1 * (pts[0 * 3 + 1] * b + pts[0 * 3 + 2] * c + d)
+					/ a;
+
+			pts[1 * 3 + 1] = 1 * f + center.y;
+			pts[1 * 3 + 2] = -1 * f + center.z;
+			pts[1 * 3 + 0] = -1 * (pts[1 * 3 + 1] * b + pts[1 * 3 + 2] * c + d)
+					/ a;
+
+			pts[2 * 3 + 1] = -1 * f + center.y;
+			pts[2 * 3 + 2] = -1 * f + center.z;
+			pts[2 * 3 + 0] = -1 * (pts[2 * 3 + 1] * b + pts[2 * 3 + 2] * c + d)
+					/ a;
+
+			pts[3 * 3 + 1] = -1 * f + center.y;
+			pts[3 * 3 + 2] = 1 * f + center.z;
+			pts[3 * 3 + 0] = -1 * (pts[3 * 3 + 1] * b + pts[3 * 3 + 2] * c + d)
+					/ a;
+		} else if (Math.abs(b) > Math.abs(a) && Math.abs(b) > Math.abs(c)) {
 			// horizontal plane! set x and z
-			pts[0*3 + 0] = 1*f + center.x;
-			pts[0*3 + 2] = 1*f + center.z;
-			pts[0*3 + 1] = -1 * (pts[0*3 + 0] * a + pts[0*3 + 2] * c + d)/b;
-			
-			pts[1*3 + 0] = 1*f + center.x;
-			pts[1*3 + 2] = -1*f + center.z;
-			pts[1*3 + 1] = -1 * (pts[1*3 + 0] * a + pts[1*3 + 2] * c + d)/b;
-			
-			pts[2*3 + 0] = -1*f + center.x;
-			pts[2*3 + 2] = -1*f + center.z;
-			pts[2*3 + 1] = -1 * (pts[2*3 + 0] * a + pts[2*3 + 2] * c + d)/b;
-			
-			pts[3*3 + 0] = -1*f + center.x;
-			pts[3*3 + 2] = 1*f + center.z;
-			pts[3*3 + 1] = -1 * (pts[3*3 + 0] * a + pts[3*3 + 2] * c + d)/b;
-		}
-		else {
+			pts[0 * 3 + 0] = 1 * f + center.x;
+			pts[0 * 3 + 2] = 1 * f + center.z;
+			pts[0 * 3 + 1] = -1 * (pts[0 * 3 + 0] * a + pts[0 * 3 + 2] * c + d)
+					/ b;
+
+			pts[1 * 3 + 0] = 1 * f + center.x;
+			pts[1 * 3 + 2] = -1 * f + center.z;
+			pts[1 * 3 + 1] = -1 * (pts[1 * 3 + 0] * a + pts[1 * 3 + 2] * c + d)
+					/ b;
+
+			pts[2 * 3 + 0] = -1 * f + center.x;
+			pts[2 * 3 + 2] = -1 * f + center.z;
+			pts[2 * 3 + 1] = -1 * (pts[2 * 3 + 0] * a + pts[2 * 3 + 2] * c + d)
+					/ b;
+
+			pts[3 * 3 + 0] = -1 * f + center.x;
+			pts[3 * 3 + 2] = 1 * f + center.z;
+			pts[3 * 3 + 1] = -1 * (pts[3 * 3 + 0] * a + pts[3 * 3 + 2] * c + d)
+					/ b;
+		} else {
 			// set x and y
-			pts[0*3 + 0] = 1*f + center.x;
-			pts[0*3 + 1] = 1*f + center.y;
-			pts[0*3 + 2] = -1 * (pts[0*3 + 0] * a + pts[0*3 + 1] * b + d)/c;
-			
-			pts[1*3 + 0] = 1*f + center.x;
-			pts[1*3 + 1] = -1*f + center.y;
-			pts[1*3 + 2] = -1 * (pts[1*3 + 0] * a + pts[1*3 + 1] * b + d)/c;
-			
-			pts[2*3 + 0] = -1*f + center.x;
-			pts[2*3 + 1] = -1*f + center.y;
-			pts[2*3 + 2] = -1 * (pts[2*3 + 0] * a + pts[2*3 + 1] * b + d)/c;
-			
-			pts[3*3 + 0] = -1*f + center.x;
-			pts[3*3 + 1] = 1*f + center.y;
-			pts[3*3 + 2] = -1 * (pts[3*3 + 0] * a + pts[3*3 + 1] * b + d)/c;
+			pts[0 * 3 + 0] = 1 * f + center.x;
+			pts[0 * 3 + 1] = 1 * f + center.y;
+			pts[0 * 3 + 2] = -1 * (pts[0 * 3 + 0] * a + pts[0 * 3 + 1] * b + d)
+					/ c;
+
+			pts[1 * 3 + 0] = 1 * f + center.x;
+			pts[1 * 3 + 1] = -1 * f + center.y;
+			pts[1 * 3 + 2] = -1 * (pts[1 * 3 + 0] * a + pts[1 * 3 + 1] * b + d)
+					/ c;
+
+			pts[2 * 3 + 0] = -1 * f + center.x;
+			pts[2 * 3 + 1] = -1 * f + center.y;
+			pts[2 * 3 + 2] = -1 * (pts[2 * 3 + 0] * a + pts[2 * 3 + 1] * b + d)
+					/ c;
+
+			pts[3 * 3 + 0] = -1 * f + center.x;
+			pts[3 * 3 + 1] = 1 * f + center.y;
+			pts[3 * 3 + 2] = -1 * (pts[3 * 3 + 0] * a + pts[3 * 3 + 1] * b + d)
+					/ c;
 		}
-		
+
 		List<Vector3f> boundary_pellets = new LinkedList<Vector3f>();
 
 		float grid = 40;
-		for (int i = 0; i <= grid; i++){
+		for (int i = 0; i <= grid; i++) {
 			Vector3f begin = new Vector3f();
 			Vector3f end = new Vector3f();
-			begin.x = pts[0*3 + 0] * i/grid + pts[1*3 + 0] * (1-i/grid);
-			begin.y = pts[0*3 + 1] * i/grid + pts[1*3 + 1] * (1-i/grid);
-			begin.z = pts[0*3 + 2] * i/grid + pts[1*3 + 2] * (1-i/grid);
-			end.x = pts[3*3 + 0] * i/grid + pts[2*3 + 0] * (1-i/grid);
-			end.y = pts[3*3 + 1] * i/grid + pts[2*3 + 1] * (1-i/grid);
-			end.z = pts[3*3 + 2] * i/grid + pts[2*3 + 2] * (1-i/grid);
+			begin.x = pts[0 * 3 + 0] * i / grid + pts[1 * 3 + 0]
+					* (1 - i / grid);
+			begin.y = pts[0 * 3 + 1] * i / grid + pts[1 * 3 + 1]
+					* (1 - i / grid);
+			begin.z = pts[0 * 3 + 2] * i / grid + pts[1 * 3 + 2]
+					* (1 - i / grid);
+			end.x = pts[3 * 3 + 0] * i / grid + pts[2 * 3 + 0] * (1 - i / grid);
+			end.y = pts[3 * 3 + 1] * i / grid + pts[2 * 3 + 1] * (1 - i / grid);
+			end.z = pts[3 * 3 + 2] * i / grid + pts[2 * 3 + 2] * (1 - i / grid);
 			boundary_pellets.add(begin);
 			boundary_pellets.add(end);
 		}
-		for (int i = 0; i <= grid; i++){
+		for (int i = 0; i <= grid; i++) {
 			Vector3f begin = new Vector3f();
 			Vector3f end = new Vector3f();
-			begin.x = pts[0*3 + 0] * i/grid + pts[3*3 + 0] * (1-i/grid);
-			begin.y = pts[0*3 + 1] * i/grid + pts[3*3 + 1] * (1-i/grid);
-			begin.z = pts[0*3 + 2] * i/grid + pts[3*3 + 2] * (1-i/grid);
-			end.x = pts[1*3 + 0] * i/grid + pts[2*3 + 0] * (1-i/grid);
-			end.y = pts[1*3 + 1] * i/grid + pts[2*3 + 1] * (1-i/grid);
-			end.z = pts[1*3 + 2] * i/grid + pts[2*3 + 2] * (1-i/grid);
+			begin.x = pts[0 * 3 + 0] * i / grid + pts[3 * 3 + 0]
+					* (1 - i / grid);
+			begin.y = pts[0 * 3 + 1] * i / grid + pts[3 * 3 + 1]
+					* (1 - i / grid);
+			begin.z = pts[0 * 3 + 2] * i / grid + pts[3 * 3 + 2]
+					* (1 - i / grid);
+			end.x = pts[1 * 3 + 0] * i / grid + pts[2 * 3 + 0] * (1 - i / grid);
+			end.y = pts[1 * 3 + 1] * i / grid + pts[2 * 3 + 1] * (1 - i / grid);
+			end.z = pts[1 * 3 + 2] * i / grid + pts[2 * 3 + 2] * (1 - i / grid);
 			boundary_pellets.add(begin);
 			boundary_pellets.add(end);
 		}
-		
-		if (Main.geometry_v.size() > 0 && current_plane.size() > 3){
-			Main.geometry_v.remove(Main.geometry_v.size()-1);
+
+		if (Main.geometry_v.size() > 0 && current_plane.size() > 3) {
+			Main.geometry_v.remove(Main.geometry_v.size() - 1);
 			System.out.println("removed some geometry");
 		}
 		PrimitiveVertex g = new PrimitiveVertex(GL_LINES, boundary_pellets, 1);
 		g.setPlane(a, b, c, d);
 		Main.geometry_v.add(g);
-		
+
 	}
-	
-	private float findPlaneExtent(){
+
+	private float findPlaneExtent() {
 		float max_distance = 0;
 		Vector3f dist = new Vector3f();
 		for (Pellet a : current_plane) {
@@ -229,17 +252,17 @@ public class PlanePellet extends Pellet {
 		}
 		return max_distance;
 	}
-	
-	private Vector3f findPlaneCenter(){
+
+	private Vector3f findPlaneCenter() {
 		Vector3f center = new Vector3f();
 		for (Pellet p : current_plane) {
 			Vector3f.add(p.pos, center, center);
 		}
-		center.scale(1f/current_plane.size());
+		center.scale(1f / current_plane.size());
 		return center;
 	}
-	
-	public static void startNewPlane(){
+
+	public static void startNewPlane() {
 		current_plane.clear();
 		System.out.println("making new plane");
 	}

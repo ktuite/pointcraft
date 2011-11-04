@@ -308,10 +308,10 @@ public class Main {
 			vel.x += Math.cos(pan_angle * 3.14159 / 180f) * walkforce / 2;
 			vel.z += Math.sin(pan_angle * 3.14159 / 180f) * walkforce / 2;
 		}
-		if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
+		if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
 			vel.y += walkforce / 2;
 		}
-		if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
+		if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
 			vel.y -= walkforce / 2;
 		}
 
