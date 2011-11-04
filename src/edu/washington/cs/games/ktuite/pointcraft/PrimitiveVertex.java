@@ -97,7 +97,7 @@ public class PrimitiveVertex {
 			dist = temp.length()/sub3.length();
 		}
 		else if (isPlane()){
-			
+			dist = (float) ((a*pos.x + b*pos.y + c*pos.z + d)/Math.sqrt(a*a + b*b + d*d));
 		}
 		System.out.println("distancE: " + dist);
 		return dist;
