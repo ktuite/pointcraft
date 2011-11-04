@@ -3,6 +3,7 @@ package edu.washington.cs.games.ktuite.pointcraft;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.util.glu.GLU.*;
 
+import java.awt.RenderingHints.Key;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -31,8 +32,10 @@ public class Main {
 	private float FOG_COLOR[] = new float[] { .89f, .89f, .89f, 1.0f };
 	public static Audio launch_effect;
 	public static Audio attach_effect;
-	
+
 	// stuff about the display
+	private static float point_size = 2;
+	private static float fog_density = 5;
 
 	// stuff about the world and how you move around
 	public static float world_scale = 1; // 40f;
@@ -109,9 +112,8 @@ public class Main {
 		glFog(GL_FOG_COLOR, fogColorBuffer);
 		glFogi(GL_FOG_MODE, GL_EXP2);
 		glFogf(GL_FOG_END, 3.0f);
-		glFogf(GL_FOG_START, .15f);
-		glFogf(GL_FOG_DENSITY, 5.0f);
-		// glEnable(GL_FOG);
+		glFogf(GL_FOG_START, .25f);
+		glFogf(GL_FOG_DENSITY, fog_density);
 
 		// getting the ordering of the points right
 		glEnable(GL_DEPTH_TEST);
@@ -323,7 +325,7 @@ public class Main {
 				if (Keyboard.getEventKey() == Keyboard.KEY_P) {
 					draw_points = !draw_points;
 				}
-				
+
 				if (Keyboard.getEventKey() == Keyboard.KEY_1) {
 					which_gun = GunMode.PELLET;
 					System.out.println("regular pellet gun selected");
@@ -341,14 +343,38 @@ public class Main {
 					System.out
 							.println("orb gun (where you can just place pellets in space without them sticking to things) selected");
 				}
-				
+
 				if (Keyboard.getEventKey() == Keyboard.KEY_N) {
 					if (which_gun == GunMode.PLANE)
 						PlanePellet.startNewPlane();
 					else if (which_gun == GunMode.LINE)
 						LinePellet.startNewLine();
 				}
+
+				if (Keyboard.getEventKey() == Keyboard.KEY_EQUALS) {
+					point_size++;
+					if (point_size > 10)
+						point_size = 10;
+				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_MINUS) {
+					point_size--;
+					if (point_size < 1)
+						point_size = 1;
+				}
 				
+				if (Keyboard.getEventKey() == Keyboard.KEY_LBRACKET){
+					fog_density -= 5;
+					if (fog_density < 0)
+						fog_density = 0;
+					glFogf(GL_FOG_DENSITY, fog_density);
+				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_RBRACKET){
+					fog_density += 5;
+					if (fog_density > 50)
+						fog_density = 50;
+					glFogf(GL_FOG_DENSITY, fog_density);
+				}
+
 			}
 		}
 
@@ -358,6 +384,10 @@ public class Main {
 			float ratio = (float) (Math.min(speed, max_speed) / speed);
 			vel.scale(ratio);
 		}
+		
+		// sneak / go slowly
+		if (Keyboard.isKeyDown(Keyboard.KEY_SPACE))
+			vel.scale(.1f);
 
 		// pos += vel
 		Vector3f.add(pos, vel, pos);
@@ -435,7 +465,7 @@ public class Main {
 	}
 
 	private void DrawPoints() {
-		glPointSize(2);
+		glPointSize(point_size);
 		glBegin(GL_POINTS);
 		for (int i = 0; i < num_points; i += 1) {
 			float r = (float) (point_colors.get(0 * num_points + i) / 255.0f);
@@ -603,6 +633,8 @@ public class Main {
 			glBegin(GL_LINES);
 			glVertex2f(f * 600 / 800, f);
 			glVertex2f(-f * 600 / 800, -f);
+			glVertex2f(-f * .2f * 600 / 800, f * .2f);
+			glVertex2f(f * .2f * 600 / 800, -f * .2f);
 			glEnd();
 			break;
 		default:
@@ -644,7 +676,8 @@ public class Main {
 			new_pellet.constructing = true;
 			all_pellets_in_world.add(new_pellet);
 			System.out.println(all_pellets_in_world);
-		} else if (which_gun == GunMode.PELLET || which_gun == GunMode.PLANE || which_gun == GunMode.LINE) {
+		} else if (which_gun == GunMode.PELLET || which_gun == GunMode.PLANE
+				|| which_gun == GunMode.LINE) {
 			System.out.println("shooting gun");
 
 			// do all this extra stuff with horizontal angle so that shooting up
