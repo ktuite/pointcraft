@@ -100,7 +100,7 @@ public class PrimitiveVertex {
 			dist = (float) ((a*pos.x + b*pos.y + c*pos.z + d)/Math.sqrt(a*a + b*b + d*d));
 		}
 		System.out.println("distancE: " + dist);
-		return dist;
+		return Math.abs(dist);
 	}
 
 }
