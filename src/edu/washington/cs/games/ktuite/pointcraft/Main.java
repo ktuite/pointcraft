@@ -365,14 +365,14 @@ public class Main {
 					if (point_size < 1)
 						point_size = 1;
 				}
-				
-				if (Keyboard.getEventKey() == Keyboard.KEY_LBRACKET){
+
+				if (Keyboard.getEventKey() == Keyboard.KEY_LBRACKET) {
 					fog_density -= 5;
 					if (fog_density < 0)
 						fog_density = 0;
 					glFogf(GL_FOG_DENSITY, fog_density);
 				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_RBRACKET){
+				if (Keyboard.getEventKey() == Keyboard.KEY_RBRACKET) {
 					fog_density += 5;
 					if (fog_density > 50)
 						fog_density = 50;
@@ -388,7 +388,7 @@ public class Main {
 			float ratio = (float) (Math.min(speed, max_speed) / speed);
 			vel.scale(ratio);
 		}
-		
+
 		// sneak / go slowly
 		if (Keyboard.isKeyDown(Keyboard.KEY_SPACE))
 			vel.scale(.1f);
@@ -417,6 +417,8 @@ public class Main {
 			if (Mouse.getEventButtonState()) {
 				if (Mouse.getEventButton() == 0) {
 					ShootGun();
+				} else if (Mouse.getEventButton() == 1) {
+					ShootDeleteGun();
 				}
 			}
 		}
@@ -700,19 +702,7 @@ public class Main {
 		} else if (which_gun != GunMode.ORB) {
 			System.out.println("shooting gun");
 
-			// do all this extra stuff with horizontal angle so that shooting up
-			// in
-			// the air makes the pellet go up in the air
-			Vector2f horiz = new Vector2f();
-			horiz.x = (float) Math.sin(pan_angle * 3.14159 / 180f);
-			horiz.y = -1 * (float) Math.cos(pan_angle * 3.14159 / 180f);
-			horiz.normalise();
-			horiz.scale((float) Math.cos(tilt_angle * 3.14159 / 180f));
-			gun_direction.x = horiz.x;
-			gun_direction.z = horiz.y;
-			gun_direction.y = -1
-					* (float) Math.sin(tilt_angle * 3.14159 / 180f);
-			gun_direction.normalise();
+			computeGunDirection();
 
 			Pellet pellet = null;
 			if (which_gun == GunMode.PLANE) {
@@ -731,4 +721,29 @@ public class Main {
 		}
 	}
 
+	private void ShootDeleteGun() {
+		System.out.println("shooting DESTRUCTOR gun");
+		computeGunDirection();
+		Pellet pellet = new DestructorPellet(all_pellets_in_world);
+		pellet.vel.set(gun_direction);
+		pellet.vel.scale(gun_speed);
+		pellet.pos.set(pos);
+		all_pellets_in_world.add(pellet);
+
+	}
+
+	private void computeGunDirection() {
+		// do all this extra stuff with horizontal angle so that shooting up
+		// in the air makes the pellet go up in the air
+		Vector2f horiz = new Vector2f();
+		horiz.x = (float) Math.sin(pan_angle * 3.14159 / 180f);
+		horiz.y = -1 * (float) Math.cos(pan_angle * 3.14159 / 180f);
+		horiz.normalise();
+		horiz.scale((float) Math.cos(tilt_angle * 3.14159 / 180f));
+		gun_direction.x = horiz.x;
+		gun_direction.z = horiz.y;
+		gun_direction.y = -1 * (float) Math.sin(tilt_angle * 3.14159 / 180f);
+		gun_direction.normalise();
+
+	}
 }
