@@ -46,7 +46,6 @@ public class Main {
 	private float veldecay = .90f;
 	private static float walkforce = 1 / 4000f * world_scale;
 	private double max_speed = 1 * world_scale;
-	private float stilts = 0.01f * world_scale;
 	private Texture skybox = null;
 
 	// stuff about the point cloud
@@ -144,7 +143,6 @@ public class Main {
 	private void SetGameVariablesFromWorldScale() {
 		walkforce = 1 / 4000f * world_scale;
 		max_speed = 1 * world_scale;
-		stilts = 0.01f * world_scale;
 	}
 
 	private void InitGameVariables() {
@@ -310,18 +308,18 @@ public class Main {
 			vel.x += Math.cos(pan_angle * 3.14159 / 180f) * walkforce / 2;
 			vel.z += Math.sin(pan_angle * 3.14159 / 180f) * walkforce / 2;
 		}
+		if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
+			vel.y += walkforce / 2;
+		}
+		if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
+			vel.y -= walkforce / 2;
+		}
 
 		// this is like putting on or taking off some stilts
 		// (numerous pairs of stilts)
 		// basically it increases or decreases your vertical world height
 		while (Keyboard.next()) {
 			if (Keyboard.getEventKeyState()) {
-				if (Keyboard.getEventKey() == Keyboard.KEY_Q) {
-					pos.y -= stilts;
-				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_E) {
-					pos.y += stilts;
-				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_P) {
 					draw_points = !draw_points;
 				}
