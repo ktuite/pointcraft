@@ -606,6 +606,34 @@ int PointCloud::QueryKdTree(float x, float y, float z, float radius){
     return neighbors;
 }
 
+double* PointCloud::QueryKdTreeGetCenter(float x, float y, float z, float radius){
+    m_query_pt[0] = x;
+    m_query_pt[1] = y;
+    m_query_pt[2] = z;
+    
+     double* center = (double*)malloc(3*sizeof(double));
+     for (int k = 0; k < 3; k++)
+        center[k] = 0;
+    
+    int max_neighbors = 100;
+    ANNidxArray nnIdx = new ANNidx[max_neighbors];
+    ANNdistArray dists = new ANNdist[max_neighbors];
+    
+    int neighbors = m_kd_3d->annkFRSearch(m_query_pt, radius*radius, max_neighbors, nnIdx, dists);
+    double weights = 0;
+    for (int j = 0; j < min(neighbors, max_neighbors); j++){
+        weights += dists[j];
+        for (int k = 0; k < 3; k++){
+            center[k] += gsl_matrix_get(m_gsl_points, k, nnIdx[j])*dists[j];
+        }
+    }
+    
+    for (int k = 0; k < 3; k++)
+        center[k] /= weights; 
+       
+    return center;
+}
+
 void PointCloud::MakeSplat(float x, float y, float z, float radius){
     m_query_pt[0] = x;
     m_query_pt[1] = y;
@@ -703,6 +731,68 @@ double* PointCloud::FitPlaneToPoints(int n, double *pts){
     plane[3] = d;
     
     return plane;
+}
+
+double* PointCloud::FitLineToPoints(int n, double *pts){
+    // fit a plane to the points made by some pellets in java
+    gsl_matrix *sample_points = gsl_matrix_calloc(n, 3);
+    
+    double mean[3];
+    for (int k = 0; k < 3; k++)
+		mean[k] = 0;
+		
+    for (int i = 0; i < n; i++){
+        for (int k = 0; k < 3; k++){
+            gsl_matrix_set(sample_points, i, k, pts[i*3 + k]);
+            mean[k] += pts[i*3 + k];
+        }
+    }
+    
+    for (int k = 0; k < 3; k++)
+		mean[k] /= n;
+		
+    for (int i = 0; i < n; i++){
+        for (int k = 0; k < 3; k++){
+            gsl_matrix_set(sample_points, i, k, gsl_matrix_get(sample_points, i, k) - mean[k]);
+        }
+    }
+
+
+    double* line_guts = (double*)malloc(6 * sizeof(double));
+
+    if (n >= 3){
+        printf("about to run SVD\n");
+        fflush(stdout);
+        
+        gsl_vector *S = gsl_vector_calloc(3);
+        gsl_matrix *V = gsl_matrix_calloc(3,3);
+        gsl_vector *work = gsl_vector_calloc(3);
+    
+        // run SVD!!! singular value decomposition! 
+        int res = gsl_linalg_SV_decomp(sample_points, V, S, work);
+        
+        // now that we have SVD, let's get the direction of the line
+        double a = gsl_matrix_get(V, 0, 0);
+        double b = gsl_matrix_get(V, 1, 0);
+        double c = gsl_matrix_get(V, 2, 0);
+        
+        
+        
+        line_guts[0] = a;
+        line_guts[1] = b;
+        line_guts[2] = c;
+    }
+    else if (n == 2){
+        for (int k = 0; k < 3; k++)
+            line_guts[k] = pts[1*3 + k] - pts[0*3 + k];
+    }
+
+    line_guts[3] = mean[0];
+    line_guts[4] = mean[1];
+    line_guts[5] = mean[2];
+    
+    return line_guts;
+    
 }
 
 void PointCloud::ClusterPoints(){

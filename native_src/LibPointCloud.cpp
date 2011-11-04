@@ -33,8 +33,12 @@ extern "C" {
         m_point_cloud->MakeKdTree();
     }
     
-    void queryKdTree(float x, float y, float z, float radius){
-        m_point_cloud->QueryKdTree(x,y,z,radius);
+    int queryKdTree(float x, float y, float z, float radius){
+        return m_point_cloud->QueryKdTree(x,y,z,radius);
+    }
+    
+    double* queryKdTreeGetCenter(float x, float y, float z, float radius){
+        return m_point_cloud->QueryKdTreeGetCenter(x,y,z,radius);
     }
     
     void makeSplat(float x, float y, float z, float radius){
@@ -51,5 +55,9 @@ extern "C" {
     
     double* fitPlane(int n, double *pts){
         return m_point_cloud->FitPlaneToPoints(n, pts);
+    }
+    
+    double* fitLine(int n, double *pts){
+        return m_point_cloud->FitLineToPoints(n, pts);
     }
 }

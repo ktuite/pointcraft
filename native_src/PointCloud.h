@@ -184,10 +184,12 @@ public:
     
     void MakeKdTree();
     int QueryKdTree(float x, float y, float z, float radius);
+    double* QueryKdTreeGetCenter(float x, float y, float z, float radius);
     void MakeSplat(float x, float y, float z, float radius);
     int CountVerticesOfLastGeometry();
     float* GetVerticesOfLastGeometry();
     double* FitPlaneToPoints(int n, double *pts);
+    double* FitLineToPoints(int n, double *pts);
     
     void TransposePointsAndFixColors();
     

@@ -55,6 +55,8 @@ public class PlanePellet extends Pellet {
 
 					// is it near some points?!
 					if (neighbors > 0) {
+						snapToCenterOfPoints();
+						
 						constructing = true;
 						Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
 						current_plane.add(this);

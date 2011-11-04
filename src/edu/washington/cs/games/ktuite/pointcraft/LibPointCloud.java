@@ -17,10 +17,13 @@ public class LibPointCloud {
 	public static native Pointer getPointColors();
 	public static native void makeKdTree();
 	public static native int queryKdTree(float x, float y, float z, float radius);
+	public static native Pointer queryKdTreeGetCenter(float x, float y, float z, float radius);
+
 	
 	public static native void makeSplat(float x, float y, float z, float radius);
 	public static native int getVertexCount();
 	public static native Pointer getVertices();
 	
+	public static native Pointer fitLine(int n, Pointer points);
 	public static native Pointer fitPlane(int n, Pointer points);
 }

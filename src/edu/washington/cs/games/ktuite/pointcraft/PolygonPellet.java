@@ -1,5 +1,6 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
+import java.nio.DoubleBuffer;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
@@ -61,7 +62,9 @@ public class PolygonPellet extends Pellet {
 					if (neighbors > 0) {
 						constructing = true;
 						Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
-
+						
+						snapToCenterOfPoints();
+						
 						if (CONNECT_TO_PREVIOUS)
 							current_cycle.add(this);
 

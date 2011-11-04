@@ -1,5 +1,6 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
+import java.nio.DoubleBuffer;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -83,6 +84,13 @@ public class Pellet {
 				radius *= 1.1;
 			}
 		}
+	}
+	
+	protected void snapToCenterOfPoints(){
+		DoubleBuffer center_of_points = LibPointCloud.queryKdTreeGetCenter(pos.x, pos.y, pos.z, radius).getByteBuffer(0, 3 * 8).asDoubleBuffer();
+		pos.x = (float) center_of_points.get(0);
+		pos.y = (float) center_of_points.get(1);
+		pos.z = (float) center_of_points.get(2);
 	}
 
 	public Pellet queryOtherPellets() {

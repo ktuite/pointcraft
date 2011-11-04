@@ -326,6 +326,10 @@ public class Main {
 					which_gun = GunMode.PELLET;
 					System.out.println("regular pellet gun selected");
 				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_2) {
+					which_gun = GunMode.LINE;
+					System.out.println("line fitting pellet gun selected");
+				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_3) {
 					which_gun = GunMode.PLANE;
 					System.out.println("plane fitting pellet gun selected");
@@ -339,6 +343,8 @@ public class Main {
 				if (Keyboard.getEventKey() == Keyboard.KEY_N) {
 					if (which_gun == GunMode.PLANE)
 						PlanePellet.startNewPlane();
+					else if (which_gun == GunMode.LINE)
+						LinePellet.startNewLine();
 				}
 				
 			}
@@ -591,6 +597,12 @@ public class Main {
 			glVertex2f(-f * 600 / 800, 0);
 			glEnd();
 			break;
+		case LINE:
+			glBegin(GL_LINES);
+			glVertex2f(f * 600 / 800, f);
+			glVertex2f(-f * 600 / 800, -f);
+			glEnd();
+			break;
 		default:
 			break;
 		}
@@ -630,7 +642,7 @@ public class Main {
 			new_pellet.constructing = true;
 			all_pellets_in_world.add(new_pellet);
 			System.out.println(all_pellets_in_world);
-		} else if (which_gun == GunMode.PELLET || which_gun == GunMode.PLANE) {
+		} else if (which_gun == GunMode.PELLET || which_gun == GunMode.PLANE || which_gun == GunMode.LINE) {
 			System.out.println("shooting gun");
 
 			// do all this extra stuff with horizontal angle so that shooting up
@@ -650,6 +662,8 @@ public class Main {
 			Pellet pellet = null;
 			if (which_gun == GunMode.PLANE) {
 				pellet = new PlanePellet(all_pellets_in_world);
+			} else if (which_gun == GunMode.LINE) {
+				pellet = new LinePellet(all_pellets_in_world);
 			} else {
 				pellet = new PolygonPellet(all_pellets_in_world);
 			}
