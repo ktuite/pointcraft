@@ -11,7 +11,7 @@ import static org.lwjgl.opengl.GL11.*;
 public class PolygonPellet extends Pellet {
 
 	public static Stack<PolygonPellet> current_cycle = new Stack<PolygonPellet>();
-	
+
 	/*
 	 * A Pellet is a magical thing that you can shoot out of a gun that will
 	 * travel towards the model and stick to the first point it intersects.
@@ -21,15 +21,15 @@ public class PolygonPellet extends Pellet {
 	public PolygonPellet(List<Pellet> _pellets) {
 		super(_pellets);
 	}
-	
-	public PolygonPellet(LinePellet lp){
+
+	public PolygonPellet(LinePellet lp) {
 		super(lp.main_pellets);
 		pos.set(lp.pos);
 		radius = lp.radius;
 		max_radius = lp.max_radius;
 	}
-	
-	public PolygonPellet(PlanePellet lp){
+
+	public PolygonPellet(PlanePellet lp) {
 		super(lp.main_pellets);
 		pos.set(lp.pos);
 		radius = lp.radius;
@@ -52,57 +52,78 @@ public class PolygonPellet extends Pellet {
 				alive = false;
 			} else {
 
-				// if it's not dead yet, see if this pellet was shot at an
-				// existing pellet
-				Pellet neighbor_pellet = queryOtherPellets();
-				if (neighbor_pellet != null) {
-					alive = false;
-					
-					if (neighbor_pellet instanceof LinePellet){
-						main_pellets.remove(neighbor_pellet);
-						neighbor_pellet = new PolygonPellet((LinePellet) neighbor_pellet);
-						main_pellets.add(neighbor_pellet);
-					}
-					if (neighbor_pellet instanceof PlanePellet){
-						main_pellets.remove(neighbor_pellet);
-						neighbor_pellet = new PolygonPellet((PlanePellet) neighbor_pellet);
-						main_pellets.add(neighbor_pellet);
-					}
-					// if neighbor pellet's class is not PolygonPellet...
-					// neighbor_pellet = new PolygonPellet(neighbor_pellet)
-					// copy the position and stuff from the line/plane pellet into the new polygon pellet
-					// then go and add it to this cycle
-					// hopefully it changes in the actual array of world pellets
-					// if not, remove that pellet from all world pelelts and then add the new one to the end
-					
-					
-					current_cycle.add((PolygonPellet) neighbor_pellet);
-					if (current_cycle.size() > 1)
+				// if its not dead yet, see if this pellet hit a line or a plane
+				if (queryScaffoldGeometry()) {
+					System.out.println("pellet stuck to some geometry");
+					constructing = true;
+
+					if (CONNECT_TO_PREVIOUS)
+						current_cycle.add(this);
+
+					if (CONNECT_TO_PREVIOUS && current_cycle.size() > 1) {
 						makeLine();
+					}
+				}
 
-					if (current_cycle.size() > 2
-							&& current_cycle.get(0) == current_cycle
-									.get(current_cycle.size() - 1))
-						makePolygon();
+				else {
+					// if it's not dead yet, see if this pellet was shot at an
+					// existing pellet
+					Pellet neighbor_pellet = queryOtherPellets();
+					if (neighbor_pellet != null) {
+						alive = false;
 
-				} else {
-					// if it's not dead yet and also didn't hit a neighboring
-					// pellet, look for nearby points in model
-					int neighbors = LibPointCloud.queryKdTree(pos.x, pos.y,
-							pos.z, radius);
+						if (neighbor_pellet instanceof LinePellet) {
+							main_pellets.remove(neighbor_pellet);
+							neighbor_pellet = new PolygonPellet(
+									(LinePellet) neighbor_pellet);
+							main_pellets.add(neighbor_pellet);
+						}
+						if (neighbor_pellet instanceof PlanePellet) {
+							main_pellets.remove(neighbor_pellet);
+							neighbor_pellet = new PolygonPellet(
+									(PlanePellet) neighbor_pellet);
+							main_pellets.add(neighbor_pellet);
+						}
+						// if neighbor pellet's class is not PolygonPellet...
+						// neighbor_pellet = new PolygonPellet(neighbor_pellet)
+						// copy the position and stuff from the line/plane
+						// pellet into the new polygon pellet
+						// then go and add it to this cycle
+						// hopefully it changes in the actual array of world
+						// pellets
+						// if not, remove that pellet from all world pelelts and
+						// then add the new one to the end
 
-					// is it near some points?!
-					if (neighbors > 0) {
-						constructing = true;
-						Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
-						
-						snapToCenterOfPoints();
-						
-						if (CONNECT_TO_PREVIOUS)
-							current_cycle.add(this);
-
-						if (CONNECT_TO_PREVIOUS && current_cycle.size() > 1) {
+						current_cycle.add((PolygonPellet) neighbor_pellet);
+						if (current_cycle.size() > 1)
 							makeLine();
+
+						if (current_cycle.size() > 2
+								&& current_cycle.get(0) == current_cycle
+										.get(current_cycle.size() - 1))
+							makePolygon();
+
+					} else {
+						// if it's not dead yet and also didn't hit a
+						// neighboring
+						// pellet, look for nearby points in model
+						int neighbors = LibPointCloud.queryKdTree(pos.x, pos.y,
+								pos.z, radius);
+
+						// is it near some points?!
+						if (neighbors > 0) {
+							constructing = true;
+							Main.attach_effect.playAsSoundEffect(1.0f, 1.0f,
+									false);
+
+							snapToCenterOfPoints();
+
+							if (CONNECT_TO_PREVIOUS)
+								current_cycle.add(this);
+
+							if (CONNECT_TO_PREVIOUS && current_cycle.size() > 1) {
+								makeLine();
+							}
 						}
 					}
 				}
@@ -137,7 +158,7 @@ public class PolygonPellet extends Pellet {
 
 		current_cycle.clear();
 	}
-	
+
 	public void draw() {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;

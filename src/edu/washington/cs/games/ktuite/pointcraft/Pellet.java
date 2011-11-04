@@ -49,45 +49,8 @@ public class Pellet {
 	}
 	
 	public void update() {
-		// constructing means the pellet has triggered something to be built at
-		// its sticking location
-		if (!constructing) {
-			// not constructing means the pellet is still traveling through
-			// space
-
-			// move the pellet
-			Vector3f.add(pos, vel, pos);
-
-			// if it's too old, kill it
-			if (Main.timer.getTime() - birthday > 5) {
-				alive = false;
-			} else {
-
-				// if it's not dead yet, see if this pellet was shot at an
-				// existing pellet
-				Pellet neighbor_pellet = queryOtherPellets();
-				if (neighbor_pellet != null) {
-					alive = false;
-				} else {
-					// if it's not dead yet and also didn't hit a neighboring
-					// pellet, look for nearby points in model
-					int neighbors = LibPointCloud.queryKdTree(pos.x, pos.y,
-							pos.z, radius);
-
-					// is it near some points?!
-					if (neighbors > 0) {
-						constructing = true;
-						Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
-					}
-				}
-			}
-		} else {
-			// the pellet has stuck... here we just give it a nice growing
-			// bubble animation
-			if (radius < max_radius) {
-				radius *= 1.1;
-			}
-		}
+		// meant to be overwritten
+		System.out.println("the wrong update function is getting called");
 	}
 	
 	protected void snapToCenterOfPoints(){
@@ -109,6 +72,18 @@ public class Pellet {
 			}
 		}
 		return null;
+	}
+	
+	public boolean queryScaffoldGeometry(){
+		// TODO: make this return the actual point of intersection
+		boolean hit_something = false;
+		for (PrimitiveVertex geom : Main.geometry_v){
+			if (radius > geom.distanceToPoint(pos)){
+				hit_something = true;
+				break;
+			}
+		}
+		return hit_something;
 	}
 	
 	public void draw() {

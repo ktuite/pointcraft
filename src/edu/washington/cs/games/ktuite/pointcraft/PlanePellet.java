@@ -210,7 +210,9 @@ public class PlanePellet extends Pellet {
 			Main.geometry_v.remove(Main.geometry_v.size()-1);
 			System.out.println("removed some geometry");
 		}
-		Main.geometry_v.add(new PrimitiveVertex(GL_LINES, boundary_pellets, 1));
+		PrimitiveVertex g = new PrimitiveVertex(GL_LINES, boundary_pellets, 1);
+		g.setPlane(a, b, c, d);
+		Main.geometry_v.add(g);
 		
 	}
 	

@@ -42,26 +42,35 @@ public class LinePellet extends Pellet {
 				alive = false;
 			} else {
 
-				// if it's not dead yet, see if this pellet was shot at an
-				// existing pellet
-				Pellet neighbor_pellet = queryOtherPellets();
-				if (neighbor_pellet != null) {
-					alive = false;
+				if (queryScaffoldGeometry()) {
+					System.out.println("pellet stuck to some geometry");
+					constructing = true;
 					current_line.add(this);
 					fitLine();
 				} else {
-					// if it's not dead yet and also didn't hit a neighboring
-					// pellet, look for nearby points in model
-					int neighbors = LibPointCloud.queryKdTree(pos.x, pos.y,
-							pos.z, radius);
-
-					// is it near some points?!
-					if (neighbors > 0) {
-						snapToCenterOfPoints();
-						constructing = true;
-						Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
+					// if it's not dead yet, see if this pellet was shot at an
+					// existing pellet
+					Pellet neighbor_pellet = queryOtherPellets();
+					if (neighbor_pellet != null) {
+						alive = false;
 						current_line.add(this);
 						fitLine();
+					} else {
+						// if it's not dead yet and also didn't hit a
+						// neighboring
+						// pellet, look for nearby points in model
+						int neighbors = LibPointCloud.queryKdTree(pos.x, pos.y,
+								pos.z, radius);
+
+						// is it near some points?!
+						if (neighbors > 0) {
+							snapToCenterOfPoints();
+							constructing = true;
+							Main.attach_effect.playAsSoundEffect(1.0f, 1.0f,
+									false);
+							current_line.add(this);
+							fitLine();
+						}
 					}
 				}
 
@@ -136,7 +145,9 @@ public class LinePellet extends Pellet {
 			Main.geometry_v.remove(Main.geometry_v.size() - 1);
 			System.out.println("removed some geometry");
 		}
-		Main.geometry_v.add(new PrimitiveVertex(GL_LINES, line_pellets, 3));
+		PrimitiveVertex g = new PrimitiveVertex(GL_LINES, line_pellets, 3);
+		g.setLine(line_pellets.get(0), line_pellets.get(1));
+		Main.geometry_v.add(g);
 
 	}
 
