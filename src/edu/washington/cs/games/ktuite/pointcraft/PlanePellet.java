@@ -47,6 +47,8 @@ public class PlanePellet extends Pellet {
 				Pellet neighbor_pellet = queryOtherPellets();
 				if (neighbor_pellet != null) {
 					alive = false;
+					current_plane.add(this);
+					fitPlane();
 				} else {
 					// if it's not dead yet and also didn't hit a neighboring
 					// pellet, look for nearby points in model

@@ -31,6 +31,8 @@ public class Main {
 	private float FOG_COLOR[] = new float[] { .89f, .89f, .89f, 1.0f };
 	public static Audio launch_effect;
 	public static Audio attach_effect;
+	
+	// stuff about the display
 
 	// stuff about the world and how you move around
 	public static float world_scale = 1; // 40f;

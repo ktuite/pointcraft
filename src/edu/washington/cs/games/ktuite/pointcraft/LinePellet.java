@@ -47,6 +47,8 @@ public class LinePellet extends Pellet {
 				Pellet neighbor_pellet = queryOtherPellets();
 				if (neighbor_pellet != null) {
 					alive = false;
+					current_line.add(this);
+					fitLine();
 				} else {
 					// if it's not dead yet and also didn't hit a neighboring
 					// pellet, look for nearby points in model

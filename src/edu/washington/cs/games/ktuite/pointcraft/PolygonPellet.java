@@ -21,6 +21,20 @@ public class PolygonPellet extends Pellet {
 	public PolygonPellet(List<Pellet> _pellets) {
 		super(_pellets);
 	}
+	
+	public PolygonPellet(LinePellet lp){
+		super(lp.main_pellets);
+		pos.set(lp.pos);
+		radius = lp.radius;
+		max_radius = lp.max_radius;
+	}
+	
+	public PolygonPellet(PlanePellet lp){
+		super(lp.main_pellets);
+		pos.set(lp.pos);
+		radius = lp.radius;
+		max_radius = lp.max_radius;
+	}
 
 	@Override
 	public void update() {
@@ -43,6 +57,25 @@ public class PolygonPellet extends Pellet {
 				Pellet neighbor_pellet = queryOtherPellets();
 				if (neighbor_pellet != null) {
 					alive = false;
+					
+					if (neighbor_pellet instanceof LinePellet){
+						main_pellets.remove(neighbor_pellet);
+						neighbor_pellet = new PolygonPellet((LinePellet) neighbor_pellet);
+						main_pellets.add(neighbor_pellet);
+					}
+					if (neighbor_pellet instanceof PlanePellet){
+						main_pellets.remove(neighbor_pellet);
+						neighbor_pellet = new PolygonPellet((PlanePellet) neighbor_pellet);
+						main_pellets.add(neighbor_pellet);
+					}
+					// if neighbor pellet's class is not PolygonPellet...
+					// neighbor_pellet = new PolygonPellet(neighbor_pellet)
+					// copy the position and stuff from the line/plane pellet into the new polygon pellet
+					// then go and add it to this cycle
+					// hopefully it changes in the actual array of world pellets
+					// if not, remove that pellet from all world pelelts and then add the new one to the end
+					
+					
 					current_cycle.add((PolygonPellet) neighbor_pellet);
 					if (current_cycle.size() > 1)
 						makeLine();
