@@ -181,7 +181,8 @@ public class Main {
 		// data of the point cloud itself, loaded in from C++
 
 		LibPointCloud
-				.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
+		.loadBundle("/Users/ktuite/Desktop/sketchymodeler/models/lewis.bundle");
+		//		.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
 		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/Uris.bin");
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out");
 		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/SageChapel.bin");
@@ -197,7 +198,7 @@ public class Main {
 		System.out.println("first color: " + point_colors.get(0));
 
 		FindMinMaxOfWorld();
-		// SetGameVariablesFromWorldScale();
+		SetGameVariablesFromWorldScale();
 
 		LibPointCloud.makeKdTree();
 	}
@@ -220,7 +221,7 @@ public class Main {
 			}
 		}
 
-		world_scale = (float) (((max_point[1] - min_point[1])) / 0.071716);
+		//world_scale = (float) (((max_point[1] - min_point[1])) / 0.071716);
 		// lewis hall height for scale ref...
 
 		System.out.println("world scale: " + world_scale);
