@@ -13,7 +13,7 @@ add jars to build path
     the above ones and at least lwjgl and the lqjgl_util 
     
 also add native library stuff
-    project properties, lwjgl, native... link to the macosx stuff in the lwjgl folder
+    project properties, java build path, expand lwjgl, go to Native Library Location... link to the macosx stuff in the lwjgl folder
     
 hot-swapping:
     must run in debug mode

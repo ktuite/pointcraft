@@ -113,8 +113,8 @@ public class PolygonPellet extends Pellet {
 						// is it near some points?!
 						if (neighbors > 0) {
 							constructing = true;
-							Main.attach_effect.playAsSoundEffect(1.0f, 1.0f,
-									false);
+							//Main.attach_effect.playAsSoundEffect(1.0f, 1.0f,
+							//		false);
 
 							snapToCenterOfPoints();
 

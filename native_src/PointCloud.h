@@ -7,12 +7,6 @@
 #include <ANN/ANN.h> 
 #include "GeometricComponent.h"
 
-#ifdef __APPLE__
-    #include <OpenGL/glu.h>
-#else
-    #include <GLUT/glu.h>
-#endif
-
 using namespace std;
 
 enum { PT_DRAW, PT_DELETE, PT_MARK, PT_MARK2 };
@@ -141,7 +135,7 @@ public:
     void DrawPoints(float size = 1);
     void DrawPrimitives();
 	 
-    GLUquadricObj *m_quadratic;
+    //GLUquadricObj *m_quadratic;
 	 
 	// Util
 	void UtilCopyUserMarkedPoints(gsl_matrix *A, double *mean);

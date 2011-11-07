@@ -38,7 +38,7 @@ public class Main {
 	private static float fog_density = 5;
 
 	// stuff about the world and how you move around
-	public static float world_scale = 1; // 40f;
+	public static float world_scale = 1f;
 	private Vector3f pos;
 	private Vector3f vel;
 	private float tilt_angle;
@@ -140,11 +140,6 @@ public class Main {
 		}
 	}
 
-	private void SetGameVariablesFromWorldScale() {
-		walkforce = 1 / 4000f * world_scale;
-		max_speed = 1 * world_scale;
-	}
-
 	private void InitGameVariables() {
 		pos = new Vector3f();
 		vel = new Vector3f();
@@ -197,8 +192,7 @@ public class Main {
 		System.out.println("first point: " + point_positions.get(0));
 		System.out.println("first color: " + point_colors.get(0));
 
-		FindMinMaxOfWorld();
-		SetGameVariablesFromWorldScale();
+		//FindMinMaxOfWorld();
 
 		LibPointCloud.makeKdTree();
 	}
@@ -220,11 +214,14 @@ public class Main {
 					max_point[k] = p;
 			}
 		}
-
-		//world_scale = (float) (((max_point[1] - min_point[1])) / 0.071716);
+		
+		world_scale = (float) (((max_point[1] - min_point[1])) / 0.071716);
 		// lewis hall height for scale ref...
 
 		System.out.println("world scale: " + world_scale);
+		walkforce = 1 / 4000f * world_scale;
+		max_speed = 1 * world_scale;
+
 	}
 
 	private void Start() {
@@ -321,6 +318,10 @@ public class Main {
 		// basically it increases or decreases your vertical world height
 		while (Keyboard.next()) {
 			if (Keyboard.getEventKeyState()) {
+				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
+					Mouse.setGrabbed(!Mouse.isGrabbed());
+				}
+				
 				if (Keyboard.getEventKey() == Keyboard.KEY_P) {
 					draw_points = !draw_points;
 				}

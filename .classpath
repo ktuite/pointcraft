@@ -7,7 +7,7 @@
 	<classpathentry kind="lib" path="lib/xpp3-1.1.4c.jar"/>
 	<classpathentry kind="lib" path="lib/lwjgl-2.7.1/jar/lwjgl.jar">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="PointCraft/lib/lwjgl-2.7.1/native/macosx"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/homes/grail/ktuite/workspace/PointCraft/lib/lwjgl-2.7.1/native/linux"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/lwjgl-2.7.1/jar/lwjgl_util.jar"/>
