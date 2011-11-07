@@ -1,0 +1,21 @@
+# linux makefile
+# make -f Makefile.linux texviewer
+
+
+LIBDIR = -L/usr/X11R6/lib -L/homes/grail/ktuite/library/ann_1.1.2/lib
+INCDIR = -I/opt/local/include -I/usr/include/GL -I/homes/grail/ktuite/library/ann_1.1.2/include
+APPLIBS = -lX11 -lpng -lgsl -lgslcblas -lANN
+
+CC = g++
+
+
+CFLAGS = -g -Wall -fPIC -w
+
+libpointcloud.so: LibPointCloud.cpp PointCloud.cpp GeometricComponent.cpp
+	$(CC) $(CFLAGS) $(INCDIR) $(LIBDIR) -shared -o $@ LibPointCloud.cpp PointCloud.cpp GeometricComponent.cpp $(APPLIBS)
+
+ALL: libfunstuff.so
+
+clean:
+	rm -f *.o *.so
+

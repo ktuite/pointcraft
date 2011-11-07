@@ -1,12 +1,5 @@
 #include "PointCloud.h"
 
-#ifdef __APPLE__
-    #include <GLUT/glut.h>
-    #include <OpenGL/glu.h>
-#else
-    #include <GL/glut.h>
-#endif
-
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -1116,6 +1109,7 @@ void PointCloud::DrawPoints(float size){
     float x, y, z;
     int r,g,b;
 
+/*
     glPointSize(size);
     
     glBegin(GL_POINTS);    
@@ -1167,11 +1161,12 @@ void PointCloud::DrawPoints(float size){
         }
     }
     glEnd();
-    
+*/  
 
 }
 
 void PointCloud::DrawPrimitives(){
+    /*
 	m_quadratic = gluNewQuadric();			// Create A Pointer To The Quadric Object ( NEW )
 	gluQuadricNormals(m_quadratic, GLU_NONE);	// Create Smooth Normals ( NEW )
 	gluQuadricTexture(m_quadratic, GL_TRUE);	
@@ -1182,6 +1177,7 @@ void PointCloud::DrawPrimitives(){
     for (int i = 0; i < m_geometry.size(); i++){
         m_geometry[i]->Draw();
     }
+    */
 }
 
 void PointCloud::UtilCopyUserMarkedPoints(gsl_matrix *A, double *mean){

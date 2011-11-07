@@ -7,11 +7,6 @@
  *
  */
 
-#ifdef __APPLE__
-    #include <OpenGL/glu.h>
-#else
-    #include <GLUT/glu.h>
-#endif
 
 #include "GeometricComponent.h"
 #include <cstring>
@@ -59,6 +54,7 @@ void GeometricComponent::Init(){
 }
 
 void GeometricComponent::Draw(){
+/*
     glBegin(GL_TRIANGLES);
         for (int i = 0; i < m_triangle_vertices.size(); i++){
             glColor3fv(m_triangle_vertices[i].color);
@@ -78,7 +74,7 @@ void GeometricComponent::Draw(){
     }
 
     printf("color type: %d %d %d and texture stuff: %d %d\n", m_texture.bitmap[0],  m_texture.bitmap[1],  m_texture.bitmap[2],m_texture.w,m_texture.h);
-    
+*/  
 }
 
 void GeometricComponent::BuildTriangles(){
