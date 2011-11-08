@@ -56,6 +56,7 @@ public class Main {
 	// stuff about general guns and general list of pellets/things shot
 	private Vector3f gun_direction;
 	final private float gun_speed = 0.001f * world_scale;
+	public static float pellet_scale = 1f;
 	public static Timer timer = new Timer();
 	public static Stack<Pellet> all_pellets_in_world;
 	private Stack<Pellet> all_dead_pellets_in_world;
@@ -431,12 +432,24 @@ public class Main {
 
 		// use scroll wheel to change orb gun distance
 		// so far the only gun mode that uses extra stuff to determine its state
+		int wheel = Mouse.getDWheel();
 		if (which_gun == GunMode.ORB) {
-			int wheel = Mouse.getDWheel();
 			if (wheel < 0) {
 				OrbPellet.orb_pellet.decreaseDistance();
 			} else if (wheel > 0) {
 				OrbPellet.orb_pellet.increaseDistance();
+			}
+		}
+		else {
+			if (wheel < 0) {
+				pellet_scale -= .1f;
+				if (pellet_scale <= 0)
+					pellet_scale = 0.1f;
+			}
+			else if (wheel > 0){
+				pellet_scale += .1f;
+				if (pellet_scale > 3)
+					pellet_scale = 3f;
 			}
 		}
 	}
@@ -593,7 +606,7 @@ public class Main {
 		glLoadIdentity();
 		glOrtho(-1, 1, 1, -1, -1, 1);
 		glColor3f(1f, 1f, 1f);
-		float f = 0.05f;
+		float f = 0.05f * pellet_scale;
 
 		glLineWidth(2);
 		int n = 30;
@@ -735,6 +748,7 @@ public class Main {
 			}
 			pellet.vel.set(gun_direction);
 			pellet.vel.scale(gun_speed);
+			pellet.vel.scale(pellet_scale);
 			pellet.pos.set(pos);
 			all_pellets_in_world.add(pellet);
 		}

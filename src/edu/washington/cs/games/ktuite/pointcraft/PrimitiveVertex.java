@@ -68,7 +68,7 @@ public class PrimitiveVertex {
 
 	public void draw() {
 		if (gl_type == GL_LINES) {
-			glColor3f(0f, .1f, .3f);
+			glColor4f(0f, .1f, .3f, .6f);
 			glLineWidth(line_width);
 		} else if (gl_type == GL_POLYGON) {
 			glColor4f(.9f, .9f, 0, .5f);
