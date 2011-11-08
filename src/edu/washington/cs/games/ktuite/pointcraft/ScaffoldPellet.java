@@ -34,14 +34,18 @@ public class ScaffoldPellet extends Pellet {
 				alive = false;
 			} else {
 
-				if (queryScaffoldGeometry()) {
+				Vector3f closest_point = queryScaffoldGeometry();
+				if (closest_point != null) {
 					System.out.println("pellet stuck to some geometry");
 					constructing = true;
+					
+					pos.set(closest_point);
 				} else {
 					// if it's not dead yet, see if this pellet was shot at an
 					// existing pellet
 					Pellet neighbor_pellet = queryOtherPellets();
 					if (neighbor_pellet != null) {
+						pos.set(neighbor_pellet.pos);
 						alive = false;
 					} else {
 						// if it's not dead yet and also didn't hit a

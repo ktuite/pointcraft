@@ -102,5 +102,24 @@ public class PrimitiveVertex {
 		//System.out.println("distancE: " + dist);
 		return Math.abs(dist);
 	}
+	
+	public Vector3f closestPoint(Vector3f pos){
+		Vector3f pt = new Vector3f();
+		if (isLine()){
+			Vector3f line = new Vector3f();
+			Vector3f.sub(pt_2, pt_1, line);
+			line.normalise();
+			
+			Vector3f diag = new Vector3f();
+			Vector3f.sub(pos, pt_1, diag);
+			
+			float dot = Vector3f.dot(line, diag);
+			Vector3f.add(pt_1, (Vector3f) line.scale(dot), pt);
+		}
+		else if (isPlane()) {
+			pt.set(pos);
+		}
+		return pt;
+	}
 
 }

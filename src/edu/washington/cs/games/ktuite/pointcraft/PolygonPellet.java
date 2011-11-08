@@ -63,9 +63,12 @@ public class PolygonPellet extends Pellet {
 			} else {
 
 				// if its not dead yet, see if this pellet hit a line or a plane
-				if (queryScaffoldGeometry()) {
+				Vector3f closest_point = queryScaffoldGeometry();
+				if (closest_point != null) {
 					System.out.println("pellet stuck to some geometry");
 					constructing = true;
+					
+					pos.set(closest_point);
 
 					if (CONNECT_TO_PREVIOUS)
 						current_cycle.add(this);

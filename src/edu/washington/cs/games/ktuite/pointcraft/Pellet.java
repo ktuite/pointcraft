@@ -74,16 +74,16 @@ public class Pellet {
 		return null;
 	}
 	
-	public boolean queryScaffoldGeometry(){
+	public Vector3f queryScaffoldGeometry(){
 		// TODO: make this return the actual point of intersection
-		boolean hit_something = false;
+		Vector3f closest_point = null;
 		for (PrimitiveVertex geom : Main.geometry_v){
 			if (radius > geom.distanceToPoint(pos)){
-				hit_something = true;
+				closest_point = geom.closestPoint(pos);
 				break;
 			}
 		}
-		return hit_something;
+		return closest_point;
 	}
 	
 	public void draw() {
