@@ -41,41 +41,39 @@ public class PlanePellet extends Pellet {
 			if (Main.timer.getTime() - birthday > 5) {
 				alive = false;
 			} else {
+				// if the pellet is not dead yet, see if it intersected anything
 
+				// did it hit another pellet?
+				Pellet neighbor_pellet = queryOtherPellets();
+
+				// did it hit a line or plane?
 				Vector3f closest_point = queryScaffoldGeometry();
-				if (closest_point != null) {
+
+				if (neighbor_pellet != null) {
+					System.out.println("pellet stuck to another pellet");
+					pos.set(neighbor_pellet.pos);
+					alive = false;
+					current_plane.add(this);
+					fitPlane();
+				} else if (closest_point != null) {
 					System.out.println("pellet stuck to some geometry");
 					constructing = true;
-					
 					pos.set(closest_point);
 					current_plane.add(this);
 					fitPlane();
 				} else {
-					// if it's not dead yet, see if this pellet was shot at an
-					// existing pellet
-					Pellet neighbor_pellet = queryOtherPellets();
-					if (neighbor_pellet != null) {
-						pos.set(neighbor_pellet.pos);
-						alive = false;
+					// it didn't hit some existing geometry or pellet
+					// so check the point cloud
+					int neighbors = LibPointCloud.queryKdTree(pos.x, pos.y,
+							pos.z, radius);
+
+					// is it near some points?!
+					if (neighbors > 0) {
+						snapToCenterOfPoints();
+						constructing = true;
+						Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
 						current_plane.add(this);
 						fitPlane();
-					} else {
-						// if it's not dead yet and also didn't hit a
-						// neighboring
-						// pellet, look for nearby points in model
-						int neighbors = LibPointCloud.queryKdTree(pos.x, pos.y,
-								pos.z, radius);
-
-						// is it near some points?!
-						if (neighbors > 0) {
-							snapToCenterOfPoints();
-
-							constructing = true;
-							Main.attach_effect.playAsSoundEffect(1.0f, 1.0f,
-									false);
-							current_plane.add(this);
-							fitPlane();
-						}
 					}
 				}
 			}

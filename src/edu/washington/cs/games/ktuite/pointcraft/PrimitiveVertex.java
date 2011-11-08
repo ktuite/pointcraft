@@ -103,6 +103,10 @@ public class PrimitiveVertex {
 		return Math.abs(dist);
 	}
 	
+	public float distanceToPlane(Vector3f pos) {
+		return (float) ((a*pos.x + b*pos.y + c*pos.z + d)/Math.sqrt(a*a + b*b + d*d));
+	}
+	
 	public Vector3f closestPoint(Vector3f pos){
 		Vector3f pt = new Vector3f();
 		if (isLine()){
@@ -117,7 +121,10 @@ public class PrimitiveVertex {
 			Vector3f.add(pt_1, (Vector3f) line.scale(dot), pt);
 		}
 		else if (isPlane()) {
-			pt.set(pos);
+			Vector3f norm = new Vector3f(a,b,c);
+			norm.normalise();
+			norm.scale(distanceToPlane(pos));
+			Vector3f.sub(pos, norm, pt);
 		}
 		return pt;
 	}
