@@ -65,7 +65,7 @@ public class Pellet {
 			if (pellet != this) {
 				Vector3f dist = new Vector3f();
 				Vector3f.sub(pos, pellet.pos, dist);
-				if (dist.length() < radius * 2) {
+				if (dist.length() < radius * 2.5) {
 					System.out.println("yes, i hit another pellet");
 					return pellet;
 				}

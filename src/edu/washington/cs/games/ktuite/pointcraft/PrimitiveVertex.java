@@ -99,7 +99,7 @@ public class PrimitiveVertex {
 		else if (isPlane()){
 			dist = (float) ((a*pos.x + b*pos.y + c*pos.z + d)/Math.sqrt(a*a + b*b + d*d));
 		}
-		System.out.println("distancE: " + dist);
+		//System.out.println("distancE: " + dist);
 		return Math.abs(dist);
 	}
 

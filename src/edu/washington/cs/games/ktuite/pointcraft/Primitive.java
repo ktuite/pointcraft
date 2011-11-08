@@ -30,7 +30,8 @@ public class Primitive {
 		gl_type = _gl_type;
 		vertices = _vertices;
 		if (gl_type == GL_POLYGON) {
-			System.out.println("making new Primitive");
+			System.out.println("making new polygon Primitive");
+			System.out.println("number of vertices: " + vertices.size());
 		}
 	}
 
@@ -44,7 +45,7 @@ public class Primitive {
 		player_position = new Vector3f(pos);
 		player_viewing_direction = new Vector3f(view);
 		player_viewing_direction.normalise();
-		//startDownloadingTexture();
+		// startDownloadingTexture();
 	}
 
 	public boolean isPolygon() {
@@ -63,28 +64,23 @@ public class Primitive {
 			glColor3f(0, 0, 0);
 			glLineWidth(line_width);
 		} else if (gl_type == GL_POLYGON) {
-			glColor4f(.9f, .9f, 0, .5f);
-			if (gl_type == GL_LINES) {
-				glColor3f(.5f, .5f, .5f);
-				glLineWidth(line_width);
-			} else if (gl_type == GL_POLYGON) {
-				glColor4f(.9f, .9f, .9f, .5f);
-				if (texture != null) {
-					glEnable(GL_TEXTURE_2D);
-					texture.bind();
-				} else {
-					glDisable(GL_TEXTURE_2D);
-					if (textureData != null) {
-						try {
-							texture = TextureLoader.getTexture("PNG",
-									new ByteArrayInputStream(textureData));
-							textureData = null;
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
+			glColor4f(.9f, .9f, .4f, .9f);
+			if (texture != null) {
+				glEnable(GL_TEXTURE_2D);
+				texture.bind();
+			} else {
+				glDisable(GL_TEXTURE_2D);
+				if (textureData != null) {
+					try {
+						texture = TextureLoader.getTexture("PNG",
+								new ByteArrayInputStream(textureData));
+						textureData = null;
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
 				}
 			}
+
 		}
 
 		Vector2f[] tex_coords = new Vector2f[] { new Vector2f(0, 0),

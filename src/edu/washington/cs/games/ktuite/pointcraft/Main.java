@@ -65,10 +65,10 @@ public class Main {
 	public static Stack<Primitive> geometry;
 	public static Stack<PrimitiveVertex> geometry_v;
 
-	private boolean draw_points = true;
+	public static boolean draw_points = true;
 
 	public enum GunMode {
-		PELLET, ORB, LINE, PLANE, ARC, CIRCLE, DESTRUCTOR
+		PELLET, ORB, LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR
 	}
 
 	public GunMode which_gun;
@@ -176,8 +176,8 @@ public class Main {
 		// data of the point cloud itself, loaded in from C++
 
 		LibPointCloud
-		.loadBundle("/Users/ktuite/Desktop/sketchymodeler/models/lewis.bundle");
-		//		.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
+		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/models/lewis.bundle");
+				.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
 		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/Uris.bin");
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out");
 		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/SageChapel.bin");
@@ -192,7 +192,7 @@ public class Main {
 		System.out.println("first point: " + point_positions.get(0));
 		System.out.println("first color: " + point_colors.get(0));
 
-		//FindMinMaxOfWorld();
+		// FindMinMaxOfWorld();
 
 		LibPointCloud.makeKdTree();
 	}
@@ -214,7 +214,7 @@ public class Main {
 					max_point[k] = p;
 			}
 		}
-		
+
 		world_scale = (float) (((max_point[1] - min_point[1])) / 0.071716);
 		// lewis hall height for scale ref...
 
@@ -321,20 +321,24 @@ public class Main {
 				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
 					Mouse.setGrabbed(!Mouse.isGrabbed());
 				}
-				
+
 				if (Keyboard.getEventKey() == Keyboard.KEY_P) {
 					draw_points = !draw_points;
 				}
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_1) {
-					which_gun = GunMode.PELLET;
+					which_gun = GunMode.POLYGON;
 					System.out.println("regular pellet gun selected");
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_2) {
+					which_gun = GunMode.PELLET;
+					System.out.println("regular pellet gun selected");
+				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_3) {
 					which_gun = GunMode.LINE;
 					System.out.println("line fitting pellet gun selected");
 				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_3) {
+				if (Keyboard.getEventKey() == Keyboard.KEY_4) {
 					which_gun = GunMode.PLANE;
 					System.out.println("plane fitting pellet gun selected");
 				}
@@ -353,6 +357,8 @@ public class Main {
 						PlanePellet.startNewPlane();
 					else if (which_gun == GunMode.LINE)
 						LinePellet.startNewLine();
+					else if (which_gun == GunMode.POLYGON)
+						PolygonPellet.startNewPolygon();
 				}
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_EQUALS) {
@@ -592,6 +598,17 @@ public class Main {
 		glLineWidth(2);
 		int n = 30;
 		switch (which_gun) {
+		case POLYGON:
+			int m = 5;
+			glBegin(GL_LINE_LOOP);
+			for (int i = 0; i < m; i++) {
+				float angle = (float) (Math.PI * 2 * i / m);
+				float x = (float) (Math.cos(angle) * f * 0.75 * 600 / 800);
+				float y = (float) (Math.sin(angle) * f * 0.75);
+				glVertex2f(x, y);
+			}
+			glEnd();
+			break;
 		case PELLET:
 			glBegin(GL_LINES);
 			glVertex2f(0, f);
@@ -705,7 +722,9 @@ public class Main {
 			computeGunDirection();
 
 			Pellet pellet = null;
-			if (which_gun == GunMode.PLANE) {
+			if (which_gun == GunMode.PELLET) {
+				pellet = new ScaffoldPellet(all_pellets_in_world);
+			} else if (which_gun == GunMode.PLANE) {
 				pellet = new PlanePellet(all_pellets_in_world);
 			} else if (which_gun == GunMode.LINE) {
 				pellet = new LinePellet(all_pellets_in_world);

@@ -96,10 +96,10 @@ public class LinePellet extends Pellet {
 	public void draw() {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
-			glColor4f(.2f, .7f, .7f, alpha);
+			glColor4f(.1f, .4f, .7f, alpha);
 			sphere.draw(radius, 32, 32);
 		} else {
-			glColor4f(.2f, .5f, .7f, 1f);
+			glColor4f(.1f, .4f, .7f, 1f);
 			sphere.draw(radius, 32, 32);
 		}
 	}

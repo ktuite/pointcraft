@@ -27,6 +27,7 @@ public class PolygonPellet extends Pellet {
 		pos.set(lp.pos);
 		radius = lp.radius;
 		max_radius = lp.max_radius;
+		constructing = lp.constructing;
 	}
 
 	public PolygonPellet(PlanePellet lp) {
@@ -34,6 +35,15 @@ public class PolygonPellet extends Pellet {
 		pos.set(lp.pos);
 		radius = lp.radius;
 		max_radius = lp.max_radius;
+		constructing = lp.constructing;
+	}
+	
+	public PolygonPellet(ScaffoldPellet lp) {
+		super(lp.main_pellets);
+		pos.set(lp.pos);
+		radius = lp.radius;
+		max_radius = lp.max_radius;
+		constructing = lp.constructing;
 	}
 
 	@Override
@@ -63,6 +73,11 @@ public class PolygonPellet extends Pellet {
 					if (CONNECT_TO_PREVIOUS && current_cycle.size() > 1) {
 						makeLine();
 					}
+					
+					if (current_cycle.size() > 2
+							&& current_cycle.get(0) == current_cycle
+									.get(current_cycle.size() - 1))
+						makePolygon();
 				}
 
 				else {
@@ -84,6 +99,12 @@ public class PolygonPellet extends Pellet {
 									(PlanePellet) neighbor_pellet);
 							main_pellets.add(neighbor_pellet);
 						}
+						if (neighbor_pellet instanceof ScaffoldPellet) {
+							main_pellets.remove(neighbor_pellet);
+							neighbor_pellet = new PolygonPellet(
+									(ScaffoldPellet) neighbor_pellet);
+							main_pellets.add(neighbor_pellet);
+						}
 						// if neighbor pellet's class is not PolygonPellet...
 						// neighbor_pellet = new PolygonPellet(neighbor_pellet)
 						// copy the position and stuff from the line/plane
@@ -103,7 +124,7 @@ public class PolygonPellet extends Pellet {
 										.get(current_cycle.size() - 1))
 							makePolygon();
 
-					} else {
+					} else if (Main.draw_points){
 						// if it's not dead yet and also didn't hit a
 						// neighboring
 						// pellet, look for nearby points in model
@@ -151,7 +172,6 @@ public class PolygonPellet extends Pellet {
 		for (PolygonPellet p : current_cycle) {
 			cycle.add(p);
 		}
-		cycle.add(this);
 		Primitive polygon = new Primitive(GL_POLYGON, cycle);
 		polygon.setPlayerPositionAndViewingDirection(pos, vel);
 		Main.geometry.add(polygon);
@@ -168,5 +188,10 @@ public class PolygonPellet extends Pellet {
 			glColor4f(.9f, .1f, .4f, 1f);
 			sphere.draw(radius, 32, 32);
 		}
+	}
+	
+	public static void startNewPolygon() {
+		current_cycle.clear();
+		System.out.println("making new polygon");
 	}
 }
