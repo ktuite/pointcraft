@@ -45,7 +45,7 @@ public class Primitive {
 		player_position = new Vector3f(pos);
 		player_viewing_direction = new Vector3f(view);
 		player_viewing_direction.normalise();
-		// startDownloadingTexture();
+		startDownloadingTexture();
 	}
 
 	public boolean isPolygon() {
@@ -64,7 +64,7 @@ public class Primitive {
 			glColor3f(0, 0, 0);
 			glLineWidth(line_width);
 		} else if (gl_type == GL_POLYGON) {
-			glColor4f(.9f, .9f, .4f, .9f);
+			glColor4f(.9f, .9f, .9f, .9f);
 			if (texture != null) {
 				glEnable(GL_TEXTURE_2D);
 				texture.bind();
@@ -94,6 +94,8 @@ public class Primitive {
 			glVertex3f(vertex.x, vertex.y, vertex.z);
 		}
 		glEnd();
+		
+		glDisable(GL_TEXTURE_2D);
 	}
 
 	public void startDownloadingTexture() {
