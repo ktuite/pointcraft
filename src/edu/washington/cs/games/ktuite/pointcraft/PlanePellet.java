@@ -276,6 +276,7 @@ public class PlanePellet extends Pellet {
 	}
 
 	private void checkForIntersections(float a, float b, float c, float d){
+		intersection_points.clear();
 		System.out.println("checking for new plane-line interesction");
 		for (PrimitiveVertex geom : Main.geometry_v){
 			Vector3f intersect = geom.checkForIntersectionPlaneWithLine(a,b,c,d);
@@ -288,7 +289,6 @@ public class PlanePellet extends Pellet {
 				i.radius = current_plane.get(0).radius;
 
 				intersection_points.add(i);
-				break;
 			}
 		}
 	}
