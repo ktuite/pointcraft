@@ -128,5 +128,25 @@ public class PrimitiveVertex {
 		}
 		return pt;
 	}
+	
+	public Vector3f checkForIntersectionLineWithPlane(Vector3f p1, Vector3f p2){
+		Vector3f i = null;
+		
+		if (isPlane()){
+			float u_denom = a * (p1.x - p2.x) + b * (p1.y - p2.y) + c * (p1.z - p2.z);
+			if (u_denom != 0){
+				float u_num = a * p1.x + b * p1.y + c * p1.z + d;
+				float u = u_num/u_denom;
+				if (u > 0 && u < 1){
+					i = new Vector3f();
+					i.x = p1.x + u * (p2.x - p1.x);
+					i.y = p1.y + u * (p2.y - p1.y);
+					i.z = p1.z + u * (p2.z - p1.z);
+				}
+			}
+		}
+		
+		return i;
+	}
 
 }

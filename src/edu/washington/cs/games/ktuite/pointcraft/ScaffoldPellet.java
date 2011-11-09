@@ -18,6 +18,15 @@ public class ScaffoldPellet extends Pellet {
 		super(_pellets);
 	}
 
+	public ScaffoldPellet(LinePellet p) {
+		super(p.main_pellets);
+		alive = true;
+		constructing = true;
+		pos.set(p.pos);
+		radius = p.radius;
+		max_radius = p.max_radius;
+	}
+
 	@Override
 	public void update() {
 		// constructing means the pellet has triggered something to be built at

@@ -16,6 +16,11 @@ public class LinePellet extends Pellet {
 
 	public static List<LinePellet> current_line = new LinkedList<LinePellet>();
 
+	// temporary holder of intersection pellets
+	public static List<LinePellet> intersection_points = new LinkedList<LinePellet>();
+
+	private boolean is_intersection = false;
+
 	/*
 	 * A Pellet is a magical thing that you can shoot out of a gun that will
 	 * travel towards the model and stick to the first point it intersects.
@@ -97,7 +102,11 @@ public class LinePellet extends Pellet {
 	}
 
 	public void draw() {
-		if (constructing) {
+		if (is_intersection) {
+			float alpha = 1 - radius / max_radius * .2f;
+			glColor4f(.1f, .8f, .3f, alpha);
+			sphere.draw(radius, 32, 32);
+		} else if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
 			glColor4f(.1f, .4f, .7f, alpha);
 			sphere.draw(radius, 32, 32);
@@ -152,6 +161,7 @@ public class LinePellet extends Pellet {
 		g.setLine(line_pellets.get(0), line_pellets.get(1));
 		Main.geometry_v.add(g);
 
+		checkForIntersections(line_pellets.get(0), line_pellets.get(1));
 	}
 
 	private float findLineExtent() {
@@ -168,6 +178,24 @@ public class LinePellet extends Pellet {
 		return max_distance;
 	}
 
+	private void checkForIntersections(Vector3f p1, Vector3f p2) {
+		System.out.println("checking for new line-plane interesction");
+		for (PrimitiveVertex geom : Main.geometry_v){
+			Vector3f intersect = geom.checkForIntersectionLineWithPlane(p1, p2);
+			if (intersect != null){
+				LinePellet i = new LinePellet(main_pellets);
+				i.alive = true;
+				i.constructing = true;
+				i.is_intersection = true;
+				i.pos.set(intersect);
+				i.radius = current_line.get(0).radius;
+
+				intersection_points.add(i);
+				break;
+			}
+		}
+	}
+
 	private Vector3f findLineCenter() {
 		Vector3f center = new Vector3f();
 		for (Pellet p : current_line) {
@@ -178,6 +206,13 @@ public class LinePellet extends Pellet {
 	}
 
 	public static void startNewLine() {
+		for (LinePellet p : intersection_points){
+			ScaffoldPellet sp = new ScaffoldPellet(p);
+			Main.all_pellets_in_world.add(sp);
+		}
+		//Main.all_pellets_in_world.addAll(intersection_points);
+		intersection_points.clear();
+		
 		current_line.clear();
 		System.out.println("making new line");
 	}
