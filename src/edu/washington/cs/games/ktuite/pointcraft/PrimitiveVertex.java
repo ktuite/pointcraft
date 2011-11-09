@@ -3,6 +3,7 @@ package edu.washington.cs.games.ktuite.pointcraft;
 import static org.lwjgl.opengl.GL11.*;
 
 import java.io.InputStream;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.List;
 
@@ -13,7 +14,11 @@ import org.newdawn.slick.opengl.TextureLoader;
 /* these primitives built out of pellets...
  * keep a list of pellets and then draw lines or polygons between them.
  */
-public class PrimitiveVertex {
+public class PrimitiveVertex implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6613817266342660991L;
 	private int gl_type;
 	private List<Vector3f> vertices;
 	private float line_width = 5f;

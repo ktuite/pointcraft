@@ -45,7 +45,8 @@ public class Primitive {
 		player_position = new Vector3f(pos);
 		player_viewing_direction = new Vector3f(view);
 		player_viewing_direction.normalise();
-		startDownloadingTexture();
+		if (vertices.size() > 4)
+			startDownloadingTexture();
 	}
 
 	public boolean isPolygon() {
@@ -135,8 +136,8 @@ public class Primitive {
 	}
 
 	public String plyFace() {
-		String s = vertices.size() - 2 + "";
-		for (int i = 0; i < vertices.size() - 2; i++) {
+		String s = vertices.size() - 1 + "";
+		for (int i = 0; i < vertices.size() - 1; i++) {
 			Pellet pellet = vertices.get(i);
 			s += " " + Main.all_pellets_in_world.indexOf(pellet);
 		}
@@ -146,7 +147,7 @@ public class Primitive {
 	}
 
 	public void printTriangleVertices() {
-		for (int i = 0; i < vertices.size() - 2; i++) {
+		for (int i = 0; i < vertices.size() - 1; i++) {
 			Pellet pellet = vertices.get(i);
 			System.out.println(pellet.pos.x + " " + pellet.pos.y + " "
 					+ pellet.pos.z);

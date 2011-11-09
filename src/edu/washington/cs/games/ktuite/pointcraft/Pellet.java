@@ -1,5 +1,6 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
+import java.io.Serializable;
 import java.nio.DoubleBuffer;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,11 +9,15 @@ import org.lwjgl.util.glu.Sphere;
 import org.lwjgl.util.vector.Vector3f;
 import static org.lwjgl.opengl.GL11.*;
 
-public class Pellet {
+public class Pellet implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4916416210830926080L;
 	public Vector3f pos;
 	public Vector3f vel;
-	public Sphere sphere;
+	public transient Sphere sphere;
 	public float radius;
 	public float max_radius;
 	public boolean alive;
@@ -61,6 +66,9 @@ public class Pellet {
 	}
 
 	public Pellet queryOtherPellets() {
+		if (!Main.draw_pellets)
+			return null;
+		
 		for (Pellet pellet : main_pellets) {
 			if (pellet != this) {
 				Vector3f dist = new Vector3f();
@@ -75,6 +83,9 @@ public class Pellet {
 	}
 	
 	public Vector3f queryScaffoldGeometry(){
+		if (!Main.draw_scaffolding)
+			return null;
+		
 		// TODO: make this return the actual point of intersection
 		Vector3f closest_point = null;
 		for (PrimitiveVertex geom : Main.geometry_v){

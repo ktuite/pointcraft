@@ -67,6 +67,8 @@ public class Main {
 	public static Stack<PrimitiveVertex> geometry_v;
 
 	public static boolean draw_points = true;
+	public static boolean draw_scaffolding = true;
+	public static boolean draw_pellets = true;
 
 	public enum GunMode {
 		PELLET, ORB, LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR
@@ -178,8 +180,8 @@ public class Main {
 
 		LibPointCloud
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/models/lewis.bundle");
-				.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
-		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/Uris.bin");
+		// .load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
+				.load("/Users/ktuite/Desktop/sketchymodeler/server_code/Uris.bin");
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out");
 		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/SageChapel.bin");
 		System.out.println("number of points: " + LibPointCloud.getNumPoints());
@@ -270,22 +272,6 @@ public class Main {
 	}
 
 	private void EventLoop() {
-		// undoing actions
-		if (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29)) {
-			while (Keyboard.next()) {
-				if (Keyboard.getEventKeyState()
-						&& Keyboard.getEventKey() == Keyboard.KEY_Z) {
-					System.out.println("UNDO!");
-					undoLastPellet();
-				}
-				if (Keyboard.getEventKeyState()
-						&& Keyboard.getEventKey() == Keyboard.KEY_S) {
-					System.out.println("SAVE!");
-					Save.attemptToSave();
-				}
-			}
-		}
-
 		// WASD key motion, with a little bit of gliding
 		if (Keyboard.isKeyDown(Keyboard.KEY_W)
 				|| Keyboard.isKeyDown(Keyboard.KEY_UP)) {
@@ -319,12 +305,32 @@ public class Main {
 		// basically it increases or decreases your vertical world height
 		while (Keyboard.next()) {
 			if (Keyboard.getEventKeyState()) {
+				if (Keyboard.getEventKey() == Keyboard.KEY_S
+						&& (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29))) {
+					Save.attemptToSave();
+				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_O
+						&& (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29))) {
+					Save.loadHeckaData();
+				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_Z
+						&& (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29))) {
+					System.out.println("UNDO!");
+					undoLastPellet();
+				}
+
 				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
 					Mouse.setGrabbed(!Mouse.isGrabbed());
 				}
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_P) {
 					draw_points = !draw_points;
+				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_O) {
+					draw_scaffolding = !draw_scaffolding;
+				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_I) {
+					draw_pellets = !draw_pellets;
 				}
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_1) {
@@ -439,14 +445,12 @@ public class Main {
 			} else if (wheel > 0) {
 				OrbPellet.orb_pellet.increaseDistance();
 			}
-		}
-		else {
+		} else {
 			if (wheel < 0) {
 				pellet_scale -= .1f;
 				if (pellet_scale <= 0)
 					pellet_scale = 0.1f;
-			}
-			else if (wheel > 0){
+			} else if (wheel > 0) {
 				pellet_scale += .1f;
 				if (pellet_scale > 3)
 					pellet_scale = 3f;
@@ -470,15 +474,20 @@ public class Main {
 		if (draw_points)
 			DrawPoints(); // draw the actual 3d things
 
-		DrawPellets();
-		if (which_gun == GunMode.ORB)
-			OrbPellet.drawOrbPellet();
+		if (draw_pellets) {
+			DrawPellets();
+			if (which_gun == GunMode.ORB)
+				OrbPellet.drawOrbPellet();
+		}
 
 		for (Primitive geom : geometry) {
 			geom.draw();
 		}
-		for (PrimitiveVertex geom : geometry_v) {
-			geom.draw();
+
+		if (draw_scaffolding) {
+			for (PrimitiveVertex geom : geometry_v) {
+				geom.draw();
+			}
 		}
 		glDisable(GL_FOG);
 
@@ -492,7 +501,7 @@ public class Main {
 	private void DrawPoints() {
 		glPointSize(point_size);
 		glBegin(GL_POINTS);
-		for (int i = 0; i < num_points; i += 1) {
+		for (int i = 0; i < num_points; i += 7) {
 			float r = (float) (point_colors.get(0 * num_points + i) / 255.0f);
 			float g = (float) (point_colors.get(1 * num_points + i) / 255.0f);
 			float b = (float) (point_colors.get(2 * num_points + i) / 255.0f);
@@ -516,7 +525,7 @@ public class Main {
 				all_dead_pellets_in_world.add(pellet);
 			}
 		}
-		
+
 		for (PlanePellet pellet : PlanePellet.intersection_points) {
 			if (pellet.alive) {
 				glPushMatrix();
@@ -527,7 +536,7 @@ public class Main {
 				all_dead_pellets_in_world.add(pellet);
 			}
 		}
-		
+
 		for (Pellet pellet : all_pellets_in_world) {
 			if (pellet.alive) {
 				glPushMatrix();
