@@ -210,7 +210,6 @@ public class LinePellet extends Pellet {
 			ScaffoldPellet sp = new ScaffoldPellet(p);
 			Main.all_pellets_in_world.add(sp);
 		}
-		//Main.all_pellets_in_world.addAll(intersection_points);
 		intersection_points.clear();
 		
 		current_line.clear();

@@ -517,6 +517,17 @@ public class Main {
 			}
 		}
 		
+		for (PlanePellet pellet : PlanePellet.intersection_points) {
+			if (pellet.alive) {
+				glPushMatrix();
+				glTranslatef(pellet.pos.x, pellet.pos.y, pellet.pos.z);
+				pellet.draw();
+				glPopMatrix();
+			} else {
+				all_dead_pellets_in_world.add(pellet);
+			}
+		}
+		
 		for (Pellet pellet : all_pellets_in_world) {
 			if (pellet.alive) {
 				glPushMatrix();

@@ -16,6 +16,11 @@ public class PlanePellet extends Pellet {
 
 	public static List<PlanePellet> current_plane = new LinkedList<PlanePellet>();
 
+	// temporary holder of intersection pellets
+	public static List<PlanePellet> intersection_points = new LinkedList<PlanePellet>();
+
+	private boolean is_intersection = false;
+	
 	/*
 	 * A Pellet is a magical thing that you can shoot out of a gun that will
 	 * travel towards the model and stick to the first point it intersects.
@@ -96,7 +101,11 @@ public class PlanePellet extends Pellet {
 	}
 
 	public void draw() {
-		if (constructing) {
+		if (is_intersection) {
+			float alpha = 1 - radius / max_radius * .2f;
+			glColor4f(.1f, .8f, .3f, alpha);
+			sphere.draw(radius, 32, 32);
+		} else if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
 			glColor4f(.2f, .2f, .7f, alpha);
 			sphere.draw(radius, 32, 32);
@@ -238,6 +247,8 @@ public class PlanePellet extends Pellet {
 		PrimitiveVertex g = new PrimitiveVertex(GL_LINES, boundary_pellets, 1);
 		g.setPlane(a, b, c, d);
 		Main.geometry_v.add(g);
+		
+		checkForIntersections(a, b, c, d);
 
 	}
 
@@ -254,7 +265,7 @@ public class PlanePellet extends Pellet {
 		}
 		return max_distance;
 	}
-
+	
 	private Vector3f findPlaneCenter() {
 		Vector3f center = new Vector3f();
 		for (Pellet p : current_plane) {
@@ -264,7 +275,31 @@ public class PlanePellet extends Pellet {
 		return center;
 	}
 
+	private void checkForIntersections(float a, float b, float c, float d){
+		System.out.println("checking for new plane-line interesction");
+		for (PrimitiveVertex geom : Main.geometry_v){
+			Vector3f intersect = geom.checkForIntersectionPlaneWithLine(a,b,c,d);
+			if (intersect != null){
+				PlanePellet i = new PlanePellet(main_pellets);
+				i.alive = true;
+				i.constructing = true;
+				i.is_intersection = true;
+				i.pos.set(intersect);
+				i.radius = current_plane.get(0).radius;
+
+				intersection_points.add(i);
+				break;
+			}
+		}
+	}
+	
 	public static void startNewPlane() {
+		for (PlanePellet p : intersection_points){
+			ScaffoldPellet sp = new ScaffoldPellet(p);
+			Main.all_pellets_in_world.add(sp);
+		}
+		intersection_points.clear();
+		
 		current_plane.clear();
 		System.out.println("making new plane");
 	}
