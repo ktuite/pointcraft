@@ -1,20 +1,15 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
-import java.io.Serializable;
 import java.nio.DoubleBuffer;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.lwjgl.util.glu.Sphere;
 import org.lwjgl.util.vector.Vector3f;
 import static org.lwjgl.opengl.GL11.*;
 
-public class Pellet implements Serializable {
+public class Pellet{
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -4916416210830926080L;
+	static private int ID = 0;
 	public Vector3f pos;
 	public Vector3f vel;
 	public transient Sphere sphere;
@@ -24,6 +19,7 @@ public class Pellet implements Serializable {
 	public boolean constructing;
 	public float birthday;
 	protected List<Pellet> main_pellets;
+	public int id;
 
 	public static boolean CONNECT_TO_PREVIOUS = true;
 	//public static List<Pellet> current_cycle = new LinkedList<Pellet>();
@@ -44,13 +40,15 @@ public class Pellet implements Serializable {
 		alive = true;
 		constructing = false;
 		main_pellets = _pellets;
+		id = ID;
+		ID++;
 
 		//if (Main.launch_effect != null)
 		//	Main.launch_effect.playAsSoundEffect(1.0f, 1.0f, false);
 	}
 
 	public void finalize(){
-		System.out.println("deletng this pellet");
+		System.out.println("deletng pellet " + id);
 	}
 	
 	public void update() {

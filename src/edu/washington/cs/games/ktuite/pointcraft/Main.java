@@ -180,8 +180,8 @@ public class Main {
 
 		LibPointCloud
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/models/lewis.bundle");
-		// .load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
-				.load("/Users/ktuite/Desktop/sketchymodeler/server_code/Uris.bin");
+		 .load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
+		//		.load("/Users/ktuite/Desktop/sketchymodeler/server_code/Parr.bin");
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out");
 		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/SageChapel.bin");
 		System.out.println("number of points: " + LibPointCloud.getNumPoints());
@@ -241,14 +241,14 @@ public class Main {
 	private static void undoLastPellet() {
 		if (PolygonPellet.current_cycle.size() > 0) {
 			PolygonPellet.current_cycle.pop();
-			all_pellets_in_world.pop();
+			//all_pellets_in_world.pop();
 		}
 		if (geometry.size() > 0 && geometry.peek().isPolygon()) {
 			Primitive last_poly = geometry.pop();
 			for (int i = 0; i < last_poly.numVertices() - 2; i++) {
 				geometry.pop();
 				if (all_pellets_in_world.size() > 0) {
-					all_pellets_in_world.pop();
+					//all_pellets_in_world.pop();
 				}
 			}
 			PolygonPellet.current_cycle.clear();
@@ -501,7 +501,7 @@ public class Main {
 	private void DrawPoints() {
 		glPointSize(point_size);
 		glBegin(GL_POINTS);
-		for (int i = 0; i < num_points; i += 7) {
+		for (int i = 0; i < num_points; i += 1) {
 			float r = (float) (point_colors.get(0 * num_points + i) / 255.0f);
 			float g = (float) (point_colors.get(1 * num_points + i) / 255.0f);
 			float b = (float) (point_colors.get(2 * num_points + i) / 255.0f);
