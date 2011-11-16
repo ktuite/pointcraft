@@ -3,14 +3,11 @@ package edu.washington.cs.games.ktuite.pointcraft;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.util.glu.GLU.*;
 
-import java.awt.RenderingHints.Key;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Stack;
 
 import org.lwjgl.LWJGLException;
@@ -65,6 +62,8 @@ public class Main {
 	// kind of geometry
 	public static Stack<Primitive> geometry;
 	public static Stack<PrimitiveVertex> geometry_v;
+
+	public static DataStore data_store;
 
 	public static boolean draw_points = true;
 	public static boolean draw_scaffolding = true;
@@ -155,13 +154,14 @@ public class Main {
 		all_pellets_in_world = new Stack<Pellet>();
 		all_dead_pellets_in_world = new Stack<Pellet>();
 
-		which_gun = GunMode.PELLET;
+		which_gun = GunMode.POLYGON;
 		OrbPellet.orb_pellet = new OrbPellet(all_pellets_in_world);
 
 		// TODO: Move this crap elsewhere... init the different geometry
 		// containers individually
 		geometry = new Stack<Primitive>();
 		geometry_v = new Stack<PrimitiveVertex>();
+		data_store = new DataStore();
 
 		try {
 			launch_effect = AudioLoader.getAudio("WAV",
@@ -180,8 +180,8 @@ public class Main {
 
 		LibPointCloud
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/models/lewis.bundle");
-		 .load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
-		//		.load("/Users/ktuite/Desktop/sketchymodeler/server_code/Parr.bin");
+				.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
+		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/Parr.bin");
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out");
 		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/SageChapel.bin");
 		System.out.println("number of points: " + LibPointCloud.getNumPoints());
@@ -200,6 +200,7 @@ public class Main {
 		LibPointCloud.makeKdTree();
 	}
 
+	@SuppressWarnings("unused")
 	private void FindMinMaxOfWorld() {
 		float[] min_point = new float[3];
 		float[] max_point = new float[3];
@@ -241,14 +242,14 @@ public class Main {
 	private static void undoLastPellet() {
 		if (PolygonPellet.current_cycle.size() > 0) {
 			PolygonPellet.current_cycle.pop();
-			//all_pellets_in_world.pop();
+			// all_pellets_in_world.pop();
 		}
 		if (geometry.size() > 0 && geometry.peek().isPolygon()) {
 			Primitive last_poly = geometry.pop();
-			for (int i = 0; i < last_poly.numVertices() - 2; i++) {
+			for (int i = 0; i < last_poly.numVertices() - 1; i++) {
 				geometry.pop();
 				if (all_pellets_in_world.size() > 0) {
-					//all_pellets_in_world.pop();
+					// all_pellets_in_world.pop();
 				}
 			}
 			PolygonPellet.current_cycle.clear();
@@ -275,29 +276,37 @@ public class Main {
 		// WASD key motion, with a little bit of gliding
 		if (Keyboard.isKeyDown(Keyboard.KEY_W)
 				|| Keyboard.isKeyDown(Keyboard.KEY_UP)) {
-			vel.x += Math.sin(pan_angle * 3.14159 / 180f) * walkforce;
-			vel.z -= Math.cos(pan_angle * 3.14159 / 180f) * walkforce;
+			vel.x += Math.sin(pan_angle * 3.14159 / 180f) * walkforce
+					* pellet_scale;
+			vel.z -= Math.cos(pan_angle * 3.14159 / 180f) * walkforce
+					* pellet_scale;
 		}
 		if (Keyboard.isKeyDown(Keyboard.KEY_S)
 				|| Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
-			vel.x -= Math.sin(pan_angle * 3.14159 / 180f) * walkforce;
-			vel.z += Math.cos(pan_angle * 3.14159 / 180f) * walkforce;
+			vel.x -= Math.sin(pan_angle * 3.14159 / 180f) * walkforce
+					* pellet_scale;
+			vel.z += Math.cos(pan_angle * 3.14159 / 180f) * walkforce
+					* pellet_scale;
 		}
 		if (Keyboard.isKeyDown(Keyboard.KEY_A)
 				|| Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
-			vel.x -= Math.cos(pan_angle * 3.14159 / 180f) * walkforce / 2;
-			vel.z -= Math.sin(pan_angle * 3.14159 / 180f) * walkforce / 2;
+			vel.x -= Math.cos(pan_angle * 3.14159 / 180f) * walkforce / 2
+					* pellet_scale;
+			vel.z -= Math.sin(pan_angle * 3.14159 / 180f) * walkforce / 2
+					* pellet_scale;
 		}
 		if (Keyboard.isKeyDown(Keyboard.KEY_D)
 				|| Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) {
-			vel.x += Math.cos(pan_angle * 3.14159 / 180f) * walkforce / 2;
-			vel.z += Math.sin(pan_angle * 3.14159 / 180f) * walkforce / 2;
+			vel.x += Math.cos(pan_angle * 3.14159 / 180f) * walkforce / 2
+					* pellet_scale;
+			vel.z += Math.sin(pan_angle * 3.14159 / 180f) * walkforce / 2
+					* pellet_scale;
 		}
 		if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
-			vel.y += walkforce / 2;
+			vel.y += walkforce / 2 * pellet_scale;
 		}
 		if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
-			vel.y -= walkforce / 2;
+			vel.y -= walkforce / 2 * pellet_scale;
 		}
 
 		// this is like putting on or taking off some stilts
@@ -307,10 +316,9 @@ public class Main {
 			if (Keyboard.getEventKeyState()) {
 				if (Keyboard.getEventKey() == Keyboard.KEY_S
 						&& (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29))) {
-					Save.attemptToSave();
+					Save.saveHeckaData();
 				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_O
-						&& (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29))) {
+				if (Keyboard.getEventKey() == Keyboard.KEY_L) {
 					Save.loadHeckaData();
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_Z
@@ -392,6 +400,10 @@ public class Main {
 					glFogf(GL_FOG_DENSITY, fog_density);
 				}
 
+				if (Keyboard.getEventKey() == Keyboard.KEY_T) {
+					data_store.putThingsInDataStoreFromMain();
+				}
+
 			}
 		}
 
@@ -404,7 +416,7 @@ public class Main {
 
 		// sneak / go slowly
 		if (Keyboard.isKeyDown(Keyboard.KEY_SPACE))
-			vel.scale(.1f);
+			vel.scale(.3f);
 
 		// pos += vel
 		Vector3f.add(pos, vel, pos);
@@ -638,7 +650,7 @@ public class Main {
 		glLoadIdentity();
 		glOrtho(-1, 1, 1, -1, -1, 1);
 		glColor3f(1f, 1f, 1f);
-		float f = 0.05f * pellet_scale;
+		float f = (float) (0.05f * Math.sqrt(pellet_scale));
 
 		glLineWidth(2);
 		int n = 30;
@@ -792,6 +804,7 @@ public class Main {
 		Pellet pellet = new DestructorPellet(all_pellets_in_world);
 		pellet.vel.set(gun_direction);
 		pellet.vel.scale(gun_speed);
+		pellet.vel.scale(pellet_scale);
 		pellet.pos.set(pos);
 		all_pellets_in_world.add(pellet);
 

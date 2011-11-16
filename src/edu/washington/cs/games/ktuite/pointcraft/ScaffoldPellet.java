@@ -67,7 +67,7 @@ public class ScaffoldPellet extends Pellet {
 					System.out.println("pellet stuck to some geometry");
 					constructing = true;
 					pos.set(closest_point);
-				} else if (Main.draw_pellets){
+				} else if (Main.draw_points){
 					// it didn't hit some existing geometry or pellet
 					// so check the point cloud
 					int neighbors = LibPointCloud.queryKdTree(pos.x, pos.y,

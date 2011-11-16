@@ -6,9 +6,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.List;
 
+import org.lwjgl.util.glu.Sphere;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.newdawn.slick.opengl.Texture;
@@ -17,14 +20,27 @@ import org.newdawn.slick.opengl.TextureLoader;
 /* these primitives built out of pellets...
  * keep a list of pellets and then draw lines or polygons between them.
  */
-public class Primitive {
+public class Primitive implements Serializable {
+
+	private static final long serialVersionUID = 4570525546147184729L;
+
 	private int gl_type;
 	private List<Pellet> vertices;
 	private float line_width = 5f;
-	private byte[] textureData = null;
-	private Texture texture = null;
+	private byte[] texture_data = null;
+	private transient Texture texture = null;
 	private Vector3f player_position;
 	private Vector3f player_viewing_direction;
+	private String texture_url = null;
+
+	private void readObject(ObjectInputStream ois)
+			throws ClassNotFoundException, IOException {
+		ois.defaultReadObject();
+		if (texture_url != null){
+			//texture_url = "dont_texture-" + texture_url;
+			startDownloadingTexture();
+		}
+	}
 
 	public Primitive(int _gl_type, List<Pellet> _vertices) {
 		gl_type = _gl_type;
@@ -71,11 +87,11 @@ public class Primitive {
 				texture.bind();
 			} else {
 				glDisable(GL_TEXTURE_2D);
-				if (textureData != null) {
+				if (texture_data != null) {
 					try {
 						texture = TextureLoader.getTexture("PNG",
-								new ByteArrayInputStream(textureData));
-						textureData = null;
+								new ByteArrayInputStream(texture_data));
+						texture_data = null;
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -95,26 +111,28 @@ public class Primitive {
 			glVertex3f(vertex.x, vertex.y, vertex.z);
 		}
 		glEnd();
-		
+
 		glDisable(GL_TEXTURE_2D);
 	}
 
 	public void startDownloadingTexture() {
-		String url_string = "http://mazagran.cs.washington.edu:8080/texture.png?&v=";
-		for (Pellet p : vertices) {
-			Vector3f v = p.pos;
-			url_string += v.x + "," + v.y + "," + v.z + ",";
+		if (texture_url == null) {
+			texture_url = "http://mazagran.cs.washington.edu:8080/texture.png?&v=";
+			for (Pellet p : vertices) {
+				Vector3f v = p.pos;
+				texture_url += v.x + "," + v.y + "," + v.z + ",";
+			}
+			texture_url += "garbage,&w=128,&h=128,";
+			if (player_position != null && player_viewing_direction != null) {
+				texture_url += "&p=" + player_position.x + ","
+						+ player_position.y + "," + player_position.z + ",";
+				texture_url += "&e=" + player_viewing_direction.x + ","
+						+ player_viewing_direction.y + ","
+						+ player_viewing_direction.z + ",";
+			}
 		}
-		url_string += "garbage,&w=128,&h=128,";
-		if (player_position != null && player_viewing_direction != null) {
-			url_string += "&p=" + player_position.x + "," + player_position.y
-					+ "," + player_position.z + ",";
-			url_string += "&e=" + player_viewing_direction.x + ","
-					+ player_viewing_direction.y + ","
-					+ player_viewing_direction.z + ",";
-		}
-		System.out.println(url_string);
-		final String final_url_string = url_string;
+		System.out.println(texture_url);
+		final String final_url_string = texture_url;
 		new Thread() {
 			public void run() {
 
@@ -127,7 +145,7 @@ public class Primitive {
 					while ((n = is.read(bytes)) != -1) {
 						baos.write(bytes, 0, n);
 					}
-					textureData = baos.toByteArray();
+					texture_data = baos.toByteArray();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

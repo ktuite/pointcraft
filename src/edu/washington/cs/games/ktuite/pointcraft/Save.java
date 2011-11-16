@@ -10,19 +10,17 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Writer;
-import java.util.List;
 import java.util.Stack;
 
 import javax.swing.JFileChooser;
 
 import org.lwjgl.input.Mouse;
-import org.lwjgl.util.vector.Vector3f;
 
 public class Save {
 
 	private static JFileChooser fc;
 
-	public static void attemptToSave() {
+	public static void attemptToSavePly() {
 		Mouse.setGrabbed(false);
 		System.out.println("save");
 		if (fc == null) {
@@ -34,27 +32,36 @@ public class Save {
 			String file_name = file.getName();
 			System.out.println("saving to file name: " + file_name);
 			save(file);
-			
-			String file_name2 = file_name + ".data";
-			saveHeckaData(file_name2);
 		}
 		Mouse.setGrabbed(true);
 	}
-	
-	public static void saveHeckaData(String file_name){
-		try {
-			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(new File(file_name)));
-			out.writeObject(Main.all_pellets_in_world);
-			out.writeObject(Main.geometry);
-			out.writeObject(Main.geometry_v);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+	public static void saveHeckaData() {
+		boolean mouseGrabbed = Mouse.isGrabbed();
+		Mouse.setGrabbed(false);
+		if (fc == null) {
+			fc = new JFileChooser();
 		}
+		int returnVal = fc.showSaveDialog(fc);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = fc.getSelectedFile();
+			try {
+				ObjectOutputStream out = new ObjectOutputStream(
+						new FileOutputStream(file));
+				out.writeObject(Main.all_pellets_in_world);
+				out.writeObject(Main.geometry);
+				out.writeObject(Main.geometry_v);
+				out.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		Mouse.setGrabbed(mouseGrabbed);
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	public static void loadHeckaData(){
+	public static void loadHeckaData() {
 		boolean mouseGrabbed = Mouse.isGrabbed();
 		Mouse.setGrabbed(false);
 		if (fc == null) {
@@ -80,6 +87,8 @@ public class Save {
 			}
 		}
 		Mouse.setGrabbed(mouseGrabbed);
+		
+		//System.out.println("primitive vertex geomery... where is it?" + Main.geometry_v.size());
 	}
 
 	public static void save(File file) {
@@ -108,7 +117,7 @@ public class Save {
 				output.write("150 150 150\n");
 			}
 			for (Primitive geom : Main.geometry) {
-				if (geom.isPolygon()){
+				if (geom.isPolygon()) {
 					output.write(geom.plyFace());
 				}
 			}

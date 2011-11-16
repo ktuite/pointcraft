@@ -2,14 +2,10 @@ package edu.washington.cs.games.ktuite.pointcraft;
 
 import static org.lwjgl.opengl.GL11.*;
 
-import java.io.InputStream;
 import java.io.Serializable;
-import java.net.URL;
 import java.util.List;
 
 import org.lwjgl.util.vector.Vector3f;
-import org.newdawn.slick.opengl.Texture;
-import org.newdawn.slick.opengl.TextureLoader;
 
 /* these primitives built out of pellets...
  * keep a list of pellets and then draw lines or polygons between them.
@@ -22,9 +18,9 @@ public class PrimitiveVertex implements Serializable {
 	private int gl_type;
 	private List<Vector3f> vertices;
 	private float line_width = 5f;
-	private Vector3f pt_1;
-	private Vector3f pt_2;
-	private float a, b, c, d;
+	public Vector3f pt_1;
+	public Vector3f pt_2;
+	public float a, b, c, d;
 
 	public PrimitiveVertex(int _gl_type, List<Vector3f> _vertices) {
 		gl_type = _gl_type;

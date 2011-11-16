@@ -1,5 +1,9 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.nio.DoubleBuffer;
 import java.util.List;
 
@@ -7,7 +11,9 @@ import org.lwjgl.util.glu.Sphere;
 import org.lwjgl.util.vector.Vector3f;
 import static org.lwjgl.opengl.GL11.*;
 
-public class Pellet{
+public class Pellet implements Serializable {
+
+	private static final long serialVersionUID = 5646810963409606680L;
 
 	static private int ID = 0;
 	public Vector3f pos;
@@ -22,7 +28,16 @@ public class Pellet{
 	public int id;
 
 	public static boolean CONNECT_TO_PREVIOUS = true;
-	//public static List<Pellet> current_cycle = new LinkedList<Pellet>();
+
+	private void writeObject(ObjectOutputStream oos) throws IOException {
+		oos.defaultWriteObject();
+	}
+
+	private void readObject(ObjectInputStream ois)
+			throws ClassNotFoundException, IOException {
+		ois.defaultReadObject();
+		sphere = new Sphere();
+	}
 
 	/*
 	 * A Pellet is a magical thing that you can shoot out of a gun that will
@@ -43,21 +58,23 @@ public class Pellet{
 		id = ID;
 		ID++;
 
-		//if (Main.launch_effect != null)
-		//	Main.launch_effect.playAsSoundEffect(1.0f, 1.0f, false);
+		// if (Main.launch_effect != null)
+		// Main.launch_effect.playAsSoundEffect(1.0f, 1.0f, false);
 	}
 
-	public void finalize(){
+	public void finalize() {
 		System.out.println("deletng pellet " + id);
 	}
-	
+
 	public void update() {
 		// meant to be overwritten
 		System.out.println("the wrong update function is getting called");
 	}
-	
-	protected void snapToCenterOfPoints(){
-		DoubleBuffer center_of_points = LibPointCloud.queryKdTreeGetCenter(pos.x, pos.y, pos.z, radius).getByteBuffer(0, 3 * 8).asDoubleBuffer();
+
+	protected void snapToCenterOfPoints() {
+		DoubleBuffer center_of_points = LibPointCloud
+				.queryKdTreeGetCenter(pos.x, pos.y, pos.z, radius)
+				.getByteBuffer(0, 3 * 8).asDoubleBuffer();
 		pos.x = (float) center_of_points.get(0);
 		pos.y = (float) center_of_points.get(1);
 		pos.z = (float) center_of_points.get(2);
@@ -66,7 +83,7 @@ public class Pellet{
 	public Pellet queryOtherPellets() {
 		if (!Main.draw_pellets)
 			return null;
-		
+
 		for (Pellet pellet : main_pellets) {
 			if (pellet != this) {
 				Vector3f dist = new Vector3f();
@@ -79,22 +96,22 @@ public class Pellet{
 		}
 		return null;
 	}
-	
-	public Vector3f queryScaffoldGeometry(){
+
+	public Vector3f queryScaffoldGeometry() {
 		if (!Main.draw_scaffolding)
 			return null;
-		
+
 		// TODO: make this return the actual point of intersection
 		Vector3f closest_point = null;
-		for (PrimitiveVertex geom : Main.geometry_v){
-			if (radius > geom.distanceToPoint(pos)){
+		for (PrimitiveVertex geom : Main.geometry_v) {
+			if (radius > geom.distanceToPoint(pos)) {
 				closest_point = geom.closestPoint(pos);
 				break;
 			}
 		}
 		return closest_point;
 	}
-	
+
 	public void draw() {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;

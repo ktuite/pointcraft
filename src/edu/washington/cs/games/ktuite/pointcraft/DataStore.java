@@ -9,21 +9,56 @@ import org.lwjgl.util.vector.Vector3f;
 public class DataStore implements Serializable {
 
 	private static final long serialVersionUID = 6554769726907063951L;
+	
 	class pellet {
 		int pellet_id;
 		Vector3f pos;
 		float radius;
 		Main.GunMode type;
+		
+		public pellet(Pellet p){
+			pellet_id = p.id;
+			pos = p.pos;
+			radius = p.radius;
+			if (p instanceof ScaffoldPellet)
+				type = Main.GunMode.PELLET;
+			else if (p instanceof LinePellet)
+				type = Main.GunMode.LINE;
+			else if (p instanceof PlanePellet)
+				type = Main.GunMode.PLANE;
+			else if (p instanceof PolygonPellet)
+				type = Main.GunMode.POLYGON;
+		}
+		
+		@Override
+		public String toString(){
+			String s = "Pellet ID: " + pellet_id;
+			s += " (" + type + ") ";
+			s += pos; 
+			return s;
+		}
 	}
 	
 	class line {
 		Vector3f pt_1;
 		Vector3f pt_2;
+		
+		public line(PrimitiveVertex v){
+			pt_1 = v.pt_1;
+			pt_2 = v.pt_2;
+		}
 	}
 	
 	class plane {
 		Vector3f mean;
 		float a,b,c,d;
+		
+		public plane(PrimitiveVertex v){
+			a = v.a;
+			b = v.b;
+			c = v.c;
+			d = v.d;
+		}
 	}
 	
 	class polygon {
@@ -74,5 +109,22 @@ public class DataStore implements Serializable {
 		System.out.println("Actions:\n---------");
 		for (action p : actions)
 			System.out.println("\t" + p);
+	}
+	
+	public void putThingsInDataStoreFromMain(){
+		for (Pellet p : Main.all_pellets_in_world){
+			pellets.add(new pellet(p));
+		}
+		
+		for (PrimitiveVertex v : Main.geometry_v){
+			if (v.isLine())
+				lines.add(new line(v));
+		}
+		
+		//for (Primitive p : Main.geometry){
+			// do nothing for now
+		//}
+		
+		showData();
 	}
 }
