@@ -180,8 +180,8 @@ public class Main {
 
 		LibPointCloud
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/models/lewis.bundle");
-				.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
-		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/Parr.bin");
+		//		.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
+		 .load("/Users/ktuite/Desktop/sketchymodeler/server_code/Parr.bin");
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out");
 		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/SageChapel.bin");
 		System.out.println("number of points: " + LibPointCloud.getNumPoints());
@@ -516,18 +516,31 @@ public class Main {
 	}
 
 	private void DrawPoints() {
+		/*
 		glPointSize(point_size);
 		glBegin(GL_POINTS);
 		for (int i = 0; i < num_points; i += 1) {
-			float r = (float) (point_colors.get(0 * num_points + i) / 255.0f);
-			float g = (float) (point_colors.get(1 * num_points + i) / 255.0f);
-			float b = (float) (point_colors.get(2 * num_points + i) / 255.0f);
+			float r = (float) (point_colors.get(0 + 3 * i));
+			float g = (float) (point_colors.get(1 + 3 * i));
+			float b = (float) (point_colors.get(2 + 3 * i));
 			glColor3f(r, g, b);
-			glVertex3d(point_positions.get(0 * num_points + i),
-					point_positions.get(1 * num_points + i),
-					point_positions.get(2 * num_points + i));
+			glVertex3d(point_positions.get(0 + 3 * i),
+					point_positions.get(1 + 3 * i),
+					point_positions.get(2 + 3 * i));
 		}
 		glEnd();
+		*/
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_COLOR_ARRAY);
+
+		GL11.glVertexPointer(3, 0, point_positions);
+		GL11.glColorPointer(3, 0, point_colors);
+
+		glPointSize(point_size);
+		glDrawArrays(GL_POINTS, 0, num_points);
+
+		glDisableClientState(GL_VERTEX_ARRAY);
+		glDisableClientState(GL_COLOR_ARRAY);
 	}
 
 	private void DrawPellets() {

@@ -12,182 +12,185 @@ PointCloud::PointCloud(char *filename, bool from_binary, bool from_bundle){
     if (from_binary){
         printf("[PointCloud] Loading from BINARY file\n");
         LoadBinaryPointCloud(filename);
-        return;
+   
     }
     else if (from_bundle){
         printf("[PointCloud] Loading from TEXT BUNDLE File\n");
         ReadBundleFile(filename);
-        return;
+
     }
     else {
         printf("[PointCloud] Parsing a text file... this shall take a little while.\n");
-    }
+    
 	
-	//m_model = new GeometricModel();
-	
-    m_num_points = 0; 
-    bool has_normals = false; 
-    int num_fields = 9; // position and color and normal
-    
-    char prompt1[256], prompt2[256], prompt3[256];
-    int eof;
-    
-    FILE *fp;
-    fp = fopen(filename, "r");
-    
-    
-    if (fp == NULL) {
-        printf("failed to open %s!\n", filename);
-        //return NULL;
-    }
-    
-    eof = fscanf(fp, "%s", prompt1);
-    if (eof == EOF || strcmp(prompt1, "ply") != 0) {
-        printf("expect \"ply\" flag\n");
-        //return NULL;
-    }
-
-    eof = fscanf(fp, "%s%s%s", prompt1, prompt2, prompt3);
-    if (eof == EOF || strcmp(prompt1, "format") != 0 || strcmp(prompt2, "ascii") != 0 || strcmp(prompt3, "1.0") != 0) {
-        printf("expect \"format ascii 1.0\"\n");
-        //return NULL;
-    }
-
-    eof = fscanf(fp, "%s%s%d", prompt1, prompt2, &m_num_points);
-    if (eof == EOF || strcmp(prompt1, "element") != 0 || strcmp(prompt2, "vertex") != 0) {
-        printf("expect \"element vertex\"\n");
-        //return NULL;
-    }
-    printf("NUM VERTICES: %d\n", m_num_points);
-
-    if (m_num_points <= 0) {
-        printf("invalid number of vertices\n");
-        //return NULL;
-    }
-
-    /* Position */
-    eof = fscanf(fp, "%s%s%s", prompt1, prompt2, prompt3);
-    if (eof == EOF || strcmp(prompt1, "property") != 0 || strcmp(prompt2, "float") != 0 || strcmp(prompt3, "x") != 0) {
-        printf("expect \"property float x\"\n");
-        //return NULL;
-    }
-
-    eof = fscanf(fp, "%s%s%s", prompt1, prompt2, prompt3);
-    if (eof == EOF || strcmp(prompt1, "property") != 0 || strcmp(prompt2, "float") != 0 || strcmp(prompt3, "y") != 0) {
-        printf("expect \"property float y\"\n");
-        //return NULL;
-    }
-
-    eof = fscanf(fp, "%s%s%s", prompt1, prompt2, prompt3);
-    if (eof == EOF || strcmp(prompt1, "property") != 0 || strcmp(prompt2, "float") != 0 || strcmp(prompt3, "z") != 0) {
-        printf("expect \"property float z\"\n");
-        //return NULL;
-    }
-
-    /* Normal */
-    eof = fscanf(fp, "%s%s%s", prompt1, prompt2, prompt3);
-    if (eof == EOF || strcmp(prompt1, "property") != 0 || strcmp(prompt2, "float") != 0 || strcmp(prompt3, "nx") != 0) {
-        printf("expect \"property float nx\"\n");
-        //return NULL;
-    }
-
-    eof = fscanf(fp, "%s%s%s", prompt1, prompt2, prompt3);
-    if (eof == EOF || strcmp(prompt1, "property") != 0 || strcmp(prompt2, "float") != 0 || strcmp(prompt3, "ny") != 0) {
-        printf("expect \"property float ny\"\n");
-        //return NULL;
-    }
-
-    eof = fscanf(fp, "%s%s%s", prompt1, prompt2, prompt3);
-    if (eof == EOF || strcmp(prompt1, "property") != 0 || strcmp(prompt2, "float") != 0 || strcmp(prompt3, "nz") != 0) {
-        printf("expect \"property float nz\"\n");
-        //return NULL;
-    }
-    
-    has_normals = true;
-
-
-    /* Color */
-    eof = fscanf(fp, "%s%s%s", prompt1, prompt2, prompt3);
-    if (eof == EOF || strcmp(prompt1, "property") != 0 || strcmp(prompt2, "uchar") != 0 || strcmp(prompt3, "diffuse_red") != 0) {
-        printf("expect \"property uchar diffuse_red\"\n");
-        //return NULL;
-    }
-
-    eof = fscanf(fp, "%s%s%s", prompt1, prompt2, prompt3);
-    if (eof == EOF || strcmp(prompt1, "property") != 0 || strcmp(prompt2, "uchar") != 0 || strcmp(prompt3, "diffuse_green") != 0) {
-        printf("expect \"property uchar diffuse_green\"\n");
-        //return NULL;
-    }
-
-    eof = fscanf(fp, "%s%s%s", prompt1, prompt2, prompt3);
-    if (eof == EOF || strcmp(prompt1, "property") != 0 || strcmp(prompt2, "uchar") != 0 || strcmp(prompt3, "diffuse_blue") != 0) {
-        printf("expect \"property uchar diffuse_blue\"\n");
-        //return NULL;
-    }
-
-    eof = fscanf(fp, "%s", prompt1);
-    if (eof == EOF || strcmp(prompt1, "end_header") != 0) {
-        printf("expect \"end_header\"\n");
-        //return NULL;
-    }
-    
-    // alloc point array
-    printf("number of points: %d, number of fields %d\n", m_num_points, num_fields);
-    
-    m_gsl_points = gsl_matrix_calloc(3, m_num_points);
-    m_gsl_colors = gsl_matrix_calloc(3, m_num_points);
-    m_gsl_normals = gsl_matrix_calloc(3, m_num_points);
-
-    
-    for (int i = 0; i < m_num_points; i++) {
-        double x,y,z;
-        double nx, ny, nz;
-        int r,g,b;
-
-        /* Read position */
-        eof = fscanf(fp, "%lf %lf %lf", &x, &y, &z);
-        if (eof == EOF) {
-            printf("fail to load vertex %d\n",i);
-            //return NULL;
-        }
-
-        gsl_matrix_set(m_gsl_points, 0, i, x);
-        gsl_matrix_set(m_gsl_points, 1, i, y);
-        gsl_matrix_set(m_gsl_points, 2, i, z);
-
-
-        /* Read normal */
-        eof = fscanf(fp, "%lf %lf %lf", &nx, &ny, &nz);
-        if (eof == EOF) {
-            printf("fail to load vertex normal %d\n",i);
-            //return NULL;
-        }
-
-        gsl_matrix_set(m_gsl_normals, 0, i, nx);
-        gsl_matrix_set(m_gsl_normals, 1, i, ny);
-        gsl_matrix_set(m_gsl_normals, 2, i, nz);
-
-        /* Read color */
-        eof = fscanf(fp, "%d %d %d", &r, &g, &b);
-        if (eof == EOF) {
-            printf("fail to load vertex color %d\n",i);
+        //m_model = new GeometricModel();
+        
+        m_num_points = 0; 
+        bool has_normals = false; 
+        int num_fields = 9; // position and color and normal
+        
+        char prompt1[256], prompt2[256], prompt3[256];
+        int eof;
+        
+        FILE *fp;
+        fp = fopen(filename, "r");
+        
+        
+        if (fp == NULL) {
+            printf("failed to open %s!\n", filename);
             //return NULL;
         }
         
-        gsl_matrix_set(m_gsl_colors, 0, i, r);
-        gsl_matrix_set(m_gsl_colors, 1, i, g);
-        gsl_matrix_set(m_gsl_colors, 2, i, b);
+        eof = fscanf(fp, "%s", prompt1);
+        if (eof == EOF || strcmp(prompt1, "ply") != 0) {
+            printf("expect \"ply\" flag\n");
+            //return NULL;
+        }
+    
+        eof = fscanf(fp, "%s%s%s", prompt1, prompt2, prompt3);
+        if (eof == EOF || strcmp(prompt1, "format") != 0 || strcmp(prompt2, "ascii") != 0 || strcmp(prompt3, "1.0") != 0) {
+            printf("expect \"format ascii 1.0\"\n");
+            //return NULL;
+        }
+    
+        eof = fscanf(fp, "%s%s%d", prompt1, prompt2, &m_num_points);
+        if (eof == EOF || strcmp(prompt1, "element") != 0 || strcmp(prompt2, "vertex") != 0) {
+            printf("expect \"element vertex\"\n");
+            //return NULL;
+        }
+        printf("NUM VERTICES: %d\n", m_num_points);
+    
+        if (m_num_points <= 0) {
+            printf("invalid number of vertices\n");
+            //return NULL;
+        }
+    
+        /* Position */
+        eof = fscanf(fp, "%s%s%s", prompt1, prompt2, prompt3);
+        if (eof == EOF || strcmp(prompt1, "property") != 0 || strcmp(prompt2, "float") != 0 || strcmp(prompt3, "x") != 0) {
+            printf("expect \"property float x\"\n");
+            //return NULL;
+        }
+    
+        eof = fscanf(fp, "%s%s%s", prompt1, prompt2, prompt3);
+        if (eof == EOF || strcmp(prompt1, "property") != 0 || strcmp(prompt2, "float") != 0 || strcmp(prompt3, "y") != 0) {
+            printf("expect \"property float y\"\n");
+            //return NULL;
+        }
+    
+        eof = fscanf(fp, "%s%s%s", prompt1, prompt2, prompt3);
+        if (eof == EOF || strcmp(prompt1, "property") != 0 || strcmp(prompt2, "float") != 0 || strcmp(prompt3, "z") != 0) {
+            printf("expect \"property float z\"\n");
+            //return NULL;
+        }
+    
+        /* Normal */
+        eof = fscanf(fp, "%s%s%s", prompt1, prompt2, prompt3);
+        if (eof == EOF || strcmp(prompt1, "property") != 0 || strcmp(prompt2, "float") != 0 || strcmp(prompt3, "nx") != 0) {
+            printf("expect \"property float nx\"\n");
+            //return NULL;
+        }
+    
+        eof = fscanf(fp, "%s%s%s", prompt1, prompt2, prompt3);
+        if (eof == EOF || strcmp(prompt1, "property") != 0 || strcmp(prompt2, "float") != 0 || strcmp(prompt3, "ny") != 0) {
+            printf("expect \"property float ny\"\n");
+            //return NULL;
+        }
+    
+        eof = fscanf(fp, "%s%s%s", prompt1, prompt2, prompt3);
+        if (eof == EOF || strcmp(prompt1, "property") != 0 || strcmp(prompt2, "float") != 0 || strcmp(prompt3, "nz") != 0) {
+            printf("expect \"property float nz\"\n");
+            //return NULL;
+        }
+        
+        has_normals = true;
+    
+    
+        /* Color */
+        eof = fscanf(fp, "%s%s%s", prompt1, prompt2, prompt3);
+        if (eof == EOF || strcmp(prompt1, "property") != 0 || strcmp(prompt2, "uchar") != 0 || strcmp(prompt3, "diffuse_red") != 0) {
+            printf("expect \"property uchar diffuse_red\"\n");
+            //return NULL;
+        }
+    
+        eof = fscanf(fp, "%s%s%s", prompt1, prompt2, prompt3);
+        if (eof == EOF || strcmp(prompt1, "property") != 0 || strcmp(prompt2, "uchar") != 0 || strcmp(prompt3, "diffuse_green") != 0) {
+            printf("expect \"property uchar diffuse_green\"\n");
+            //return NULL;
+        }
+    
+        eof = fscanf(fp, "%s%s%s", prompt1, prompt2, prompt3);
+        if (eof == EOF || strcmp(prompt1, "property") != 0 || strcmp(prompt2, "uchar") != 0 || strcmp(prompt3, "diffuse_blue") != 0) {
+            printf("expect \"property uchar diffuse_blue\"\n");
+            //return NULL;
+        }
+    
+        eof = fscanf(fp, "%s", prompt1);
+        if (eof == EOF || strcmp(prompt1, "end_header") != 0) {
+            printf("expect \"end_header\"\n");
+            //return NULL;
+        }
+        
+        // alloc point array
+        printf("number of points: %d, number of fields %d\n", m_num_points, num_fields);
+        
+        m_gsl_points = gsl_matrix_calloc(3, m_num_points);
+        m_gsl_colors = gsl_matrix_calloc(3, m_num_points);
+        m_gsl_normals = gsl_matrix_calloc(3, m_num_points);
+    
+        
+        for (int i = 0; i < m_num_points; i++) {
+            double x,y,z;
+            double nx, ny, nz;
+            int r,g,b;
+    
+            /* Read position */
+            eof = fscanf(fp, "%lf %lf %lf", &x, &y, &z);
+            if (eof == EOF) {
+                printf("fail to load vertex %d\n",i);
+                //return NULL;
+            }
+    
+            gsl_matrix_set(m_gsl_points, 0, i, x);
+            gsl_matrix_set(m_gsl_points, 1, i, y);
+            gsl_matrix_set(m_gsl_points, 2, i, z);
+    
+    
+            /* Read normal */
+            eof = fscanf(fp, "%lf %lf %lf", &nx, &ny, &nz);
+            if (eof == EOF) {
+                printf("fail to load vertex normal %d\n",i);
+                //return NULL;
+            }
+    
+            gsl_matrix_set(m_gsl_normals, 0, i, nx);
+            gsl_matrix_set(m_gsl_normals, 1, i, ny);
+            gsl_matrix_set(m_gsl_normals, 2, i, nz);
+    
+            /* Read color */
+            eof = fscanf(fp, "%d %d %d", &r, &g, &b);
+            if (eof == EOF) {
+                printf("fail to load vertex color %d\n",i);
+                //return NULL;
+            }
+            
+            gsl_matrix_set(m_gsl_colors, 0, i, r);
+            gsl_matrix_set(m_gsl_colors, 1, i, g);
+            gsl_matrix_set(m_gsl_colors, 2, i, b);
+        }
+        
+        m_draw = (int*) calloc(m_num_points, sizeof(int));
+        m_delete = (bool*) calloc(m_num_points, sizeof(bool));
+        m_point_lookup = (structure_ptr*) calloc(m_num_points, sizeof(structure_ptr));
+        for (int i = 0; i < m_num_points; i++){
+            m_point_lookup[i].idx = -1;
+            m_point_lookup[i].flash_idx = -1;
+        }
+        
+        fclose(fp);
     }
     
-    m_draw = (int*) calloc(m_num_points, sizeof(int));
-	m_delete = (bool*) calloc(m_num_points, sizeof(bool));
-	m_point_lookup = (structure_ptr*) calloc(m_num_points, sizeof(structure_ptr));
-    for (int i = 0; i < m_num_points; i++){
-		m_point_lookup[i].idx = -1;
-        m_point_lookup[i].flash_idx = -1;
-	}
-	
-    fclose(fp);
+    TransposePointsAndFixColors();
 }
 
 void PointCloud::LoadBinaryPointCloud(char *filename){
@@ -484,6 +487,9 @@ void PointCloud::TransposePointsAndFixColors(){
     gsl_matrix_transpose_memcpy(m_gsl_colors_fixed, m_gsl_colors);
     gsl_matrix_free(m_gsl_colors);
     m_gsl_colors = m_gsl_colors_fixed;
+    
+    printf("points transposed and colors fixed\n");
+    fflush(stdout);
 }
 
 void PointCloud::SetBasePointIndices(){
@@ -576,7 +582,7 @@ void PointCloud::MakeKdTree(){
     m_ann_points = annAllocPts(num_points, 3); 
     for (int i = 0; i < num_points; i++){
         for (int k = 0; k < 3; k++){
-            m_ann_points[i][k] = gsl_matrix_get(m_gsl_points, k, i);
+            m_ann_points[i][k] = gsl_matrix_get(m_gsl_points, i, k);
         }
     }
     
@@ -617,7 +623,7 @@ double* PointCloud::QueryKdTreeGetCenter(float x, float y, float z, float radius
     for (int j = 0; j < min(neighbors, max_neighbors); j++){
         weights += dists[j];
         for (int k = 0; k < 3; k++){
-            center[k] += gsl_matrix_get(m_gsl_points, k, nnIdx[j])*dists[j];
+            center[k] += gsl_matrix_get(m_gsl_points, nnIdx[j], k)*dists[j];
         }
     }
     
@@ -798,7 +804,7 @@ void PointCloud::ClusterPoints(){
     ANNpointArray ann_points = annAllocPts(num_points, 3); 
     for (int i = 0; i < num_points; i++){
         for (int k = 0; k < 3; k++){
-            ann_points[i][k] = gsl_matrix_get(m_gsl_points, k, i);
+            ann_points[i][k] = gsl_matrix_get(m_gsl_points, i, k);
         }
     }
     
@@ -1189,7 +1195,7 @@ void PointCloud::UtilCopyUserMarkedPoints(gsl_matrix *A, double *mean){
 	for (int h = 0; h < m_user_marked_points.size(); h++){
 		int i = m_user_marked_points[h];
 		for (int k = 0; k < 3; k++){
-			mean[k] += gsl_matrix_get(m_gsl_points, k, i);
+			mean[k] += gsl_matrix_get(m_gsl_points, i, k);
 		}
 	}
 	
@@ -1199,7 +1205,7 @@ void PointCloud::UtilCopyUserMarkedPoints(gsl_matrix *A, double *mean){
 	for (int h = 0; h < m_user_marked_points.size(); h++){
 		int i = m_user_marked_points[h];
 		for (int k = 0; k < 3; k++){
-			gsl_matrix_set(A, h, k, gsl_matrix_get(m_gsl_points, k, i) - mean[k]);
+			gsl_matrix_set(A, h, k, gsl_matrix_get(m_gsl_points, i, k) - mean[k]);
 		}
 	}
 }
@@ -1213,7 +1219,7 @@ void PointCloud::UtilCopyMarkedPoints(gsl_matrix *A, double *mean){
 	for (int h = 0; h < m_marked_points.size(); h++){
 		int i = m_marked_points[h];
 		for (int k = 0; k < 3; k++){
-			mean[k] += gsl_matrix_get(m_gsl_points, k, i);
+			mean[k] += gsl_matrix_get(m_gsl_points, i, k);
 		}
 	}
 	
