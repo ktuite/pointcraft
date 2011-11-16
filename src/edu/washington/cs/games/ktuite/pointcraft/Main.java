@@ -403,6 +403,10 @@ public class Main {
 				if (Keyboard.getEventKey() == Keyboard.KEY_T) {
 					data_store.putThingsInDataStoreFromMain();
 				}
+				
+				if (Keyboard.getEventKey() == Keyboard.KEY_U){
+					WiggleTool.fixModel();
+				}
 
 			}
 		}
@@ -468,6 +472,7 @@ public class Main {
 					pellet_scale = 3f;
 			}
 		}
+
 	}
 
 	private void DisplayLoop() {

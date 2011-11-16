@@ -75,6 +75,10 @@ public class Primitive implements Serializable {
 	public int numVertices() {
 		return vertices.size();
 	}
+	
+	public List<Pellet> getVertices(){
+		return vertices;
+	}
 
 	public void draw() {
 		if (gl_type == GL_LINES) {

@@ -106,7 +106,7 @@ public class PrimitiveVertex implements Serializable {
 
 	public float distanceToPlane(Vector3f pos) {
 		return (float) ((a * pos.x + b * pos.y + c * pos.z + d) / Math.sqrt(a
-				* a + b * b + d * d));
+				* a + b * b + c * c));
 	}
 
 	public Vector3f closestPoint(Vector3f pos) {
