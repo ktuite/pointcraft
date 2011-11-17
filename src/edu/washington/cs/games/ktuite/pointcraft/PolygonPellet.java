@@ -137,8 +137,7 @@ public class PolygonPellet extends Pellet {
 					// is it near some points?!
 					if (neighbors > 0) {
 						constructing = true;
-						// Main.attach_effect.playAsSoundEffect(1.0f, 1.0f,
-						// false);
+						 Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
 
 						snapToCenterOfPoints();
 
@@ -204,5 +203,24 @@ public class PolygonPellet extends Pellet {
 	public static void startNewPolygon() {
 		current_cycle.clear();
 		System.out.println("making new polygon");
+	}
+	
+	public void delete(){
+		System.out.println("delete");
+		if (current_cycle.contains(this) && current_cycle.peek() == this){
+			current_cycle.pop();
+			if (!Main.geometry.lastElement().isPolygon()){
+				Main.geometry.pop();
+			}
+			alive = false;
+		}
+		alive = false;
+		for (Primitive g : Main.geometry){
+			// kill the pellet unless its part of a polygon
+			if (g.getVertices().contains(this)){
+				alive = true;
+				break;
+			}
+		}
 	}
 }

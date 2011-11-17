@@ -20,7 +20,7 @@ public class PlanePellet extends Pellet {
 	public static List<PlanePellet> intersection_points = new LinkedList<PlanePellet>();
 
 	private boolean is_intersection = false;
-	
+
 	/*
 	 * A Pellet is a magical thing that you can shoot out of a gun that will
 	 * travel towards the model and stick to the first point it intersects.
@@ -60,12 +60,6 @@ public class PlanePellet extends Pellet {
 					alive = false;
 					current_plane.add(this);
 					fitPlane();
-				} else if (closest_point != null) {
-					System.out.println("pellet stuck to some geometry");
-					constructing = true;
-					pos.set(closest_point);
-					current_plane.add(this);
-					fitPlane();
 				} else {
 					// it didn't hit some existing geometry or pellet
 					// so check the point cloud
@@ -79,7 +73,14 @@ public class PlanePellet extends Pellet {
 						Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
 						current_plane.add(this);
 						fitPlane();
+					} else if (closest_point != null) {
+						System.out.println("pellet stuck to some geometry");
+						constructing = true;
+						pos.set(closest_point);
+						current_plane.add(this);
+						fitPlane();
 					}
+
 				}
 			}
 		} else {
@@ -92,7 +93,8 @@ public class PlanePellet extends Pellet {
 	}
 
 	public void finalize() {
-		if (current_plane.size() == 3 || current_plane.size() == 4)
+		if (current_plane.contains(this)
+				&& (current_plane.size() == 3 || current_plane.size() == 4))
 			Main.geometry_v.remove(Main.geometry_v.size() - 1);
 		if (current_plane.contains(this)) {
 			current_plane.remove(this);
@@ -247,7 +249,7 @@ public class PlanePellet extends Pellet {
 		PrimitiveVertex g = new PrimitiveVertex(GL_LINES, boundary_pellets, 1);
 		g.setPlane(a, b, c, d);
 		Main.geometry_v.add(g);
-		
+
 		checkForIntersections(a, b, c, d);
 
 	}
@@ -265,7 +267,7 @@ public class PlanePellet extends Pellet {
 		}
 		return max_distance;
 	}
-	
+
 	private Vector3f findPlaneCenter() {
 		Vector3f center = new Vector3f();
 		for (Pellet p : current_plane) {
@@ -275,12 +277,13 @@ public class PlanePellet extends Pellet {
 		return center;
 	}
 
-	private void checkForIntersections(float a, float b, float c, float d){
+	private void checkForIntersections(float a, float b, float c, float d) {
 		intersection_points.clear();
 		System.out.println("checking for new plane-line interesction");
-		for (PrimitiveVertex geom : Main.geometry_v){
-			Vector3f intersect = geom.checkForIntersectionPlaneWithLine(a,b,c,d);
-			if (intersect != null){
+		for (PrimitiveVertex geom : Main.geometry_v) {
+			Vector3f intersect = geom.checkForIntersectionPlaneWithLine(a, b,
+					c, d);
+			if (intersect != null) {
 				PlanePellet i = new PlanePellet(main_pellets);
 				i.alive = true;
 				i.constructing = true;
@@ -292,14 +295,14 @@ public class PlanePellet extends Pellet {
 			}
 		}
 	}
-	
+
 	public static void startNewPlane() {
-		for (PlanePellet p : intersection_points){
+		for (PlanePellet p : intersection_points) {
 			ScaffoldPellet sp = new ScaffoldPellet(p);
 			Main.all_pellets_in_world.add(sp);
 		}
 		intersection_points.clear();
-		
+
 		current_plane.clear();
 		System.out.println("making new plane");
 	}

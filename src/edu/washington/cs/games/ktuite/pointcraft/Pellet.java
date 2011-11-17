@@ -65,6 +65,10 @@ public class Pellet implements Serializable {
 	public void finalize() {
 		System.out.println("deletng pellet " + id);
 	}
+	
+	public void delete(){
+		alive = false;
+	}
 
 	public void update() {
 		// meant to be overwritten
@@ -110,6 +114,19 @@ public class Pellet implements Serializable {
 			}
 		}
 		return closest_point;
+	}
+	
+	public PrimitiveVertex getIntersectedScaffoldGeometry() {
+		if (!Main.draw_scaffolding)
+			return null;
+
+		for (PrimitiveVertex geom : Main.geometry_v) {
+			if (radius > geom.distanceToPoint(pos)) {
+				return geom;
+			}
+		}
+		
+		return null;
 	}
 
 	public void draw() {

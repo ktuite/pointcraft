@@ -29,8 +29,16 @@ public class DestructorPellet extends Pellet {
 			if (neighbor_pellet != null) {
 				// TODO: delete the thing it hit
 				alive = false;
-				neighbor_pellet.alive = false;
-				neighbor_pellet.finalize();
+				neighbor_pellet.delete();
+			} else {
+				PrimitiveVertex geom = getIntersectedScaffoldGeometry();
+				if (geom != null) {
+					if (geom.isLine())
+						LinePellet.current_line.clear();
+					else if (geom.isPlane())
+						PlanePellet.current_plane.clear();
+					Main.geometry_v.remove(geom);
+				}
 			}
 		}
 	}
