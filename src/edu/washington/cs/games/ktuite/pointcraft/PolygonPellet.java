@@ -209,7 +209,7 @@ public class PolygonPellet extends Pellet {
 		System.out.println("delete");
 		if (current_cycle.contains(this) && current_cycle.peek() == this){
 			current_cycle.pop();
-			if (!Main.geometry.lastElement().isPolygon()){
+			if (!Main.geometry.isEmpty() && !Main.geometry.lastElement().isPolygon()){
 				Main.geometry.pop();
 			}
 			alive = false;
