@@ -176,4 +176,27 @@ public class Primitive implements Serializable {
 		}
 		System.out.println("");
 	}
+	
+	public float distanceToPolygonPlane(Vector3f pos){
+		Vector3f v1 = new Vector3f();
+		Vector3f.sub(vertices.get(0).pos, vertices.get(1).pos, v1);
+		Vector3f v2 = new Vector3f();
+		Vector3f.sub(vertices.get(0).pos, vertices.get(2).pos, v2);
+		Vector3f norm = new Vector3f();
+		Vector3f.cross(v1, v2, norm);
+		norm.normalise();
+
+		float a = norm.x;
+		float b = norm.y;
+		float c = norm.z;
+		float d = -1
+				* (a * vertices.get(0).pos.x + b
+						* vertices.get(0).pos.y + c
+						* vertices.get(0).pos.z);
+
+		float distance = (float) ((a * pos.x + b * pos.y + c * pos.z + d) / Math
+				.sqrt(a * a + b * b + c * c));
+		
+		return Math.abs(distance);
+	}
 }

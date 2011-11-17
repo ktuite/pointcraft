@@ -8,8 +8,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.Stack;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -63,11 +65,11 @@ public class Main {
 	public static Stack<Primitive> geometry;
 	public static Stack<PrimitiveVertex> geometry_v;
 
-	public static DataStore data_store;
-
 	public static boolean draw_points = true;
 	public static boolean draw_scaffolding = true;
 	public static boolean draw_pellets = true;
+
+	public static int picked_polygon = -1;
 
 	public enum GunMode {
 		PELLET, ORB, LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR
@@ -161,7 +163,6 @@ public class Main {
 		// containers individually
 		geometry = new Stack<Primitive>();
 		geometry_v = new Stack<PrimitiveVertex>();
-		data_store = new DataStore();
 
 		try {
 			launch_effect = AudioLoader.getAudio("WAV",
@@ -180,8 +181,8 @@ public class Main {
 
 		LibPointCloud
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/models/lewis.bundle");
-		//		.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
-		 .load("/Users/ktuite/Desktop/sketchymodeler/server_code/Parr.bin");
+		// .load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
+				.load("/Users/ktuite/Desktop/sketchymodeler/server_code/Parr.bin");
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out");
 		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/SageChapel.bin");
 		System.out.println("number of points: " + LibPointCloud.getNumPoints());
@@ -400,11 +401,7 @@ public class Main {
 					glFogf(GL_FOG_DENSITY, fog_density);
 				}
 
-				if (Keyboard.getEventKey() == Keyboard.KEY_T) {
-					data_store.putThingsInDataStoreFromMain();
-				}
-				
-				if (Keyboard.getEventKey() == Keyboard.KEY_U){
+				if (Keyboard.getEventKey() == Keyboard.KEY_U) {
 					WiggleTool.fixModel();
 				}
 
@@ -510,26 +507,106 @@ public class Main {
 
 		glPopMatrix();
 
+		pickPolygon();
+
 		DrawHud();
 
 		Display.update();
 	}
 
+	private void pickPolygon() {
+		int x = Display.getDisplayMode().getWidth() / 2;
+		int y = Display.getDisplayMode().getHeight() / 2;
+		final int BUFSIZE = 512;
+		int[] selectBuf = new int[BUFSIZE];
+		IntBuffer selectBuffer = BufferUtils.createIntBuffer(BUFSIZE);
+		IntBuffer viewport = BufferUtils.createIntBuffer(16);
+		int hits;
+
+		glGetInteger(GL_VIEWPORT, viewport);
+		glSelectBuffer(selectBuffer);
+		glRenderMode(GL_SELECT);
+
+		glInitNames();
+		glPushName(-1);
+
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		/* create 5x5 pixel picking region near cursor location */
+		gluPickMatrix((float) x, (float) (viewport.get(3) - y), 5.0f, 5.0f,
+				viewport);
+		gluPerspective(60, 800.0f / 600.0f, .001f, 1000.0f);
+
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glRotatef(tilt_angle, 1.0f, 0.0f, 0.0f); // rotate our camera up/down
+		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
+		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
+
+		// draw polygons for picking
+		for (int i = 0; i < geometry.size(); i++) {
+			Primitive g = geometry.get(i);
+			if (g.isPolygon()) {
+				glLoadName(i);
+				g.draw();
+			}
+		}
+
+		glPopMatrix();
+		glMatrixMode(GL_PROJECTION);
+
+		glPopMatrix();
+		glFlush();
+
+		hits = glRenderMode(GL_RENDER);
+		selectBuffer.get(selectBuf);
+		picked_polygon = processHits(hits, selectBuf); // which polygon actually
+														// selected
+	}
+
+	private int processHits(int hits, int buffer[]) {
+		int names, ptr = 0;
+
+		int selected_geometry = -1;
+		int min_dist = Integer.MAX_VALUE;
+
+		// System.out.println("hits = " + hits);
+		// ptr = (GLuint *) buffer;
+		for (int i = 0; i < hits; i++) { /* for each hit */
+			names = buffer[ptr];
+			// System.out.println(" number of names for hit = " + names);
+			ptr++;
+			// System.out.println("  z1 is " + buffer[ptr]);
+			int temp_min_dist = buffer[ptr];
+			ptr++;
+			// System.out.println(" z2 is " + buffer[ptr]);
+			ptr++;
+
+			// System.out.print("\n   the name is ");
+			for (int j = 0; j < names; j++) { /* for each name */
+				// System.out.println("" + buffer[ptr]);
+				if (temp_min_dist < min_dist) {
+					min_dist = temp_min_dist;
+					selected_geometry = buffer[ptr];
+				}
+				ptr++;
+			}
+			// System.out.println();
+		}
+
+		return selected_geometry;
+	}
+
 	private void DrawPoints() {
 		/*
-		glPointSize(point_size);
-		glBegin(GL_POINTS);
-		for (int i = 0; i < num_points; i += 1) {
-			float r = (float) (point_colors.get(0 + 3 * i));
-			float g = (float) (point_colors.get(1 + 3 * i));
-			float b = (float) (point_colors.get(2 + 3 * i));
-			glColor3f(r, g, b);
-			glVertex3d(point_positions.get(0 + 3 * i),
-					point_positions.get(1 + 3 * i),
-					point_positions.get(2 + 3 * i));
-		}
-		glEnd();
-		*/
+		 * glPointSize(point_size); glBegin(GL_POINTS); for (int i = 0; i <
+		 * num_points; i += 1) { float r = (float) (point_colors.get(0 + 3 *
+		 * i)); float g = (float) (point_colors.get(1 + 3 * i)); float b =
+		 * (float) (point_colors.get(2 + 3 * i)); glColor3f(r, g, b);
+		 * glVertex3d(point_positions.get(0 + 3 * i), point_positions.get(1 + 3
+		 * * i), point_positions.get(2 + 3 * i)); } glEnd();
+		 */
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_COLOR_ARRAY);
 

@@ -38,6 +38,20 @@ public class DestructorPellet extends Pellet {
 					else if (geom.isPlane())
 						PlanePellet.current_plane.clear();
 					Main.geometry_v.remove(geom);
+					alive = false;
+				}
+				else {
+					Primitive poly = getIntersectedPolygon();
+					if (poly != null){
+						int idx = Main.geometry.indexOf(poly);
+						int lines_to_remove = poly.numVertices()-1;
+						int start_deleting = idx-lines_to_remove;
+						for (int i = 0; i <= lines_to_remove; i++){
+							Main.geometry.remove(start_deleting);
+						}
+						
+						alive = false;
+					}
 				}
 			}
 		}
