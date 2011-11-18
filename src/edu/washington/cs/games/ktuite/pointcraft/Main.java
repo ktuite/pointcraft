@@ -107,7 +107,7 @@ public class Main {
 			Display.setVSyncEnabled(true);
 			Display.create();
 			Display.setTitle("PointCraft FPS-3D-Modeler");
-			Mouse.setGrabbed(false);
+			Mouse.setGrabbed(true);
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 			System.out.println("ERROR running InitDisplay... game exiting");
@@ -227,6 +227,8 @@ public class Main {
 		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/Parr.bin");
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out");
 		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/SageChapel.bin");
+		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/HOC_culdesac.bin");
+		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/fountainplus.bin");
 		System.out.println("number of points: " + LibPointCloud.getNumPoints());
 
 		num_points = LibPointCloud.getNumPoints();

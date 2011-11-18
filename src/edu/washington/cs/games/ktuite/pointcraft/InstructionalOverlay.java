@@ -50,10 +50,17 @@ public class InstructionalOverlay extends Widget {
 				Save.loadHeckaData();
 			}
 		});
+		
+		export_button.addCallback(new Runnable() {
+			public void run() {
+				Save.savePly();
+			}
+		});
 
 		add(start_button);
 		add(save_button);
 		add(load_button);
+		add(export_button);
 		//add(a_label);
 	}
 
@@ -78,7 +85,10 @@ public class InstructionalOverlay extends Widget {
 				getInnerY() + 30);
 
 		load_button.adjustSize();
-		load_button.setPosition(save_button.getX(), save_button.getY() + 40);
+		load_button.setPosition(save_button.getX(), save_button.getY() + 30);
+		
+		export_button.adjustSize();
+		export_button.setPosition(load_button.getX(), load_button.getY() + 30);
 		
 		start_button.adjustSize();
 		start_button.setPosition(getInnerX() + (getInnerWidth() - start_button.getWidth()) / 2, getInnerHeight() - 70);

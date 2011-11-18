@@ -87,8 +87,9 @@ public class Save {
 			}
 		}
 		Mouse.setGrabbed(mouseGrabbed);
-		
-		//System.out.println("primitive vertex geomery... where is it?" + Main.geometry_v.size());
+
+		// System.out.println("primitive vertex geomery... where is it?" +
+		// Main.geometry_v.size());
 	}
 
 	public static void save(File file) {
@@ -129,6 +130,70 @@ public class Save {
 			e.printStackTrace();
 		}
 
+	}
+
+	public static void savePly() {
+		boolean mouseGrabbed = Mouse.isGrabbed();
+		Mouse.setGrabbed(false);
+		if (fc == null) {
+			fc = new JFileChooser();
+		}
+		int returnVal = fc.showSaveDialog(fc);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = fc.getSelectedFile();
+			try {
+				Writer output = new BufferedWriter(new FileWriter(file));
+				int VERTEX_COUNT = 0;
+				int FACE_COUNT = 0;
+				for (Primitive g : Main.geometry) {
+					if (g.isPolygon()) {
+						VERTEX_COUNT += (g.numVertices() - 1);
+						FACE_COUNT += 1;
+					}
+				}
+
+				String header = "ply\n" + "format ascii 1.0\n"
+						+ "element vertex " + VERTEX_COUNT + "\n"
+						+ "property float x\n" + "property float y\n"
+						+ "property float z\n" + "property uchar diffuse_red\n"
+						+ "property uchar diffuse_green\n"
+						+ "property uchar diffuse_blue\n" + "element face "
+						+ FACE_COUNT + "\n"
+						+ "property list uchar int vertex_index\n"
+						+ "end_header\n";
+				output.write(header);
+				
+				for (Primitive geom : Main.geometry) {
+					if (geom.isPolygon()) {
+						for (int i = 0; i < geom.numVertices() -1; i++){
+							Pellet pellet = geom.getVertices().get(i);
+							output.write(pellet.pos.x + " " + pellet.pos.y + " "
+									+ pellet.pos.z + " ");
+							output.write("150 150 150\n");
+						}
+					}
+				}
+				
+				int current_vertex = 0;
+				for (Primitive geom : Main.geometry) {
+					if (geom.isPolygon()) {
+						output.write(geom.numVertices() - 1 + " ");
+						for (int i = current_vertex; i < geom.numVertices()-1 + current_vertex; i++){
+							output.write(i + " ");
+						}
+						output.write("\n");
+						current_vertex += (geom.numVertices() - 1);
+					}
+				}
+				
+				output.close();
+
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		Mouse.setGrabbed(mouseGrabbed);
 	}
 
 }
