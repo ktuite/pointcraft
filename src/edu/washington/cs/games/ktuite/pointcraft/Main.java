@@ -84,7 +84,8 @@ public class Main {
 
 	public GunMode which_gun;
 
-	private GUI gui;
+	private GUI onscreen_gui;
+	private GUI instructional_gui;
 	private OnscreenOverlay onscreen_overlay;
 
 	public static void main(String[] args) {
@@ -93,7 +94,7 @@ public class Main {
 		main.InitDisplay();
 		main.InitGUI();
 		main.InitGraphics();
-		
+
 		main.InitData();
 		main.InitGameVariables();
 
@@ -105,7 +106,8 @@ public class Main {
 			Display.setDisplayMode(new DisplayMode(800, 600));
 			Display.setVSyncEnabled(true);
 			Display.create();
-			Mouse.setGrabbed(true);
+			Display.setTitle("PointCraft FPS-3D-Modeler");
+			Mouse.setGrabbed(false);
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 			System.out.println("ERROR running InitDisplay... game exiting");
@@ -118,12 +120,19 @@ public class Main {
 		LWJGLRenderer renderer;
 		try {
 			renderer = new LWJGLRenderer();
-			onscreen_overlay =new OnscreenOverlay();
-			gui = new GUI(onscreen_overlay, renderer);
+			onscreen_overlay = new OnscreenOverlay();
+			onscreen_gui = new GUI(onscreen_overlay, renderer);
 			URL url = new File("assets/theme/onscreen.xml").toURL();
 			ThemeManager themeManager = ThemeManager.createThemeManager(url,
 					renderer);
-			gui.applyTheme(themeManager);
+			onscreen_gui.applyTheme(themeManager);
+
+			instructional_gui = new GUI(new InstructionalOverlay(), renderer);
+			URL url2 = new File("assets/theme/guiTheme.xml").toURL();
+			ThemeManager themeManager2 = ThemeManager.createThemeManager(url2,
+					renderer);
+			instructional_gui.applyTheme(themeManager2);
+
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 		} catch (MalformedURLException e) {
@@ -265,10 +274,16 @@ public class Main {
 	private void Start() {
 		while (!Display.isCloseRequested()) {
 			Timer.tick();
-			UpdateGameObjects();
-			EventLoop(); // input like mouse and keyboard
-			DisplayLoop(); // draw things on the screen
-			
+
+			if (Mouse.isGrabbed()) {
+				EventLoop(); // input like mouse and keyboard
+				UpdateGameObjects();
+				DisplayLoop(); // draw things on the screen
+				
+			} else {
+				UpdateInstructionalGui();
+				InstructionalEventLoop();
+			}
 
 		}
 
@@ -305,6 +320,16 @@ public class Main {
 		if (which_gun == GunMode.ORB) {
 			OrbPellet
 					.updateOrbPellet(pos, gun_direction, pan_angle, tilt_angle);
+		}
+	}
+
+	private void InstructionalEventLoop() {
+		while (Keyboard.next()) {
+			if (Keyboard.getEventKeyState()) {
+				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
+					Mouse.setGrabbed(!Mouse.isGrabbed());
+				}
+			}
 		}
 	}
 
@@ -546,17 +571,25 @@ public class Main {
 
 		DrawHud();
 
-		
-		UpdateGui();
-			
+		UpdateOnscreenGui();
+
 		Display.update();
 	}
-	
-	private void UpdateGui(){
-		if (gui != null){
-			onscreen_overlay.label_current_mode.setText("Current Gun: " + which_gun);
-			gui.update();
+
+	private void UpdateOnscreenGui() {
+		if (onscreen_gui != null) {
+			onscreen_overlay.label_current_mode.setText("Current Gun: "
+					+ which_gun);
+			onscreen_gui.update();
 		}
+	}
+
+	private void UpdateInstructionalGui() {
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+		if (instructional_gui != null) {
+			instructional_gui.update();
+		}
+		Display.update();
 	}
 
 	private void pickPolygon() {

@@ -91,6 +91,9 @@
 
     <theme name="onscreenoverlay" ref="-defaults">
     </theme>
+    
+    <theme name="instructionaloverlay" ref="-defaults">
+    </theme>
 
     <theme name="login-panel" ref="-defaults" allowWildcard="true">
                     <param name="background"><image>evilframe.background</image></param>

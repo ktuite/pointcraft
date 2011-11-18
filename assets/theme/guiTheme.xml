@@ -10,15 +10,16 @@
     <include filename="gui.xml"/>
     <include filename="Eforen.xml"/>
 
-    <images file="chaos_sphere_blue_800x600.png" format="RGB" filter="linear">
-        <area name="gui.background" xywh="0,0,800,600"/>
+    <images file="pointcraft-fancy.png" format="RGBA" filter="linear">
+        <area name="gui.background" xywh="*"/>
     </images>
 
-    <images file="TWL Logo.png" format="RGBA">
-        <area name="twl-logo" inset="-8" xywh="0,0,256,128"/>
-    </images>
-
-    <fontDef name="normal" filename="font.fnt" color="white">
+    <fontDef name="normal" filename="font.fnt" color="black">
+        <fontParam if="error" color="red"/>
+        <fontParam if="textSelection" color="white"/>
+    </fontDef>
+    
+    <fontDef name="white-font" filename="font.fnt" color="white">
         <fontParam if="error" color="red"/>
         <fontParam if="textSelection" color="white"/>
     </fontDef>
@@ -64,6 +65,7 @@
         <param name="border"><border>background.border</border></param>
         <param name="textAlignment"><enum type="alignment">center</enum></param>
         <param name="minWidth"><int>56</int></param>
+        <param name="font"><font>white-font</font></param>
     </theme>
 
     <theme name="togglebutton" ref="button" allowWildcard="true">
@@ -432,7 +434,6 @@
     <theme name="licenseTextArea" ref="textarea">
         <param name="border"><border>0,0,0,10</border></param>
         <param name="images"><map>
-            <param name="twl-logo"><image>twl-logo</image></param>
             <param name="ul-bullet"><image>textarea.ul-bullet</image></param>
         </map></param>
         <param name="minWidth"><int>400</int></param>
@@ -467,5 +468,12 @@
         <theme name="" ref="*"/>
         <param name="spacing"><int>5</int></param>
         <param name="alignment"><enum type="alignment">CENTER</enum></param>
+    </theme>
+    
+   	<theme name="instructionaloverlay" ref="-defaults">
+   		<param name="background"><image>gui.background</image></param>
+   	 	<theme name="label" ref="label"/>
+   	 	<theme name="button" ref="button"/>
+   	 	<theme name="textarea" ref="textarea"/>
     </theme>
 </themes>
