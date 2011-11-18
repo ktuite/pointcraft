@@ -29,11 +29,13 @@ public class WiggleTool {
 		// TODO: for all lines that look like they might be vertical or
 		// horizontal, make them become vertical or horizontal.
 
+		/*
 		for (Primitive g : Main.geometry) {
 			// only do it for quads
 			if (g.isPolygon() && g.numVertices() == 5)
 				rectangularify(g);
 		}
+		*/
 	}
 
 	private static void rectangularify(Primitive g) {

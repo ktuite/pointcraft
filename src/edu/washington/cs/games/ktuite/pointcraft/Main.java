@@ -375,13 +375,14 @@ public class Main {
 		// basically it increases or decreases your vertical world height
 		while (Keyboard.next()) {
 			if (Keyboard.getEventKeyState()) {
+				/*
 				if (Keyboard.getEventKey() == Keyboard.KEY_S
 						&& (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29))) {
 					Save.saveHeckaData();
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_L) {
 					Save.loadHeckaData();
-				}
+				}*/
 				if (Keyboard.getEventKey() == Keyboard.KEY_Z
 						&& (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29))) {
 					System.out.println("UNDO!");
