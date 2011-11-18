@@ -221,9 +221,9 @@ public class Main {
 	private void InitData() {
 		// data of the point cloud itself, loaded in from C++
 
-		LibPointCloud
+		LibPointCloud.load("assets/models/lewis-hall.bin");
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/models/lewis.bundle");
-				.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
+		//		.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
 		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/Parr.bin");
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out");
 		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/SageChapel.bin");
