@@ -3,7 +3,10 @@ package edu.washington.cs.games.ktuite.pointcraft;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.util.glu.GLU.*;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
@@ -25,6 +28,10 @@ import org.newdawn.slick.openal.AudioLoader;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
+
+import de.matthiasmann.twl.GUI;
+import de.matthiasmann.twl.renderer.lwjgl.LWJGLRenderer;
+import de.matthiasmann.twl.theme.ThemeManager;
 
 public class Main {
 	// stuff about the atmosphere
@@ -77,13 +84,19 @@ public class Main {
 
 	public GunMode which_gun;
 
+	private GUI gui;
+	private OnscreenOverlay onscreen_overlay;
+
 	public static void main(String[] args) {
 		Main main = new Main();
 
 		main.InitDisplay();
+		main.InitGUI();
 		main.InitGraphics();
+		
 		main.InitData();
 		main.InitGameVariables();
+
 		main.Start();
 	}
 
@@ -97,6 +110,26 @@ public class Main {
 			e.printStackTrace();
 			System.out.println("ERROR running InitDisplay... game exiting");
 			System.exit(1);
+		}
+	}
+
+	private void InitGUI() {
+
+		LWJGLRenderer renderer;
+		try {
+			renderer = new LWJGLRenderer();
+			onscreen_overlay =new OnscreenOverlay();
+			gui = new GUI(onscreen_overlay, renderer);
+			URL url = new File("assets/theme/onscreen.xml").toURL();
+			ThemeManager themeManager = ThemeManager.createThemeManager(url,
+					renderer);
+			gui.applyTheme(themeManager);
+		} catch (LWJGLException e) {
+			e.printStackTrace();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -181,8 +214,8 @@ public class Main {
 
 		LibPointCloud
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/models/lewis.bundle");
-		// .load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
-				.load("/Users/ktuite/Desktop/sketchymodeler/server_code/Parr.bin");
+				.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
+		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/Parr.bin");
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out");
 		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/SageChapel.bin");
 		System.out.println("number of points: " + LibPointCloud.getNumPoints());
@@ -235,6 +268,8 @@ public class Main {
 			UpdateGameObjects();
 			EventLoop(); // input like mouse and keyboard
 			DisplayLoop(); // draw things on the screen
+			
+
 		}
 
 		Display.destroy();
@@ -511,7 +546,17 @@ public class Main {
 
 		DrawHud();
 
+		
+		UpdateGui();
+			
 		Display.update();
+	}
+	
+	private void UpdateGui(){
+		if (gui != null){
+			onscreen_overlay.label_current_mode.setText("Current Gun: " + which_gun);
+			gui.update();
+		}
 	}
 
 	private void pickPolygon() {
