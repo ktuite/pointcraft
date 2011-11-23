@@ -77,6 +77,8 @@ public class Main {
 	public static boolean draw_pellets = true;
 
 	public static int picked_polygon = -1;
+	
+	public static ServerCommunicator server;
 
 	public enum GunMode {
 		PELLET, ORB, LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR
@@ -216,12 +218,16 @@ public class Main {
 			System.out.println("couldn't load sounds");
 			System.exit(1);
 		}
+		
+		server = new ServerCommunicator("http://phci03.cs.washington.edu/pointcraft/");
 	}
 
 	private void InitData() {
 		// data of the point cloud itself, loaded in from C++
 
-		LibPointCloud.load("assets/models/lewis-hall.bin");
+		LibPointCloud
+		.load("/Users/ktuite/Desktop/sketchymodeler/server_code/Uris.bin");
+		//.load("assets/models/lewis-hall.bin");
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/models/lewis.bundle");
 		//		.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
 		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/Parr.bin");
