@@ -149,6 +149,10 @@ public class Main {
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		gluPerspective(60, 800.0f / 600.0f, .001f, 1000.0f);
+		
+		//glOrtho(-800.0f / 600.0f, 800.0f / 600.0f, -1f, 1f, 0.001f, 1000.0f);
+		//gluLookAt(0, 0, 0, 0, 0, -1, 0.05343333f, 0.9966372f, -0.062121693f);
+		glScalef(60, 60, 60);
 		glMatrixMode(GL_MODELVIEW);
 
 		// fog
@@ -1004,6 +1008,23 @@ public class Main {
 		gun_direction.z = horiz.y;
 		gun_direction.y = -1 * (float) Math.sin(tilt_angle * 3.14159 / 180f);
 		gun_direction.normalise();
-
+		//System.out.println("gun direction:" + gun_direction);
+		//calculateUpVectorAdjustment(new Vector3f(gun_direction));
+	}
+	
+	private void calculateUpVectorAdjustment(Vector3f new_up){
+		new_up.set(-0.05343333f, -0.9966372f, 0.062121693f);
+		Vector3f old_up = new Vector3f(0,1,0);
+		new_up.negate();
+		Vector3f rotation_axis = new Vector3f();
+		Vector3f.cross(old_up, new_up, rotation_axis);
+		float rotation_angle = -1* (float) Math.acos(Vector3f.dot(old_up, new_up)) * 180 / (float) Math.PI;
+		
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glRotatef(rotation_angle, rotation_axis.x, rotation_axis.y, rotation_axis.z);
+		
+		System.out.println("rotation angle: " + rotation_angle);
+		System.out.println("rotation axis: " + rotation_axis);
 	}
 }
