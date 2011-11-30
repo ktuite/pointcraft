@@ -56,8 +56,17 @@ public class DoublePellet extends Pellet {
 
 				if (closest_point != null) {
 					System.out.println("pellet stuck to some geometry");
-					constructing = true;
+					
 					pos.set(closest_point);
+					
+					if (is_first_pellet) {
+						constructing = true;
+						launchSecondPellet();
+					}
+					else {
+						constructing = true;
+					}
+					
 				} else if (Main.draw_points){
 					// it didn't hit some existing geometry or pellet
 					// so check the point cloud
