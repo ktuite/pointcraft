@@ -54,6 +54,14 @@ public class PolygonPellet extends Pellet {
 		max_radius = lp.max_radius;
 		constructing = lp.constructing;
 	}
+	
+	public PolygonPellet(VerticalLinePellet lp) {
+		super(lp.main_pellets);
+		pos.set(lp.pos);
+		radius = lp.radius;
+		max_radius = lp.max_radius;
+		constructing = lp.constructing;
+	}
 
 	@Override
 	public void update() {

@@ -91,7 +91,7 @@ public class Main {
 	public float overhead_scale = 1;
 
 	public enum GunMode {
-		PELLET, ORB, LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, OVERHEAD
+		PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, OVERHEAD
 	}
 
 	public GunMode which_gun;
@@ -468,6 +468,10 @@ public class Main {
 					System.out.println("plane fitting pellet gun selected");
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_5) {
+					which_gun = GunMode.VERTICAL_LINE;
+					System.out.println("vertical line pellet gun selected");
+				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_8) {
 					which_gun = GunMode.OVERHEAD;
 					tilt_locked = true;
 					last_tilt = tilt_angle;
@@ -491,6 +495,8 @@ public class Main {
 						LinePellet.startNewLine();
 					else if (which_gun == GunMode.POLYGON)
 						PolygonPellet.startNewPolygon();
+					else if (which_gun == GunMode.VERTICAL_LINE)
+						VerticalLinePellet.clearAllVerticalLines();
 				}
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_EQUALS) {
@@ -996,6 +1002,20 @@ public class Main {
 			glVertex2f(f * .2f * 600 / 800, -f * .2f);
 			glEnd();
 			break;
+		case VERTICAL_LINE:
+			glBegin(GL_LINES);
+			glVertex2f(0, f);
+			glVertex2f(0, -f);
+			glEnd();
+			glBegin(GL_LINE_LOOP);
+			for (int i = 0; i < n; i++) {
+				float angle = (float) (Math.PI * 2 * i / n);
+				float x = (float) (Math.cos(angle) * f * 0.25 * 600 / 800);
+				float y = (float) (Math.sin(angle) * f * 0.25);
+				glVertex2f(x, y);
+			}
+			glEnd();
+			break;
 		case DESTRUCTOR:
 			glBegin(GL_LINES);
 			glVertex2f(f * 600 / 800, f);
@@ -1082,6 +1102,8 @@ public class Main {
 				pellet = new PlanePellet(all_pellets_in_world);
 			} else if (which_gun == GunMode.LINE) {
 				pellet = new LinePellet(all_pellets_in_world);
+			} else if (which_gun == GunMode.VERTICAL_LINE) {
+				pellet = new VerticalLinePellet(all_pellets_in_world);
 			} else if (which_gun == GunMode.OVERHEAD) {
 				pellet = new DoublePellet(all_pellets_in_world);
 			} else if (which_gun == GunMode.DESTRUCTOR) {
