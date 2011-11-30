@@ -66,6 +66,7 @@ public class Main {
 	public static Timer timer = new Timer();
 	public static Stack<Pellet> all_pellets_in_world;
 	private Stack<Pellet> all_dead_pellets_in_world;
+	public static Stack<Pellet> new_pellets_to_add_to_world;
 
 	// TODO: move out of here and put somewhere else since this is a certain
 	// kind of geometry
@@ -90,7 +91,7 @@ public class Main {
 	public float overhead_scale = 1;
 
 	public enum GunMode {
-		PELLET, ORB, LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR
+		PELLET, ORB, LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, OVERHEAD
 	}
 
 	public GunMode which_gun;
@@ -224,7 +225,8 @@ public class Main {
 		gun_direction = new Vector3f();
 		all_pellets_in_world = new Stack<Pellet>();
 		all_dead_pellets_in_world = new Stack<Pellet>();
-
+		new_pellets_to_add_to_world = new Stack<Pellet>();
+		
 		which_gun = GunMode.POLYGON;
 		OrbPellet.orb_pellet = new OrbPellet(all_pellets_in_world);
 
@@ -350,6 +352,11 @@ public class Main {
 		for (Pellet pellet : all_pellets_in_world) {
 			pellet.update();
 		}
+		
+		for (Pellet pellet : new_pellets_to_add_to_world){
+			all_pellets_in_world.add(pellet);
+		}
+		new_pellets_to_add_to_world.clear();
 
 		if (which_gun == GunMode.ORB) {
 			OrbPellet
@@ -404,8 +411,7 @@ public class Main {
 			if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
 				vel.y -= walkforce / 2 * pellet_scale;
 			}
-		}
-		else {
+		} else {
 			if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
 				overhead_scale /= 1.05f;
 			}
@@ -461,6 +467,13 @@ public class Main {
 					which_gun = GunMode.PLANE;
 					System.out.println("plane fitting pellet gun selected");
 				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_5) {
+					which_gun = GunMode.OVERHEAD;
+					tilt_locked = true;
+					last_tilt = tilt_angle;
+					tilt_animation = 30;
+					System.out.println("overhead mode and double pellet gun");
+				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_9) {
 					which_gun = GunMode.ORB;
 					System.out
@@ -508,23 +521,12 @@ public class Main {
 					WiggleTool.fixModel();
 				}
 
-				if (Keyboard.getEventKey() == Keyboard.KEY_5) {
-					tilt_locked = !tilt_locked;
-					System.out.println("tilt locked: " + tilt_locked);
-					System.out.println("last tilt angle: " + last_tilt
-							+ ", current tilt angle: " + tilt_angle);
-					if (tilt_locked) {
-						last_tilt = tilt_angle;
-						tilt_animation = 30;
-						// animate to looking down
-					} else {
-						tilt_animation = -30;
-						tilt_locked = true; // set to true until done animating
-						// animate tilt_angle to last_tilt
-					}
-				}
-
 			}
+		}
+
+		if (tilt_locked && which_gun != GunMode.OVERHEAD && tilt_animation == 0) {
+			tilt_animation = -30;
+			tilt_locked = true; // set to true until done animating
 		}
 
 		// normalize the speed
@@ -540,7 +542,7 @@ public class Main {
 
 		if (tilt_locked)
 			vel.scale(.5f);
-		
+
 		// pos += vel
 		Vector3f.add(pos, vel, pos);
 
@@ -1011,6 +1013,24 @@ public class Main {
 			}
 			glEnd();
 			break;
+		case OVERHEAD:
+			glBegin(GL_LINE_LOOP);
+			for (int i = 0; i < n; i++) {
+				float angle = (float) (Math.PI * 2 * i / n);
+				float x = (float) (Math.cos(angle) * f * 0.75 * 600 / 800);
+				float y = (float) (Math.sin(angle) * f * 0.75 + f/2);
+				glVertex2f(x, y);
+			}
+			glEnd();
+			glBegin(GL_LINE_LOOP);
+			for (int i = 0; i < n; i++) {
+				float angle = (float) (Math.PI * 2 * i / n);
+				float x = (float) (Math.cos(angle) * f * 0.35 * 600 / 800);
+				float y = (float) (Math.sin(angle) * f * 0.35);
+				glVertex2f(x, y);
+			}
+			glEnd();
+			break;
 		default:
 			break;
 		}
@@ -1062,6 +1082,8 @@ public class Main {
 				pellet = new PlanePellet(all_pellets_in_world);
 			} else if (which_gun == GunMode.LINE) {
 				pellet = new LinePellet(all_pellets_in_world);
+			} else if (which_gun == GunMode.OVERHEAD) {
+				pellet = new DoublePellet(all_pellets_in_world);
 			} else if (which_gun == GunMode.DESTRUCTOR) {
 				pellet = new DestructorPellet(all_pellets_in_world);
 			} else {
