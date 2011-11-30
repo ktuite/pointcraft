@@ -77,8 +77,17 @@ public class Main {
 	public static boolean draw_pellets = true;
 
 	public static int picked_polygon = -1;
-	
+
 	public static ServerCommunicator server;
+
+	// overhead view stuff
+	public static float last_tilt = 0;
+	public static boolean tilt_locked = false;
+	public static int tilt_animation = 0;
+	public static DoubleBuffer proj_ortho;
+	public static DoubleBuffer proj_persp;
+	public static DoubleBuffer proj_intermediate;
+	public float overhead_scale = 1;
 
 	public enum GunMode {
 		PELLET, ORB, LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR
@@ -147,12 +156,24 @@ public class Main {
 	private void InitGraphics() {
 		// view matrix
 		glMatrixMode(GL_PROJECTION);
+
+		glLoadIdentity();
+		glOrtho(-800.0f / 600.0f, 800.0f / 600.0f, -1f, 1f, 0.001f, 1000.0f);
+		// glScalef(40, 40, 40);
+
+		proj_ortho = BufferUtils.createDoubleBuffer(16);
+		glGetDouble(GL_PROJECTION_MATRIX, proj_ortho);
+		proj_ortho.put(0, proj_ortho.get(0) * 40f);
+		proj_ortho.put(5, proj_ortho.get(5) * 40f);
+
 		glLoadIdentity();
 		gluPerspective(60, 800.0f / 600.0f, .001f, 1000.0f);
-		
-		//glOrtho(-800.0f / 600.0f, 800.0f / 600.0f, -1f, 1f, 0.001f, 1000.0f);
-		//gluLookAt(0, 0, 0, 0, 0, -1, 0.05343333f, 0.9966372f, -0.062121693f);
-		glScalef(60, 60, 60);
+		proj_persp = BufferUtils.createDoubleBuffer(16);
+		glGetDouble(GL_PROJECTION_MATRIX, proj_persp);
+		proj_intermediate = BufferUtils.createDoubleBuffer(16);
+
+		// glOrtho(-800.0f / 600.0f, 800.0f / 600.0f, -1f, 1f, 0.001f, 1000.0f);
+		// gluLookAt(0, 0, 0, 0, 0, -1, 0.05343333f, 0.9966372f, -0.062121693f);
 		glMatrixMode(GL_MODELVIEW);
 
 		// fog
@@ -222,18 +243,19 @@ public class Main {
 			System.out.println("couldn't load sounds");
 			System.exit(1);
 		}
-		
-		server = new ServerCommunicator("http://phci03.cs.washington.edu/pointcraft/");
+
+		server = new ServerCommunicator(
+				"http://phci03.cs.washington.edu/pointcraft/");
 	}
 
 	private void InitData() {
 		// data of the point cloud itself, loaded in from C++
 
 		LibPointCloud
-		.load("/Users/ktuite/Desktop/sketchymodeler/server_code/Uris.bin");
-		//.load("assets/models/lewis-hall.bin");
+		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/Uris.bin");
+				.load("assets/models/lewis-hall.bin");
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/models/lewis.bundle");
-		//		.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
+		// .load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
 		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/Parr.bin");
 		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out");
 		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/SageChapel.bin");
@@ -291,7 +313,7 @@ public class Main {
 				EventLoop(); // input like mouse and keyboard
 				UpdateGameObjects();
 				DisplayLoop(); // draw things on the screen
-				
+
 			} else {
 				UpdateInstructionalGui();
 				InstructionalEventLoop();
@@ -375,11 +397,21 @@ public class Main {
 			vel.z += Math.sin(pan_angle * 3.14159 / 180f) * walkforce / 2
 					* pellet_scale;
 		}
-		if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
-			vel.y += walkforce / 2 * pellet_scale;
+		if (!tilt_locked) {
+			if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
+				vel.y += walkforce / 2 * pellet_scale;
+			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
+				vel.y -= walkforce / 2 * pellet_scale;
+			}
 		}
-		if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
-			vel.y -= walkforce / 2 * pellet_scale;
+		else {
+			if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
+				overhead_scale /= 1.05f;
+			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
+				overhead_scale *= 1.05f;
+			}
 		}
 
 		// this is like putting on or taking off some stilts
@@ -388,13 +420,11 @@ public class Main {
 		while (Keyboard.next()) {
 			if (Keyboard.getEventKeyState()) {
 				/*
-				if (Keyboard.getEventKey() == Keyboard.KEY_S
-						&& (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29))) {
-					Save.saveHeckaData();
-				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_L) {
-					Save.loadHeckaData();
-				}*/
+				 * if (Keyboard.getEventKey() == Keyboard.KEY_S &&
+				 * (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29))) {
+				 * Save.saveHeckaData(); } if (Keyboard.getEventKey() ==
+				 * Keyboard.KEY_L) { Save.loadHeckaData(); }
+				 */
 				if (Keyboard.getEventKey() == Keyboard.KEY_Z
 						&& (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29))) {
 					System.out.println("UNDO!");
@@ -478,6 +508,22 @@ public class Main {
 					WiggleTool.fixModel();
 				}
 
+				if (Keyboard.getEventKey() == Keyboard.KEY_5) {
+					tilt_locked = !tilt_locked;
+					System.out.println("tilt locked: " + tilt_locked);
+					System.out.println("last tilt angle: " + last_tilt
+							+ ", current tilt angle: " + tilt_angle);
+					if (tilt_locked) {
+						last_tilt = tilt_angle;
+						tilt_animation = 30;
+						// animate to looking down
+					} else {
+						tilt_animation = -30;
+						tilt_locked = true; // set to true until done animating
+						// animate tilt_angle to last_tilt
+					}
+				}
+
 			}
 		}
 
@@ -492,6 +538,9 @@ public class Main {
 		if (Keyboard.isKeyDown(Keyboard.KEY_SPACE))
 			vel.scale(.3f);
 
+		if (tilt_locked)
+			vel.scale(.5f);
+		
 		// pos += vel
 		Vector3f.add(pos, vel, pos);
 
@@ -499,7 +548,11 @@ public class Main {
 		vel.scale(veldecay);
 
 		// use mouse to control where player is looking
-		tilt_angle -= Mouse.getDY() / 10f;
+		if (!tilt_locked)
+			tilt_angle -= Mouse.getDY() / 10f;
+		else if (tilt_animation != 0)
+			animateTilt();
+
 		pan_angle += Mouse.getDX() / 10f;
 
 		if (tilt_angle > 90)
@@ -545,6 +598,43 @@ public class Main {
 
 	}
 
+	private void animateTilt() {
+		glGetDouble(GL_PROJECTION_MATRIX, proj_intermediate);
+
+		if (tilt_animation > 0) {
+			// animate down
+			tilt_angle += (90f - tilt_angle) / tilt_animation;
+			tilt_animation--;
+
+			int indices[] = { 0, 5, 11, 15 };
+			for (int i : indices) {
+				double k = proj_intermediate.get(i);
+				k = proj_persp.get(i) + (proj_ortho.get(i) - proj_persp.get(i))
+						* (1.0 - (float) tilt_animation / 30.0);
+				proj_intermediate.put(i, k);
+			}
+		} else if (tilt_animation < 0) {
+			// animate up
+			tilt_angle -= (last_tilt - tilt_angle) / tilt_animation;
+			tilt_animation++;
+			if (tilt_animation == 0) {
+				tilt_locked = false;
+				Mouse.getDY();
+			}
+			int indices[] = { 0, 5, 11, 15 };
+			for (int i : indices) {
+				double k = proj_intermediate.get(i);
+				k = proj_ortho.get(i) + (proj_persp.get(i) - proj_ortho.get(i))
+						* (1.0 + (float) tilt_animation / 30.0);
+				proj_intermediate.put(i, k);
+			}
+		}
+
+		glMatrixMode(GL_PROJECTION);
+		glLoadMatrix(proj_intermediate);
+		glMatrixMode(GL_MODELVIEW);
+	}
+
 	private void DisplayLoop() {
 		glClearColor(FOG_COLOR[0], FOG_COLOR[1], FOG_COLOR[2], 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -555,6 +645,7 @@ public class Main {
 
 		DrawSkybox(); // draw skybox before translate
 
+		glScalef(overhead_scale, overhead_scale, overhead_scale);
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
 
 		glEnable(GL_FOG);
@@ -1008,22 +1099,25 @@ public class Main {
 		gun_direction.z = horiz.y;
 		gun_direction.y = -1 * (float) Math.sin(tilt_angle * 3.14159 / 180f);
 		gun_direction.normalise();
-		//System.out.println("gun direction:" + gun_direction);
-		//calculateUpVectorAdjustment(new Vector3f(gun_direction));
+		// System.out.println("gun direction:" + gun_direction);
+		// calculateUpVectorAdjustment(new Vector3f(gun_direction));
 	}
-	
-	private void calculateUpVectorAdjustment(Vector3f new_up){
+
+	private void calculateUpVectorAdjustment(Vector3f new_up) {
 		new_up.set(-0.05343333f, -0.9966372f, 0.062121693f);
-		Vector3f old_up = new Vector3f(0,1,0);
+		Vector3f old_up = new Vector3f(0, 1, 0);
 		new_up.negate();
 		Vector3f rotation_axis = new Vector3f();
 		Vector3f.cross(old_up, new_up, rotation_axis);
-		float rotation_angle = -1* (float) Math.acos(Vector3f.dot(old_up, new_up)) * 180 / (float) Math.PI;
-		
+		float rotation_angle = -1
+				* (float) Math.acos(Vector3f.dot(old_up, new_up)) * 180
+				/ (float) Math.PI;
+
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
-		glRotatef(rotation_angle, rotation_axis.x, rotation_axis.y, rotation_axis.z);
-		
+		glRotatef(rotation_angle, rotation_axis.x, rotation_axis.y,
+				rotation_axis.z);
+
 		System.out.println("rotation angle: " + rotation_angle);
 		System.out.println("rotation axis: " + rotation_axis);
 	}
