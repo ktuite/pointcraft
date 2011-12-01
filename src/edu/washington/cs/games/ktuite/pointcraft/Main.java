@@ -251,6 +251,13 @@ public class Main {
 	}
 
 	private void InitData() {
+		KdTreeOfPoints.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.ply");
+		
+		num_points = KdTreeOfPoints.num_points;
+		point_positions = KdTreeOfPoints.point_positions;
+		point_colors = KdTreeOfPoints.point_colors;
+		
+		/*
 		// data of the point cloud itself, loaded in from C++
 
 		LibPointCloud
@@ -277,6 +284,7 @@ public class Main {
 		// FindMinMaxOfWorld();
 
 		LibPointCloud.makeKdTree();
+		*/
 	}
 
 	@SuppressWarnings("unused")

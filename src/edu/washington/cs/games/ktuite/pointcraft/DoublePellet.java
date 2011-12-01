@@ -10,7 +10,7 @@ public class DoublePellet extends Pellet {
 
 	private boolean is_first_pellet = true;
 	private Vector3f last_good_position = null;
-	
+
 	/*
 	 * A Pellet is a magical thing that you can shoot out of a gun that will
 	 * travel towards the model and stick to the first point it intersects.
@@ -28,8 +28,8 @@ public class DoublePellet extends Pellet {
 		if (!constructing) {
 			// not constructing means the pellet is still traveling through
 			// space
-			
-			if (Main.timer.getTime() - birthday == 0){
+
+			if (Main.timer.getTime() - birthday == 0) {
 				Vector3f back_up = new Vector3f(vel);
 				back_up.scale(-40 * Main.world_scale);
 				Vector3f.add(pos, back_up, pos);
@@ -40,14 +40,13 @@ public class DoublePellet extends Pellet {
 
 			// if it's too old, kill it
 			if (Main.timer.getTime() - birthday > 2) {
-				if (last_good_position == null){
+				if (last_good_position == null) {
 					alive = false;
-				}
-				else {
+				} else {
 					constructing = true;
 					pos = last_good_position;
 				}
-				
+
 			} else {
 				// if the pellet is not dead yet, see if it intersected anything
 
@@ -56,30 +55,27 @@ public class DoublePellet extends Pellet {
 
 				if (closest_point != null) {
 					System.out.println("pellet stuck to some geometry");
-					
+
 					pos.set(closest_point);
-					
+
 					if (is_first_pellet) {
 						constructing = true;
 						launchSecondPellet();
-					}
-					else {
+					} else {
 						constructing = true;
 					}
-					
-				} else if (Main.draw_points){
+
+				} else if (Main.draw_points) {
 					// it didn't hit some existing geometry or pellet
 					// so check the point cloud
-					int neighbors = LibPointCloud.queryKdTree(pos.x, pos.y,
-							pos.z, radius);
+					int neighbors = queryKdTree(pos.x, pos.y, pos.z, radius);
 
 					// is it near some points?!
 					if (neighbors > 0 && is_first_pellet) {
 						constructing = true;
-						Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);	
+						Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
 						launchSecondPellet();
-					}
-					else if (neighbors > 0 && !is_first_pellet){
+					} else if (neighbors > 0 && !is_first_pellet) {
 						last_good_position = new Vector3f(pos);
 					}
 				}

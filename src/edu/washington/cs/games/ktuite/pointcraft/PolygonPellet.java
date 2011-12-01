@@ -12,7 +12,7 @@ public class PolygonPellet extends Pellet {
 
 	public static Stack<PolygonPellet> current_cycle = new Stack<PolygonPellet>();
 	private boolean first_in_cycle = false;
-	
+
 	/*
 	 * A Pellet is a magical thing that you can shoot out of a gun that will
 	 * travel towards the model and stick to the first point it intersects.
@@ -46,7 +46,7 @@ public class PolygonPellet extends Pellet {
 		max_radius = lp.max_radius;
 		constructing = lp.constructing;
 	}
-	
+
 	public PolygonPellet(DoublePellet lp) {
 		super(lp.main_pellets);
 		pos.set(lp.pos);
@@ -54,7 +54,7 @@ public class PolygonPellet extends Pellet {
 		max_radius = lp.max_radius;
 		constructing = lp.constructing;
 	}
-	
+
 	public PolygonPellet(VerticalLinePellet lp) {
 		super(lp.main_pellets);
 		pos.set(lp.pos);
@@ -147,13 +147,12 @@ public class PolygonPellet extends Pellet {
 					// if it's not dead yet and also didn't hit a
 					// neighboring
 					// pellet, look for nearby points in model
-					int neighbors = LibPointCloud.queryKdTree(pos.x, pos.y,
-							pos.z, radius);
+					int neighbors = queryKdTree(pos.x, pos.y, pos.z, radius);
 
 					// is it near some points?!
 					if (neighbors > 0) {
 						constructing = true;
-						 Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
+						Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
 
 						snapToCenterOfPoints();
 
@@ -165,7 +164,7 @@ public class PolygonPellet extends Pellet {
 						}
 					}
 				}
-				
+
 				if (current_cycle.size() > 0)
 					current_cycle.get(0).setAsFirstInCycle();
 			}
@@ -196,14 +195,14 @@ public class PolygonPellet extends Pellet {
 		polygon.setPlayerPositionAndViewingDirection(pos, vel);
 		Main.geometry.add(polygon);
 		Main.server.sendGenericUpdate();
-		
+
 		current_cycle.clear();
 	}
 
-	public void setAsFirstInCycle(){
+	public void setAsFirstInCycle() {
 		first_in_cycle = true;
 	}
-	
+
 	public void draw() {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
@@ -221,20 +220,21 @@ public class PolygonPellet extends Pellet {
 		current_cycle.clear();
 		System.out.println("making new polygon");
 	}
-	
-	public void delete(){
+
+	public void delete() {
 		System.out.println("delete");
-		if (current_cycle.contains(this) && current_cycle.peek() == this){
+		if (current_cycle.contains(this) && current_cycle.peek() == this) {
 			current_cycle.pop();
-			if (!Main.geometry.isEmpty() && !Main.geometry.lastElement().isPolygon()){
+			if (!Main.geometry.isEmpty()
+					&& !Main.geometry.lastElement().isPolygon()) {
 				Main.geometry.pop();
 			}
 			alive = false;
 		}
 		alive = false;
-		for (Primitive g : Main.geometry){
+		for (Primitive g : Main.geometry) {
 			// kill the pellet unless its part of a polygon
-			if (g.getVertices().contains(this)){
+			if (g.getVertices().contains(this)) {
 				alive = true;
 				break;
 			}

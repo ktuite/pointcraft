@@ -69,8 +69,7 @@ public class LinePellet extends Pellet {
 				} else {
 					// it didn't hit some existing geometry or pellet
 					// so check the point cloud
-					int neighbors = LibPointCloud.queryKdTree(pos.x, pos.y,
-							pos.z, radius);
+					int neighbors = queryKdTree(pos.x, pos.y, pos.z, radius);
 
 					// is it near some points?!
 					if (neighbors > 0) {
@@ -92,7 +91,8 @@ public class LinePellet extends Pellet {
 		}
 	}
 
-	public void finalize() {
+	public void delete() {
+		super.delete();
 		if (current_line.size() == 2 || current_line.size() == 3)
 			Main.geometry_v.remove(Main.geometry_v.size() - 1);
 		if (current_line.contains(this)) {
@@ -127,23 +127,18 @@ public class LinePellet extends Pellet {
 			line_points.put(pellet.pos.y);
 			line_points.put(pellet.pos.z);
 		}
-
-		Pointer point_buffer = Native.getDirectBufferPointer(line_points);
-		DoubleBuffer output = LibPointCloud.fitLine(n, point_buffer)
-				.getByteBuffer(0, 6 * 8).asDoubleBuffer();
-
+		
 		float f = findLineExtent();
 
 		Vector3f line_direction = new Vector3f();
-		line_direction.x = (float) output.get(0);
-		line_direction.y = (float) output.get(1);
-		line_direction.z = (float) output.get(2);
+		Vector3f.sub(current_line.get(0).pos, current_line.get(1).pos, line_direction);
 		line_direction.normalise();
 
 		Vector3f center = new Vector3f();
-		center.x = (float) output.get(3);
-		center.y = (float) output.get(4);
-		center.z = (float) output.get(5);
+		for (Pellet pellet : current_line) {
+			Vector3f.add(center, pellet.pos, center);
+		}
+		center.scale(1f/n);
 
 		List<Vector3f> line_pellets = new LinkedList<Vector3f>();
 		line_direction.scale(f);
@@ -181,9 +176,9 @@ public class LinePellet extends Pellet {
 	private void checkForIntersections(Vector3f p1, Vector3f p2) {
 		intersection_points.clear();
 		System.out.println("checking for new line-plane interesction");
-		for (PrimitiveVertex geom : Main.geometry_v){
+		for (PrimitiveVertex geom : Main.geometry_v) {
 			Vector3f intersect = geom.checkForIntersectionLineWithPlane(p1, p2);
-			if (intersect != null){
+			if (intersect != null) {
 				LinePellet i = new LinePellet(main_pellets);
 				i.alive = true;
 				i.constructing = true;
@@ -206,12 +201,12 @@ public class LinePellet extends Pellet {
 	}
 
 	public static void startNewLine() {
-		for (LinePellet p : intersection_points){
+		for (LinePellet p : intersection_points) {
 			ScaffoldPellet sp = new ScaffoldPellet(p);
 			Main.all_pellets_in_world.add(sp);
 		}
 		intersection_points.clear();
-		
+
 		current_line.clear();
 		System.out.println("making new line");
 	}

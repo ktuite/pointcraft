@@ -30,12 +30,9 @@ public class WiggleTool {
 		// horizontal, make them become vertical or horizontal.
 
 		/*
-		for (Primitive g : Main.geometry) {
-			// only do it for quads
-			if (g.isPolygon() && g.numVertices() == 5)
-				rectangularify(g);
-		}
-		*/
+		 * for (Primitive g : Main.geometry) { // only do it for quads if
+		 * (g.isPolygon() && g.numVertices() == 5) rectangularify(g); }
+		 */
 	}
 
 	private static void rectangularify(Primitive g) {
@@ -103,8 +100,7 @@ public class WiggleTool {
 		int min_neighbors = Integer.MAX_VALUE;
 
 		for (Pellet p : g.getVertices()) {
-			int neighbors = LibPointCloud.queryKdTree(p.pos.x, p.pos.y,
-					p.pos.z, p.radius);
+			int neighbors = KdTreeOfPoints.queryKdTree(p.pos.x, p.pos.y, p.pos.z, p.radius);
 			if (neighbors < min_neighbors) {
 				min_neighbors = neighbors;
 				worst_pellet = p;

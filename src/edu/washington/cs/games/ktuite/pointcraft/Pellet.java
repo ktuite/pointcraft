@@ -76,14 +76,13 @@ public class Pellet implements Serializable {
 	}
 
 	protected void snapToCenterOfPoints() {
-		DoubleBuffer center_of_points = LibPointCloud
-				.queryKdTreeGetCenter(pos.x, pos.y, pos.z, radius)
-				.getByteBuffer(0, 3 * 8).asDoubleBuffer();
-		pos.x = (float) center_of_points.get(0);
-		pos.y = (float) center_of_points.get(1);
-		pos.z = (float) center_of_points.get(2);
+		pos.set(KdTreeOfPoints.getCenter(pos.x, pos.y, pos.z, radius));
 	}
 
+	protected int queryKdTree(float x, float y, float z, float radius){
+		return KdTreeOfPoints.queryKdTree(x, y, z, radius);
+	}
+	
 	public Pellet queryOtherPellets() {
 		if (!Main.draw_pellets)
 			return null;

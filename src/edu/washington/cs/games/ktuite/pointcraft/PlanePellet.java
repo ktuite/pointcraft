@@ -63,8 +63,7 @@ public class PlanePellet extends Pellet {
 				} else {
 					// it didn't hit some existing geometry or pellet
 					// so check the point cloud
-					int neighbors = LibPointCloud.queryKdTree(pos.x, pos.y,
-							pos.z, radius);
+					int neighbors = queryKdTree(pos.x, pos.y, pos.z, radius);
 
 					// is it near some points?!
 					if (neighbors > 0) {
@@ -92,7 +91,8 @@ public class PlanePellet extends Pellet {
 		}
 	}
 
-	public void finalize() {
+	public void delete() {
+		super.delete();
 		if (current_plane.contains(this)
 				&& (current_plane.size() == 3 || current_plane.size() == 4))
 			Main.geometry_v.remove(Main.geometry_v.size() - 1);
@@ -129,14 +129,18 @@ public class PlanePellet extends Pellet {
 			plane_points.put(pellet.pos.z);
 		}
 
-		Pointer point_buffer = Native.getDirectBufferPointer(plane_points);
-		DoubleBuffer output = LibPointCloud.fitPlane(n, point_buffer)
-				.getByteBuffer(0, 4 * 8).asDoubleBuffer();
-
-		float a = (float) output.get(0);
-		float b = (float) output.get(1);
-		float c = (float) output.get(2);
-		float d = (float) output.get(3);
+		Vector3f leg_1 = new Vector3f();
+		Vector3f.sub(current_plane.get(0).pos, current_plane.get(1).pos, leg_1);
+		Vector3f leg_2 = new Vector3f();
+		Vector3f.sub(current_plane.get(0).pos, current_plane.get(2).pos, leg_2);
+		Vector3f norm = new Vector3f();
+		Vector3f.cross(leg_1, leg_2, norm);
+		norm.normalise();
+		
+		float a = norm.x;
+		float b = norm.y;
+		float c = norm.z;
+		float d = -1 * (a * current_plane.get(0).pos.x + b * current_plane.get(0).pos.y + c * current_plane.get(0).pos.z);
 
 		float pts[] = new float[12];
 		float f = findPlaneExtent();

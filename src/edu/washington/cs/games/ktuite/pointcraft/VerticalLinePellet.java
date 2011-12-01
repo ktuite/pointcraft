@@ -70,8 +70,7 @@ public class VerticalLinePellet extends Pellet {
 					} else {
 						// it didn't hit some existing geometry or pellet
 						// so check the point cloud
-						int neighbors = LibPointCloud.queryKdTree(pos.x, pos.y,
-								pos.z, radius);
+						int neighbors = queryKdTree(pos.x, pos.y, pos.z, radius);
 
 						// is it near some points?!
 						if (neighbors > 0) {
@@ -113,8 +112,7 @@ public class VerticalLinePellet extends Pellet {
 					} else {
 						// it didn't hit some existing geometry or pellet
 						// so check the point cloud
-						int neighbors = LibPointCloud.queryKdTree(pos.x, pos.y,
-								pos.z, radius);
+						int neighbors = queryKdTree(pos.x, pos.y, pos.z, radius);
 
 						// is it near some points?!
 						if (neighbors > 2) {
@@ -168,18 +166,20 @@ public class VerticalLinePellet extends Pellet {
 			Main.new_pellets_to_add_to_world.add(bottom_pellet);
 
 		} else {
-			VerticalLinePellet new_top_pellet = new VerticalLinePellet(main_pellets);
+			VerticalLinePellet new_top_pellet = new VerticalLinePellet(
+					main_pellets);
 			new_top_pellet.pos.set(pos);
 			new_top_pellet.pos.y = top_pellet.pos.y;
 			new_top_pellet.constructing = true;
 			Main.new_pellets_to_add_to_world.add(new_top_pellet);
-			
-			VerticalLinePellet new_bottom_pellet = new VerticalLinePellet(main_pellets);
+
+			VerticalLinePellet new_bottom_pellet = new VerticalLinePellet(
+					main_pellets);
 			new_bottom_pellet.pos.set(pos);
 			new_bottom_pellet.pos.y = bottom_pellet.pos.y;
 			new_bottom_pellet.constructing = true;
 			Main.new_pellets_to_add_to_world.add(new_bottom_pellet);
-			
+
 			// make polygon
 			List<Pellet> cycle = new LinkedList<Pellet>();
 			cycle.add(top_pellet);
@@ -187,11 +187,11 @@ public class VerticalLinePellet extends Pellet {
 			cycle.add(new_bottom_pellet);
 			cycle.add(new_top_pellet);
 			cycle.add(top_pellet);
-			
+
 			Primitive polygon = new Primitive(GL_POLYGON, cycle);
 			polygon.setPlayerPositionAndViewingDirection(pos, vel);
 			Main.geometry.add(polygon);
-			
+
 			top_pellet = new_top_pellet;
 			bottom_pellet = new_bottom_pellet;
 			tryMakingFullLine();
