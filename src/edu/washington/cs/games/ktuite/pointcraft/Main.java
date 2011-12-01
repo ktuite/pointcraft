@@ -119,7 +119,7 @@ public class Main {
 			Display.setVSyncEnabled(true);
 			Display.create();
 			Display.setTitle("PointCraft FPS-3D-Modeler");
-			Mouse.setGrabbed(true);
+			Mouse.setGrabbed(false);
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 			System.out.println("ERROR running InitDisplay... game exiting");
@@ -252,7 +252,7 @@ public class Main {
 	}
 
 	private void InitData() {
-		KdTreeOfPoints.load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.ply");
+		KdTreeOfPoints.load("assets/models/lewis-hall.ply");
 		
 		num_points = KdTreeOfPoints.num_points;
 		point_positions = KdTreeOfPoints.point_positions;
