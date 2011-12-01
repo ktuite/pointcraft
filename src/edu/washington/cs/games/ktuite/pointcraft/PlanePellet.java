@@ -7,9 +7,6 @@ import java.util.List;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Vector3f;
 
-import com.sun.jna.Native;
-import com.sun.jna.Pointer;
-
 import static org.lwjgl.opengl.GL11.*;
 
 public class PlanePellet extends Pellet {
@@ -136,11 +133,14 @@ public class PlanePellet extends Pellet {
 		Vector3f norm = new Vector3f();
 		Vector3f.cross(leg_1, leg_2, norm);
 		norm.normalise();
-		
+
 		float a = norm.x;
 		float b = norm.y;
 		float c = norm.z;
-		float d = -1 * (a * current_plane.get(0).pos.x + b * current_plane.get(0).pos.y + c * current_plane.get(0).pos.z);
+		float d = -1
+				* (a * current_plane.get(0).pos.x + b
+						* current_plane.get(0).pos.y + c
+						* current_plane.get(0).pos.z);
 
 		float pts[] = new float[12];
 		float f = findPlaneExtent();

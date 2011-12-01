@@ -1,7 +1,5 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
-import de.matthiasmann.twl.Button;
-import de.matthiasmann.twl.FPSCounter;
 import de.matthiasmann.twl.Label;
 import de.matthiasmann.twl.Widget;
 

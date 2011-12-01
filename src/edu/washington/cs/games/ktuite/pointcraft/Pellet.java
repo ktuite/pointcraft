@@ -3,17 +3,13 @@ package edu.washington.cs.games.ktuite.pointcraft;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.nio.DoubleBuffer;
 import java.util.List;
 
 import org.lwjgl.util.glu.Sphere;
 import org.lwjgl.util.vector.Vector3f;
 import static org.lwjgl.opengl.GL11.*;
 
-public class Pellet implements Serializable {
-
-	private static final long serialVersionUID = 5646810963409606680L;
+public class Pellet {
 
 	static private int ID = 0;
 	public Vector3f pos;

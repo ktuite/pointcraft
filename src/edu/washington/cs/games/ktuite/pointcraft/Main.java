@@ -127,6 +127,7 @@ public class Main {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private void InitGUI() {
 
 		LWJGLRenderer renderer;
@@ -1155,6 +1156,7 @@ public class Main {
 		// calculateUpVectorAdjustment(new Vector3f(gun_direction));
 	}
 
+	@SuppressWarnings("unused")
 	private void calculateUpVectorAdjustment(Vector3f new_up) {
 		new_up.set(-0.05343333f, -0.9966372f, 0.062121693f);
 		Vector3f old_up = new Vector3f(0, 1, 0);

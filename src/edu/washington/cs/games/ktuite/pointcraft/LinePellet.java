@@ -7,9 +7,6 @@ import java.util.List;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Vector3f;
 
-import com.sun.jna.Native;
-import com.sun.jna.Pointer;
-
 import static org.lwjgl.opengl.GL11.*;
 
 public class LinePellet extends Pellet {
@@ -189,15 +186,6 @@ public class LinePellet extends Pellet {
 				intersection_points.add(i);
 			}
 		}
-	}
-
-	private Vector3f findLineCenter() {
-		Vector3f center = new Vector3f();
-		for (Pellet p : current_line) {
-			Vector3f.add(p.pos, center, center);
-		}
-		center.scale(1f / current_line.size());
-		return center;
 	}
 
 	public static void startNewLine() {

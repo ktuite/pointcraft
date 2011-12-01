@@ -1,6 +1,5 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
-import java.nio.DoubleBuffer;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;

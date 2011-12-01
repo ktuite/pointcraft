@@ -11,7 +11,6 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.List;
 
-import org.lwjgl.util.glu.Sphere;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.newdawn.slick.opengl.Texture;

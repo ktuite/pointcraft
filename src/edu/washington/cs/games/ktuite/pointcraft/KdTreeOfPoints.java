@@ -1,7 +1,6 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.DoubleBuffer;
