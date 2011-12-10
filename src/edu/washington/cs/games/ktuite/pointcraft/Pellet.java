@@ -22,6 +22,7 @@ public class Pellet {
 	public float birthday;
 	protected List<Pellet> main_pellets;
 	public int id;
+	public Main.GunMode pellet_type;
 
 	public static boolean CONNECT_TO_PREVIOUS = true;
 
@@ -53,9 +54,14 @@ public class Pellet {
 		main_pellets = _pellets;
 		id = ID;
 		ID++;
+		pellet_type = null;
 
 		// if (Main.launch_effect != null)
 		// Main.launch_effect.playAsSoundEffect(1.0f, 1.0f, false);
+	}
+	
+	public String getType(){
+		return pellet_type.toString();
 	}
 
 	public void finalize() {
@@ -71,14 +77,21 @@ public class Pellet {
 		System.out.println("the wrong update function is getting called");
 	}
 
+	public void setInPlace() {
+		if (Main.attach_effect != null){
+			Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
+			Main.server.newPellet(this);
+		}
+	}
+
 	protected void snapToCenterOfPoints() {
 		pos.set(KdTreeOfPoints.getCenter(pos.x, pos.y, pos.z, radius));
 	}
 
-	protected int queryKdTree(float x, float y, float z, float radius){
+	protected int queryKdTree(float x, float y, float z, float radius) {
 		return KdTreeOfPoints.queryKdTree(x, y, z, radius);
 	}
-	
+
 	public Pellet queryOtherPellets() {
 		if (!Main.draw_pellets)
 			return null;
@@ -128,7 +141,7 @@ public class Pellet {
 		for (int i = 0; i < Main.geometry.size(); i++) {
 			Primitive geom = Main.geometry.get(i);
 			if (geom.isPolygon()) {
-				if (radius > geom.distanceToPolygonPlane(pos)){
+				if (radius > geom.distanceToPolygonPlane(pos)) {
 					if (i == Main.picked_polygon)
 						return geom;
 				}

@@ -23,6 +23,7 @@ public class VerticalLinePellet extends Pellet {
 	 */
 	public VerticalLinePellet(List<Pellet> _pellets) {
 		super(_pellets);
+		pellet_type = Main.GunMode.VERTICAL_LINE;
 	}
 
 	@Override

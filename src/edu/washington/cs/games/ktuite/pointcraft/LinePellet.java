@@ -26,6 +26,7 @@ public class LinePellet extends Pellet {
 	 */
 	public LinePellet(List<Pellet> _pellets) {
 		super(_pellets);
+		pellet_type = Main.GunMode.LINE;
 	}
 
 	@Override
@@ -72,7 +73,7 @@ public class LinePellet extends Pellet {
 					if (neighbors > 0) {
 						snapToCenterOfPoints();
 						constructing = true;
-						Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
+						setInPlace();
 						current_line.add(this);
 						fitLine();
 					}

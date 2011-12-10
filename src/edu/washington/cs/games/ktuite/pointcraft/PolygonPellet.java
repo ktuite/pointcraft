@@ -20,46 +20,16 @@ public class PolygonPellet extends Pellet {
 	 */
 	public PolygonPellet(List<Pellet> _pellets) {
 		super(_pellets);
+		pellet_type = Main.GunMode.POLYGON;
 	}
 
-	public PolygonPellet(LinePellet lp) {
+	public PolygonPellet(Pellet lp) {
 		super(lp.main_pellets);
 		pos.set(lp.pos);
 		radius = lp.radius;
 		max_radius = lp.max_radius;
 		constructing = lp.constructing;
-	}
-
-	public PolygonPellet(PlanePellet lp) {
-		super(lp.main_pellets);
-		pos.set(lp.pos);
-		radius = lp.radius;
-		max_radius = lp.max_radius;
-		constructing = lp.constructing;
-	}
-
-	public PolygonPellet(ScaffoldPellet lp) {
-		super(lp.main_pellets);
-		pos.set(lp.pos);
-		radius = lp.radius;
-		max_radius = lp.max_radius;
-		constructing = lp.constructing;
-	}
-
-	public PolygonPellet(DoublePellet lp) {
-		super(lp.main_pellets);
-		pos.set(lp.pos);
-		radius = lp.radius;
-		max_radius = lp.max_radius;
-		constructing = lp.constructing;
-	}
-
-	public PolygonPellet(VerticalLinePellet lp) {
-		super(lp.main_pellets);
-		pos.set(lp.pos);
-		radius = lp.radius;
-		max_radius = lp.max_radius;
-		constructing = lp.constructing;
+		pellet_type = lp.pellet_type;
 	}
 
 	@Override
@@ -88,24 +58,12 @@ public class PolygonPellet extends Pellet {
 				if (neighbor_pellet != null) {
 					alive = false;
 
-					if (neighbor_pellet instanceof LinePellet) {
-						main_pellets.remove(neighbor_pellet);
-						neighbor_pellet = new PolygonPellet(
-								(LinePellet) neighbor_pellet);
-						main_pellets.add(neighbor_pellet);
+					if (!(neighbor_pellet instanceof PolygonPellet)) {
+						Main.all_dead_pellets_in_world.add(neighbor_pellet);
+						neighbor_pellet = new PolygonPellet(neighbor_pellet);
+						Main.new_pellets_to_add_to_world.add(neighbor_pellet);
 					}
-					if (neighbor_pellet instanceof PlanePellet) {
-						main_pellets.remove(neighbor_pellet);
-						neighbor_pellet = new PolygonPellet(
-								(PlanePellet) neighbor_pellet);
-						main_pellets.add(neighbor_pellet);
-					}
-					if (neighbor_pellet instanceof ScaffoldPellet) {
-						main_pellets.remove(neighbor_pellet);
-						neighbor_pellet = new PolygonPellet(
-								(ScaffoldPellet) neighbor_pellet);
-						main_pellets.add(neighbor_pellet);
-					}
+					
 					// if neighbor pellet's class is not PolygonPellet...
 					// neighbor_pellet = new PolygonPellet(neighbor_pellet)
 					// copy the position and stuff from the line/plane
@@ -151,7 +109,7 @@ public class PolygonPellet extends Pellet {
 					// is it near some points?!
 					if (neighbors > 0) {
 						constructing = true;
-						Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
+						setInPlace();
 
 						snapToCenterOfPoints();
 
@@ -193,7 +151,7 @@ public class PolygonPellet extends Pellet {
 		Primitive polygon = new Primitive(GL_POLYGON, cycle);
 		polygon.setPlayerPositionAndViewingDirection(pos, vel);
 		Main.geometry.add(polygon);
-		Main.server.sendGenericUpdate();
+		Main.server.newPolygon();
 
 		current_cycle.clear();
 	}

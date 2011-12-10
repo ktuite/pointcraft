@@ -16,8 +16,10 @@ public class ScaffoldPellet extends Pellet {
 	 */
 	public ScaffoldPellet(List<Pellet> _pellets) {
 		super(_pellets);
+		pellet_type = Main.GunMode.PELLET;
 	}
 
+	// these constructors are for making plane/line intersection points
 	public ScaffoldPellet(LinePellet p) {
 		super(p.main_pellets);
 		alive = true;
@@ -25,6 +27,7 @@ public class ScaffoldPellet extends Pellet {
 		pos.set(p.pos);
 		radius = p.radius;
 		max_radius = p.max_radius;
+		pellet_type = p.pellet_type;
 	}
 
 	public ScaffoldPellet(PlanePellet p) {
@@ -34,6 +37,7 @@ public class ScaffoldPellet extends Pellet {
 		pos.set(p.pos);
 		radius = p.radius;
 		max_radius = p.max_radius;
+		pellet_type = p.pellet_type;
 	}
 
 	@Override
@@ -76,7 +80,7 @@ public class ScaffoldPellet extends Pellet {
 					if (neighbors > 0) {
 						snapToCenterOfPoints();
 						constructing = true;
-						Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
+						setInPlace();
 					}
 				}
 			}

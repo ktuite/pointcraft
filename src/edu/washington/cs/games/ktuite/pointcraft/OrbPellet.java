@@ -16,7 +16,7 @@ public class OrbPellet extends PolygonPellet {
 
 	// having to do with orb gun only
 	public static OrbPellet orb_pellet;
-	
+
 	/*
 	 * This pellet doesnt get shot, it just sits in front of the player and gets
 	 * placed in 3d space when they choose to place it somewhere
@@ -28,6 +28,8 @@ public class OrbPellet extends PolygonPellet {
 		player_position = new Vector3f();
 		orb_distance = 0.03f;
 		max_radius = radius;
+		setInPlace();
+		pellet_type = Main.GunMode.ORB;
 	}
 
 	public void setGunDirection(Vector3f _direction) {
@@ -70,8 +72,9 @@ public class OrbPellet extends PolygonPellet {
 			sphere.draw(radius, 32, 32);
 		}
 	}
-	
-	public static void updateOrbPellet(Vector3f pos, Vector3f gun_direction, float pan_angle, float tilt_angle) {
+
+	public static void updateOrbPellet(Vector3f pos, Vector3f gun_direction,
+			float pan_angle, float tilt_angle) {
 		Vector2f horiz = new Vector2f();
 		horiz.x = (float) Math.sin(pan_angle * 3.14159 / 180f);
 		horiz.y = -1 * (float) Math.cos(pan_angle * 3.14159 / 180f);
@@ -85,8 +88,8 @@ public class OrbPellet extends PolygonPellet {
 		orb_pellet.setPlayerPosition(pos);
 		orb_pellet.update();
 	}
-	
-	public static void drawOrbPellet(){
+
+	public static void drawOrbPellet() {
 		glPushMatrix();
 		glTranslatef(orb_pellet.pos.x, orb_pellet.pos.y, orb_pellet.pos.z);
 		orb_pellet.draw();

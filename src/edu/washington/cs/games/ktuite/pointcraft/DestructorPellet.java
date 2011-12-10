@@ -9,6 +9,7 @@ public class DestructorPellet extends Pellet {
 
 	public DestructorPellet(List<Pellet> _pellets) {
 		super(_pellets);
+		pellet_type = Main.GunMode.DESTRUCTOR;
 	}
 
 	public void update() {

@@ -120,7 +120,7 @@ public class Primitive implements Serializable {
 
 	public void startDownloadingTexture() {
 		if (texture_url == null) {
-			texture_url = "http://mazagran.cs.washington.edu:8080/texture.png?&v=";
+			texture_url = "http://excelso.cs.washington.edu:8081/texture.png?&v=";
 			for (Pellet p : vertices) {
 				Vector3f v = p.pos;
 				texture_url += v.x + "," + v.y + "," + v.z + ",";

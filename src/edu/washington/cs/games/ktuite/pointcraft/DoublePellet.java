@@ -19,6 +19,7 @@ public class DoublePellet extends Pellet {
 	 */
 	public DoublePellet(List<Pellet> _pellets) {
 		super(_pellets);
+		pellet_type = Main.GunMode.DOUBLE;
 	}
 
 	@Override
@@ -29,11 +30,11 @@ public class DoublePellet extends Pellet {
 			// not constructing means the pellet is still traveling through
 			// space
 
-			if (Main.timer.getTime() - birthday == 0) {
-				Vector3f back_up = new Vector3f(vel);
-				back_up.scale(-40 * Main.world_scale);
-				Vector3f.add(pos, back_up, pos);
-			}
+			/*
+			 * if (Main.timer.getTime() - birthday == 0) { Vector3f back_up =
+			 * new Vector3f(vel); back_up.scale(-40 * Main.world_scale);
+			 * Vector3f.add(pos, back_up, pos); }
+			 */
 
 			// move the pellet
 			Vector3f.add(pos, vel, pos);
@@ -45,6 +46,7 @@ public class DoublePellet extends Pellet {
 				} else {
 					constructing = true;
 					pos = last_good_position;
+					setInPlace();
 				}
 
 			} else {
@@ -73,7 +75,7 @@ public class DoublePellet extends Pellet {
 					// is it near some points?!
 					if (neighbors > 0 && is_first_pellet) {
 						constructing = true;
-						Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
+						setInPlace();
 						launchSecondPellet();
 					} else if (neighbors > 0 && !is_first_pellet) {
 						last_good_position = new Vector3f(pos);
@@ -105,10 +107,14 @@ public class DoublePellet extends Pellet {
 	public void draw() {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
-			glColor4f(.2f, .7f, .7f, alpha);
+			glColor4f(.1f, .5f, .5f, alpha);
 			sphere.draw(radius, 32, 32);
 		} else {
-			glColor4f(.2f, .7f, .7f, 1f);
+			if (is_first_pellet) {
+				glColor4f(.2f, .7f, .7f, 1f);
+			} else {
+				glColor4f(.4f, .7f, .7f, 1f);
+			}
 			sphere.draw(radius, 32, 32);
 		}
 	}

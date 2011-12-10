@@ -65,7 +65,7 @@ public class Main {
 	public static float pellet_scale = 1f;
 	public static Timer timer = new Timer();
 	public static Stack<Pellet> all_pellets_in_world;
-	private Stack<Pellet> all_dead_pellets_in_world;
+	public static Stack<Pellet> all_dead_pellets_in_world;
 	public static Stack<Pellet> new_pellets_to_add_to_world;
 
 	// TODO: move out of here and put somewhere else since this is a certain
@@ -91,7 +91,7 @@ public class Main {
 	public float overhead_scale = 1;
 
 	public enum GunMode {
-		PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, OVERHEAD
+		PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, DOUBLE
 	}
 
 	public GunMode which_gun;
@@ -227,7 +227,7 @@ public class Main {
 		all_pellets_in_world = new Stack<Pellet>();
 		all_dead_pellets_in_world = new Stack<Pellet>();
 		new_pellets_to_add_to_world = new Stack<Pellet>();
-		
+
 		which_gun = GunMode.POLYGON;
 		OrbPellet.orb_pellet = new OrbPellet(all_pellets_in_world);
 
@@ -253,39 +253,45 @@ public class Main {
 
 	private void InitData() {
 		KdTreeOfPoints.load("assets/models/lewis-hall.ply");
-		
+
 		num_points = KdTreeOfPoints.num_points;
 		point_positions = KdTreeOfPoints.point_positions;
 		point_colors = KdTreeOfPoints.point_colors;
-		
+
 		/*
-		// data of the point cloud itself, loaded in from C++
-
-		LibPointCloud
-		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/Uris.bin");
-				.load("assets/models/lewis-hall.bin");
-		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/models/lewis.bundle");
-		// .load("/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin");
-		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/Parr.bin");
-		// .loadBundle("/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out");
-		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/SageChapel.bin");
-		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/HOC_culdesac.bin");
-		// .load("/Users/ktuite/Desktop/sketchymodeler/server_code/fountainplus.bin");
-		System.out.println("number of points: " + LibPointCloud.getNumPoints());
-
-		num_points = LibPointCloud.getNumPoints();
-		point_positions = LibPointCloud.getPointPositions()
-				.getByteBuffer(0, num_points * 3 * 8).asDoubleBuffer();
-		point_colors = LibPointCloud.getPointColors()
-				.getByteBuffer(0, num_points * 3 * 8).asDoubleBuffer();
-
-		System.out.println("first point: " + point_positions.get(0));
-		System.out.println("first color: " + point_colors.get(0));
-
-		// FindMinMaxOfWorld();
-
-		LibPointCloud.makeKdTree();
-		*/
+		 * // data of the point cloud itself, loaded in from C++
+		 * 
+		 * LibPointCloud //
+		 * .load("/Users/ktuite/Desktop/sketchymodeler/server_code/Uris.bin");
+		 * .load("assets/models/lewis-hall.bin"); //
+		 * .loadBundle("/Users/ktuite/Desktop/sketchymodeler/models/lewis.bundle"
+		 * ); // .load(
+		 * "/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin"
+		 * ); //
+		 * .load("/Users/ktuite/Desktop/sketchymodeler/server_code/Parr.bin");
+		 * // .loadBundle(
+		 * "/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out"); //
+		 * .
+		 * load("/Users/ktuite/Desktop/sketchymodeler/server_code/SageChapel.bin"
+		 * ); //
+		 * .load("/Users/ktuite/Desktop/sketchymodeler/server_code/HOC_culdesac.bin"
+		 * ); //
+		 * .load("/Users/ktuite/Desktop/sketchymodeler/server_code/fountainplus.bin"
+		 * ); System.out.println("number of points: " +
+		 * LibPointCloud.getNumPoints());
+		 * 
+		 * num_points = LibPointCloud.getNumPoints(); point_positions =
+		 * LibPointCloud.getPointPositions() .getByteBuffer(0, num_points * 3 *
+		 * 8).asDoubleBuffer(); point_colors = LibPointCloud.getPointColors()
+		 * .getByteBuffer(0, num_points * 3 * 8).asDoubleBuffer();
+		 * 
+		 * System.out.println("first point: " + point_positions.get(0));
+		 * System.out.println("first color: " + point_colors.get(0));
+		 * 
+		 * // FindMinMaxOfWorld();
+		 * 
+		 * LibPointCloud.makeKdTree();
+		 */
 	}
 
 	@SuppressWarnings("unused")
@@ -361,8 +367,8 @@ public class Main {
 		for (Pellet pellet : all_pellets_in_world) {
 			pellet.update();
 		}
-		
-		for (Pellet pellet : new_pellets_to_add_to_world){
+
+		for (Pellet pellet : new_pellets_to_add_to_world) {
 			all_pellets_in_world.add(pellet);
 		}
 		new_pellets_to_add_to_world.clear();
@@ -480,12 +486,9 @@ public class Main {
 					which_gun = GunMode.VERTICAL_LINE;
 					System.out.println("vertical line pellet gun selected");
 				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_8) {
-					which_gun = GunMode.OVERHEAD;
-					tilt_locked = true;
-					last_tilt = tilt_angle;
-					tilt_animation = 30;
-					System.out.println("overhead mode and double pellet gun");
+				if (Keyboard.getEventKey() == Keyboard.KEY_6) {
+					which_gun = GunMode.DOUBLE;
+					System.out.println("double pellet gun");
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_9) {
 					which_gun = GunMode.ORB;
@@ -495,6 +498,16 @@ public class Main {
 				if (Keyboard.getEventKey() == Keyboard.KEY_0) {
 					which_gun = GunMode.DESTRUCTOR;
 					System.out.println("the gun that deletes things");
+				}
+
+				if (Keyboard.getEventKey() == Keyboard.KEY_T) {
+					tilt_locked = !tilt_locked;
+					if (tilt_locked) {
+						last_tilt = tilt_angle;
+						tilt_animation = 30;
+					} else {
+						tilt_animation = -30;
+					}
 				}
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_N) {
@@ -539,10 +552,11 @@ public class Main {
 			}
 		}
 
-		if (tilt_locked && which_gun != GunMode.OVERHEAD && tilt_animation == 0) {
-			tilt_animation = -30;
-			tilt_locked = true; // set to true until done animating
-		}
+		/*
+		 * if (tilt_locked && which_gun != GunMode.OVERHEAD && tilt_animation ==
+		 * 0) { tilt_animation = -30; tilt_locked = true; // set to true until
+		 * done animating }
+		 */
 
 		// normalize the speed
 		double speed = Math.sqrt(vel.length());
@@ -567,7 +581,7 @@ public class Main {
 		// use mouse to control where player is looking
 		if (!tilt_locked)
 			tilt_angle -= Mouse.getDY() / 10f;
-		else if (tilt_animation != 0)
+		if (tilt_animation != 0)
 			animateTilt();
 
 		pan_angle += Mouse.getDX() / 10f;
@@ -1042,20 +1056,20 @@ public class Main {
 			}
 			glEnd();
 			break;
-		case OVERHEAD:
+		case DOUBLE:
 			glBegin(GL_LINE_LOOP);
 			for (int i = 0; i < n; i++) {
 				float angle = (float) (Math.PI * 2 * i / n);
-				float x = (float) (Math.cos(angle) * f * 0.75 * 600 / 800);
-				float y = (float) (Math.sin(angle) * f * 0.75 + f/2);
+				float x = (float) (Math.cos(angle) * f * 0.45 * 600 / 800);
+				float y = (float) (Math.sin(angle) * f * 0.45 + f / 2);
 				glVertex2f(x, y);
 			}
 			glEnd();
 			glBegin(GL_LINE_LOOP);
 			for (int i = 0; i < n; i++) {
 				float angle = (float) (Math.PI * 2 * i / n);
-				float x = (float) (Math.cos(angle) * f * 0.35 * 600 / 800);
-				float y = (float) (Math.sin(angle) * f * 0.35);
+				float x = (float) (Math.cos(angle) * f * 0.45 * 600 / 800);
+				float y = (float) (Math.sin(angle) * f * 0.45 - f / 2);
 				glVertex2f(x, y);
 			}
 			glEnd();
@@ -1113,7 +1127,7 @@ public class Main {
 				pellet = new LinePellet(all_pellets_in_world);
 			} else if (which_gun == GunMode.VERTICAL_LINE) {
 				pellet = new VerticalLinePellet(all_pellets_in_world);
-			} else if (which_gun == GunMode.OVERHEAD) {
+			} else if (which_gun == GunMode.DOUBLE) {
 				pellet = new DoublePellet(all_pellets_in_world);
 			} else if (which_gun == GunMode.DESTRUCTOR) {
 				pellet = new DestructorPellet(all_pellets_in_world);

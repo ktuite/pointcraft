@@ -26,6 +26,7 @@ public class PlanePellet extends Pellet {
 	 */
 	public PlanePellet(List<Pellet> _pellets) {
 		super(_pellets);
+		pellet_type = Main.GunMode.PLANE;
 	}
 
 	@Override
@@ -66,7 +67,7 @@ public class PlanePellet extends Pellet {
 					if (neighbors > 0) {
 						snapToCenterOfPoints();
 						constructing = true;
-						Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
+						setInPlace();
 						current_plane.add(this);
 						fitPlane();
 					} else if (closest_point != null) {

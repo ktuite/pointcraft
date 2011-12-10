@@ -35,6 +35,7 @@ public class WiggleTool {
 		 */
 	}
 
+	@SuppressWarnings("unused")
 	private static void rectangularify(Primitive g) {
 		Vector3f pos_to_change = g.getVertices().get(2).pos;
 		Vector3f also_on_line = g.getVertices().get(3).pos;
@@ -100,7 +101,8 @@ public class WiggleTool {
 		int min_neighbors = Integer.MAX_VALUE;
 
 		for (Pellet p : g.getVertices()) {
-			int neighbors = KdTreeOfPoints.queryKdTree(p.pos.x, p.pos.y, p.pos.z, p.radius);
+			int neighbors = KdTreeOfPoints.queryKdTree(p.pos.x, p.pos.y,
+					p.pos.z, p.radius);
 			if (neighbors < min_neighbors) {
 				min_neighbors = neighbors;
 				worst_pellet = p;
@@ -120,20 +122,22 @@ public class WiggleTool {
 		Vector3f.sub(planar_pellets.get(0).pos, planar_pellets.get(2).pos, v2);
 		Vector3f norm = new Vector3f();
 		Vector3f.cross(v1, v2, norm);
-		norm.normalise();
+		if (norm.length() != 0) {
+			norm.normalise();
 
-		float a = norm.x;
-		float b = norm.y;
-		float c = norm.z;
-		float d = -1
-				* (a * planar_pellets.get(0).pos.x + b
-						* planar_pellets.get(0).pos.y + c
-						* planar_pellets.get(0).pos.z);
+			float a = norm.x;
+			float b = norm.y;
+			float c = norm.z;
+			float d = -1
+					* (a * planar_pellets.get(0).pos.x + b
+							* planar_pellets.get(0).pos.y + c
+							* planar_pellets.get(0).pos.z);
 
-		Vector3f pos = worst_pellet.pos;
-		float distance = (float) ((a * pos.x + b * pos.y + c * pos.z + d) / Math
-				.sqrt(a * a + b * b + c * c));
-		norm.scale(distance);
-		Vector3f.sub(pos, norm, pos);
+			Vector3f pos = worst_pellet.pos;
+			float distance = (float) ((a * pos.x + b * pos.y + c * pos.z + d) / Math
+					.sqrt(a * a + b * b + c * c));
+			norm.scale(distance);
+			Vector3f.sub(pos, norm, pos);
+		}
 	}
 }
