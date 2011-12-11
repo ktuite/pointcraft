@@ -22,7 +22,7 @@
 
     <include filename="cursors.xml"/>
 
-    <fontDef name="normal" filename="font.fnt" color="black">
+    <fontDef name="normal" filename="codeBold.fnt" color="black">
         <fontParam if="error" color="red"/>
         <fontParam if="disabled" color="gray"/>
         <fontParam if="textSelection" color="blue"/>

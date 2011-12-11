@@ -116,6 +116,7 @@ public class Main {
 	private void InitDisplay() {
 		try {
 			Display.setDisplayMode(new DisplayMode(800, 600));
+			Display.setResizable(true);
 			Display.setVSyncEnabled(true);
 			Display.create();
 			Display.setTitle("PointCraft FPS-3D-Modeler");
@@ -156,11 +157,14 @@ public class Main {
 	}
 
 	private void InitGraphics() {
+		float width = Display.getDisplayMode().getWidth();
+		float height = Display.getDisplayMode().getHeight();
+		System.out.println("init graphics: " + width + "," + height);
 		// view matrix
 		glMatrixMode(GL_PROJECTION);
 
 		glLoadIdentity();
-		glOrtho(-800.0f / 600.0f, 800.0f / 600.0f, -1f, 1f, 0.001f, 1000.0f);
+		glOrtho(-1 * width / height, width / height, -1f, 1f, 0.001f, 1000.0f);
 		// glScalef(40, 40, 40);
 
 		proj_ortho = BufferUtils.createDoubleBuffer(16);
@@ -169,7 +173,7 @@ public class Main {
 		proj_ortho.put(5, proj_ortho.get(5) * 40f);
 
 		glLoadIdentity();
-		gluPerspective(60, 800.0f / 600.0f, .001f, 1000.0f);
+		gluPerspective(60, width / height, .001f, 1000.0f);
 		proj_persp = BufferUtils.createDoubleBuffer(16);
 		glGetDouble(GL_PROJECTION_MATRIX, proj_persp);
 		proj_intermediate = BufferUtils.createDoubleBuffer(16);
@@ -198,21 +202,26 @@ public class Main {
 		glEnable(GL_LINE_SMOOTH);
 
 		// skybox texture loaded
-		try {
-			skybox = TextureLoader.getTexture("JPG",
-					ResourceLoader.getResourceAsStream("assets/gray_sky.jpg"));
-			System.out.println("Texture loaded: " + skybox);
-			System.out.println(">> Image width: " + skybox.getImageWidth());
-			System.out.println(">> Image height: " + skybox.getImageHeight());
-			System.out.println(">> Texture width: " + skybox.getTextureWidth());
-			System.out.println(">> Texture height: "
-					+ skybox.getTextureHeight());
-			System.out.println(">> Texture ID: " + skybox.getTextureID());
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.out.println("Couldn't load skybox");
-			System.exit(1);
+		if (true || skybox == null) {
+			try {
+				skybox = TextureLoader.getTexture("JPG", ResourceLoader
+						.getResourceAsStream("assets/gray_sky.jpg"));
+				System.out.println("Texture loaded: " + skybox);
+				System.out.println(">> Image width: " + skybox.getImageWidth());
+				System.out.println(">> Image height: "
+						+ skybox.getImageHeight());
+				System.out.println(">> Texture width: "
+						+ skybox.getTextureWidth());
+				System.out.println(">> Texture height: "
+						+ skybox.getTextureHeight());
+				System.out.println(">> Texture ID: " + skybox.getTextureID());
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.out.println("Couldn't load skybox");
+				System.exit(1);
+			}
 		}
+
 	}
 
 	private void InitGameVariables() {
@@ -336,9 +345,31 @@ public class Main {
 				InstructionalEventLoop();
 			}
 
+			if ((Display.getWidth() != Display.getDisplayMode().getWidth() || Display
+					.getHeight() != Display.getDisplayMode().getHeight())
+					&& Mouse.isButtonDown(0)) {
+				dealWithDisplayResize();
+			}
+
 		}
 
 		Display.destroy();
+	}
+
+	private void dealWithDisplayResize() {
+		System.out.println("Display was resized... " + Display.getWidth());
+
+		try {
+			Display.setDisplayMode(new DisplayMode(Display.getWidth(), Display
+					.getHeight()));
+		} catch (LWJGLException e) {
+			System.out.println(e);
+		}
+
+		InitGUI();
+		InitGraphics();
+		
+
 	}
 
 	private static void undoLastPellet() {
@@ -456,7 +487,7 @@ public class Main {
 					Mouse.setGrabbed(!Mouse.isGrabbed());
 				}
 
-				if (Keyboard.getEventKey() == Keyboard.KEY_P) {
+				if (Keyboard.getEventKey() == Keyboard.KEY_P || Keyboard.getEventKey() == Keyboard.KEY_C) {
 					draw_points = !draw_points;
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_O) {
@@ -749,7 +780,8 @@ public class Main {
 		/* create 5x5 pixel picking region near cursor location */
 		gluPickMatrix((float) x, (float) (viewport.get(3) - y), 5.0f, 5.0f,
 				viewport);
-		gluPerspective(60, 800.0f / 600.0f, .001f, 1000.0f);
+		gluPerspective(60, Display.getDisplayMode().getWidth()
+				/ Display.getDisplayMode().getHeight(), .001f, 1000.0f);
 
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
@@ -1188,5 +1220,79 @@ public class Main {
 
 		System.out.println("rotation angle: " + rotation_angle);
 		System.out.println("rotation axis: " + rotation_axis);
+	}
+
+	/**
+	 * Set the display mode to be used
+	 * 
+	 * @param width
+	 *            The width of the display required
+	 * @param height
+	 *            The height of the display required
+	 * @param fullscreen
+	 *            True if we want fullscreen mode
+	 */
+	public void setDisplayMode(int width, int height, boolean fullscreen) {
+
+		// return if requested DisplayMode is already set
+		if ((Display.getDisplayMode().getWidth() == width)
+				&& (Display.getDisplayMode().getHeight() == height)
+				&& (Display.isFullscreen() == fullscreen)) {
+			return;
+		}
+
+		try {
+			DisplayMode targetDisplayMode = null;
+
+			if (fullscreen) {
+				DisplayMode[] modes = Display.getAvailableDisplayModes();
+				int freq = 0;
+
+				for (int i = 0; i < modes.length; i++) {
+					DisplayMode current = modes[i];
+
+					if ((current.getWidth() == width)
+							&& (current.getHeight() == height)) {
+						if ((targetDisplayMode == null)
+								|| (current.getFrequency() >= freq)) {
+							if ((targetDisplayMode == null)
+									|| (current.getBitsPerPixel() > targetDisplayMode
+											.getBitsPerPixel())) {
+								targetDisplayMode = current;
+								freq = targetDisplayMode.getFrequency();
+							}
+						}
+
+						// if we've found a match for bpp and frequence against
+						// the
+						// original display mode then it's probably best to go
+						// for this one
+						// since it's most likely compatible with the monitor
+						if ((current.getBitsPerPixel() == Display
+								.getDesktopDisplayMode().getBitsPerPixel())
+								&& (current.getFrequency() == Display
+										.getDesktopDisplayMode().getFrequency())) {
+							targetDisplayMode = current;
+							break;
+						}
+					}
+				}
+			} else {
+				targetDisplayMode = new DisplayMode(width, height);
+			}
+
+			if (targetDisplayMode == null) {
+				System.out.println("Failed to find value mode: " + width + "x"
+						+ height + " fs=" + fullscreen);
+				return;
+			}
+
+			Display.setDisplayMode(targetDisplayMode);
+			Display.setFullscreen(fullscreen);
+
+		} catch (LWJGLException e) {
+			System.out.println("Unable to setup mode " + width + "x" + height
+					+ " fullscreen=" + fullscreen + e);
+		}
 	}
 }
