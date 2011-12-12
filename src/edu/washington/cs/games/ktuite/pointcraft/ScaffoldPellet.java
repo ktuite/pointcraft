@@ -83,6 +83,10 @@ public class ScaffoldPellet extends Pellet {
 						setInPlace();
 					}
 				}
+				
+				if (constructing == true){
+					ActionTracker.newScaffoldPellet(this);
+				}
 			}
 		} else {
 			// the pellet has stuck... here we just give it a nice growing

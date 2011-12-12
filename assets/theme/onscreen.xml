@@ -27,7 +27,8 @@
         <fontParam if="disabled" color="gray"/>
         <fontParam if="textSelection" color="blue"/>
     </fontDef>
-    <fontDef name="black" filename="font.fnt" color="gray"/>
+    
+    <fontDef name="black" filename="font.fnt" color="black"/>
 
     <fontDef name="button" filename="font.fnt" color="white">
         <fontParam if="disabled" color="gray"/>
@@ -62,6 +63,10 @@
 
     <theme name="label" ref="-defaults" allowWildcard="true"/>
     
+    <theme name="sublabel" ref="-defaults" allowWildcard="true">
+    	<param name="font"><font>black</font></param>
+    </theme>
+    
     <theme name="button" ref="-defaults" allowWildcard="true">
         <param name="background"><image>innerframe.background</image></param>
         <param name="border"><border>background.border</border></param>
@@ -95,9 +100,9 @@
     <theme name="instructionaloverlay" ref="-defaults">
     </theme>
 
-    <theme name="login-panel" ref="-defaults" allowWildcard="true">
-                    <param name="background"><image>evilframe.background</image></param>
-                    <param name="border"><border>background.border</border></param>
+    <theme name="login-panel" ref="-defaults" allowWildcard="true">            
+    	<param name="background"><image>evilframe.background</image></param>
+        <param name="border"><border>background.border</border></param>
         <param name="defaultGap"><dimension>5,5</dimension></param>
         <param name="smallGap"><dimension>8,8</dimension></param>
         <param name="mediumGap"><dimension>10,10</dimension></param>

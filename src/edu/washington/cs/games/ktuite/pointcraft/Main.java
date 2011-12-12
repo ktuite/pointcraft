@@ -256,6 +256,7 @@ public class Main {
 
 		server = new ServerCommunicator(
 				"http://phci03.cs.washington.edu/pointcraft/");
+
 	}
 
 	private void InitData() {
@@ -368,7 +369,7 @@ public class Main {
 		InitGraphics();
 
 	}
-
+/*
 	private static void undoLastPellet() {
 		if (PolygonPellet.current_cycle.size() > 0) {
 			PolygonPellet.current_cycle.pop();
@@ -390,7 +391,7 @@ public class Main {
 		// great to begin with
 
 	}
-
+*/
 	private void UpdateGameObjects() {
 		for (Pellet pellet : all_pellets_in_world) {
 			pellet.update();
@@ -476,8 +477,7 @@ public class Main {
 				 */
 				if (Keyboard.getEventKey() == Keyboard.KEY_Z
 						&& (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29))) {
-					System.out.println("UNDO!");
-					undoLastPellet();
+					ActionTracker.undo();
 				}
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
@@ -576,6 +576,10 @@ public class Main {
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_U) {
 					WiggleTool.fixModel();
+				}
+				
+				if (Keyboard.getEventKey() == Keyboard.KEY_Z) {
+					System.out.println("Last action: " + ActionTracker.showLatestAction());
 				}
 
 			}
@@ -744,6 +748,7 @@ public class Main {
 		if (onscreen_gui != null) {
 			onscreen_overlay.label_current_mode.setText("Current Gun: "
 					+ which_gun);
+			onscreen_overlay.label_last_action.setText("Last Action: " + ActionTracker.showLatestAction());
 			onscreen_gui.update();
 		}
 	}
