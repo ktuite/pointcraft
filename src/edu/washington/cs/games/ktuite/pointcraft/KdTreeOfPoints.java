@@ -84,10 +84,10 @@ public class KdTreeOfPoints {
 			max_span = max_corner[1] - min_corner[1];
 		if (max_corner[2] - min_corner[2] > max_span)
 			max_span = max_corner[2] - min_corner[2];
-		
+
 		tree = new PointOctree(center, max_span);
-		tree.setMinNodeSize(max_span/5);
-		
+		tree.setMinNodeSize(max_span / 5);
+
 		for (int i = 0; i < num_points; i++) {
 			tree.addPoint(new Vec3D((float) point_positions.get(i * 3 + 0),
 					(float) point_positions.get(i * 3 + 1),
@@ -106,8 +106,10 @@ public class KdTreeOfPoints {
 			int count = 0;
 			String line = buf.readLine();
 			while (!line.startsWith("end_header")) {
-				if (line.startsWith("element vertex"))
+				if (line.startsWith("element vertex")) {
 					num_points = Integer.parseInt(line.split("\\s+")[2]);
+					count = 0;
+				}
 				if (line.contains(" x"))
 					x_idx = count;
 				else if (line.contains(" y"))
@@ -126,6 +128,9 @@ public class KdTreeOfPoints {
 
 				line = buf.readLine();
 			}
+
+			System.out.println(x_idx + "," + y_idx + "," + z_idx + "    "
+					+ r_idx + "," + g_idx + "," + b_idx);
 
 			point_colors = BufferUtils.createDoubleBuffer(num_points * 3);
 			point_positions = BufferUtils.createDoubleBuffer(num_points * 3);
