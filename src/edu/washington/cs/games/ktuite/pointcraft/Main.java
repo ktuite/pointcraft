@@ -202,24 +202,20 @@ public class Main {
 		glEnable(GL_LINE_SMOOTH);
 
 		// skybox texture loaded
-		if (true || skybox == null) {
-			try {
-				skybox = TextureLoader.getTexture("JPG", ResourceLoader
-						.getResourceAsStream("assets/gray_sky.jpg"));
-				System.out.println("Texture loaded: " + skybox);
-				System.out.println(">> Image width: " + skybox.getImageWidth());
-				System.out.println(">> Image height: "
-						+ skybox.getImageHeight());
-				System.out.println(">> Texture width: "
-						+ skybox.getTextureWidth());
-				System.out.println(">> Texture height: "
-						+ skybox.getTextureHeight());
-				System.out.println(">> Texture ID: " + skybox.getTextureID());
-			} catch (IOException e) {
-				e.printStackTrace();
-				System.out.println("Couldn't load skybox");
-				System.exit(1);
-			}
+		try {
+			skybox = TextureLoader.getTexture("JPG",
+					ResourceLoader.getResourceAsStream("assets/gray_sky.jpg"));
+			System.out.println("Texture loaded: " + skybox);
+			System.out.println(">> Image width: " + skybox.getImageWidth());
+			System.out.println(">> Image height: " + skybox.getImageHeight());
+			System.out.println(">> Texture width: " + skybox.getTextureWidth());
+			System.out.println(">> Texture height: "
+					+ skybox.getTextureHeight());
+			System.out.println(">> Texture ID: " + skybox.getTextureID());
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.out.println("Couldn't load skybox");
+			System.exit(1);
 		}
 
 	}
@@ -370,7 +366,6 @@ public class Main {
 
 		InitGUI();
 		InitGraphics();
-		
 
 	}
 
@@ -489,7 +484,8 @@ public class Main {
 					Mouse.setGrabbed(!Mouse.isGrabbed());
 				}
 
-				if (Keyboard.getEventKey() == Keyboard.KEY_P || Keyboard.getEventKey() == Keyboard.KEY_C) {
+				if (Keyboard.getEventKey() == Keyboard.KEY_P
+						|| Keyboard.getEventKey() == Keyboard.KEY_C) {
 					draw_points = !draw_points;
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_O) {
@@ -870,28 +866,16 @@ public class Main {
 	private void DrawPellets() {
 		// temp
 		/*
-		for (LinePellet pellet : LinePellet.intersection_points) {
-			if (pellet.alive) {
-				glPushMatrix();
-				glTranslatef(pellet.pos.x, pellet.pos.y, pellet.pos.z);
-				pellet.draw();
-				glPopMatrix();
-			} else {
-				all_dead_pellets_in_world.add(pellet);
-			}
-		}
-
-		for (PlanePellet pellet : PlanePellet.intersection_points) {
-			if (pellet.alive) {
-				glPushMatrix();
-				glTranslatef(pellet.pos.x, pellet.pos.y, pellet.pos.z);
-				pellet.draw();
-				glPopMatrix();
-			} else {
-				all_dead_pellets_in_world.add(pellet);
-			}
-		}
-		*/
+		 * for (LinePellet pellet : LinePellet.intersection_points) { if
+		 * (pellet.alive) { glPushMatrix(); glTranslatef(pellet.pos.x,
+		 * pellet.pos.y, pellet.pos.z); pellet.draw(); glPopMatrix(); } else {
+		 * all_dead_pellets_in_world.add(pellet); } }
+		 * 
+		 * for (PlanePellet pellet : PlanePellet.intersection_points) { if
+		 * (pellet.alive) { glPushMatrix(); glTranslatef(pellet.pos.x,
+		 * pellet.pos.y, pellet.pos.z); pellet.draw(); glPopMatrix(); } else {
+		 * all_dead_pellets_in_world.add(pellet); } }
+		 */
 
 		for (Pellet pellet : all_pellets_in_world) {
 			if (pellet.alive) {

@@ -7,7 +7,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.io.Serializable;
 import java.net.URL;
 import java.util.List;
 
@@ -19,9 +18,7 @@ import org.newdawn.slick.opengl.TextureLoader;
 /* these primitives built out of pellets...
  * keep a list of pellets and then draw lines or polygons between them.
  */
-public class Primitive implements Serializable {
-
-	private static final long serialVersionUID = 4570525546147184729L;
+public class Primitive {
 
 	private int gl_type;
 	private List<Pellet> vertices;

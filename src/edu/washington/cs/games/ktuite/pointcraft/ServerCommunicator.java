@@ -1,16 +1,8 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
-
 import org.lwjgl.util.vector.Vector3f;
 
 public class ServerCommunicator {

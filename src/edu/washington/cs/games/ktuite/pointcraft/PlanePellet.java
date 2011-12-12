@@ -1,10 +1,7 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
-import java.nio.DoubleBuffer;
-import java.util.LinkedList;
 import java.util.List;
 
-import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Vector3f;
 
 import static org.lwjgl.opengl.GL11.*;
