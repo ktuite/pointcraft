@@ -245,7 +245,7 @@ public class Main {
 		geometry = new Stack<Primitive>();
 		geometry_v = new Stack<Scaffold>();
 		geometry_v.push(LinePellet.current_line);
-		//geometry_v.push(PlanePellet.current_plane);
+		geometry_v.push(PlanePellet.current_plane);
 
 		try {
 			launch_effect = AudioLoader.getAudio("WAV",

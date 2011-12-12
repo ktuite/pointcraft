@@ -19,7 +19,7 @@ public class Scaffold {
 	}
 	
 	public float distanceToPoint(Vector3f pos) {
-		return -100;
+		return Float.MAX_VALUE;
 	}
 	
 	public Vector3f closestPoint(Vector3f pos) {
@@ -32,6 +32,10 @@ public class Scaffold {
 	
 	public void addNewPellet(Pellet p){
 		
+	}
+	
+	public void add(Pellet p) {
+		pellets.add(p);
 	}
 	
 	/*

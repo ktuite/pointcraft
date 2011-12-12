@@ -17,10 +17,6 @@ public class LineScaffold extends Scaffold {
 		super();
 	}
 
-	public void add(Pellet p) {
-		pellets.add(p);
-	}
-
 	public void fitLine() {
 
 		int n = pellets.size();
@@ -60,7 +56,48 @@ public class LineScaffold extends Scaffold {
 		Vector3f.add(center, line_direction, center);
 		pt_2.set(center);
 
-		// checkForIntersections(line_pellets.get(0), line_pellets.get(1));
+		checkForIntersections();
+	}
+
+	private void checkForIntersections() {
+		for (Scaffold geom : Main.geometry_v) {
+			if (geom instanceof PlaneScaffold) {
+				Vector3f intersect = ((PlaneScaffold) geom)
+						.checkForIntersectionLineWithPlane(pt_1, pt_2);
+				if (intersect != null) {
+					LinePellet i = new LinePellet(Main.all_pellets_in_world);
+					i.alive = true;
+					i.constructing = true;
+					i.is_intersection = true;
+					i.pos.set(intersect);
+					i.radius = pellets.get(0).radius;
+
+					pellets.add(i);
+					Main.new_pellets_to_add_to_world.add(i);
+				}
+			}
+		}
+	}
+
+	public Vector3f checkForIntersectionPlaneWithLine(float a, float b,
+			float c, float d) {
+		Vector3f i = null;
+		if (pt_1 == null || pt_2 == null)
+			return i;
+
+		float u_denom = a * (pt_1.x - pt_2.x) + b * (pt_1.y - pt_2.y) + c
+				* (pt_1.z - pt_2.z);
+		if (u_denom != 0) {
+			float u_num = a * pt_1.x + b * pt_1.y + c * pt_1.z + d;
+			float u = u_num / u_denom;
+			if (u > 0 && u < 1) {
+				i = new Vector3f();
+				i.x = pt_1.x + u * (pt_2.x - pt_1.x);
+				i.y = pt_1.y + u * (pt_2.y - pt_1.y);
+				i.z = pt_1.z + u * (pt_2.z - pt_1.z);
+			}
+		}
+		return i;
 	}
 
 	public void addNewPellet(Pellet p) {

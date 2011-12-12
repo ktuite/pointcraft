@@ -16,7 +16,7 @@ public class LinePellet extends Pellet {
 	// temporary holder of intersection pellets
 	//public static List<LinePellet> intersection_points = new LinkedList<LinePellet>();
 
-	private boolean is_intersection = false;
+	public boolean is_intersection = false;
 
 	/*
 	 * A Pellet is a magical thing that you can shoot out of a gun that will
@@ -29,6 +29,10 @@ public class LinePellet extends Pellet {
 		pellet_type = Main.GunMode.LINE;
 	}
 
+	public void setIsIntersection(){
+		is_intersection = true;
+	}
+	
 	@Override
 	public void update() {
 		// constructing means the pellet has triggered something to be built at
@@ -36,6 +40,9 @@ public class LinePellet extends Pellet {
 		if (!constructing) {
 			// not constructing means the pellet is still traveling through
 			// space
+			
+			if (current_line.pellets.size() >= 2)
+				startNewLine();
 
 			// move the pellet
 			Vector3f.add(pos, vel, pos);
@@ -79,9 +86,6 @@ public class LinePellet extends Pellet {
 						current_line.fitLine();
 					}
 				}
-				
-				if (current_line.pellets.size() >= 2)
-					startNewLine();
 
 			}
 		} else {
@@ -92,46 +96,15 @@ public class LinePellet extends Pellet {
 			}
 		}
 	}
-
-	/*
-	private boolean pelletHitActiveLine() {
-		for (Scaffold geom : Main.geometry_v) {
-			if (geom.isLine()){
-				if (radius > geom.distanceToPoint(pos)) {
-					Vector3f current_direction = new Vector3f();
-					Vector3f checked_direction = new Vector3f();
-					Vector3f.sub(geom.pt_1, geom.pt_2, checked_direction);
-					Vector3f.sub(current_line.get(0).pos, current_line.get(1).pos, current_direction);
-					checked_direction.normalise();
-					current_direction.normalise();
-					if (Vector3f.dot(current_direction, checked_direction) == 1.0){
-						System.out.println("hit active line: " + Vector3f.dot(current_direction, checked_direction));
-						return true;
-					}					
-				}
-			}
-		}
-		
-		return false;
-	}
-*/
 	
 	public void delete() {
-		/*
 		super.delete();
-		if (current_line.size() == 2 || current_line.size() == 3)
-			Main.geometry_v.remove(Main.geometry_v.size() - 1);
-		if (current_line.contains(this)) {
-			current_line.remove(this);
-			fitLine();
-		}
-		*/
 	}
 
 	public void draw() {
 		if (is_intersection) {
 			float alpha = 1 - radius / max_radius * .2f;
-			glColor4f(.1f, .8f, .3f, alpha);
+			glColor4f(.1f, .4f, .7f, alpha);
 			sphere.draw(radius, 32, 32);
 		} else if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
@@ -143,36 +116,7 @@ public class LinePellet extends Pellet {
 		}
 	}
 
-
-	private void checkForIntersections(Vector3f p1, Vector3f p2) {
-		/*
-		intersection_points.clear();
-		System.out.println("checking for new line-plane interesction");
-		for (Scaffold geom : Main.geometry_v) {
-			Vector3f intersect = geom.checkForIntersectionLineWithPlane(p1, p2);
-			if (intersect != null) {
-				LinePellet i = new LinePellet(main_pellets);
-				i.alive = true;
-				i.constructing = true;
-				i.is_intersection = true;
-				i.pos.set(intersect);
-				i.radius = current_line.get(0).radius;
-
-				intersection_points.add(i);
-			}
-		}
-		*/
-	}
-
 	public static void startNewLine() {
-		/*
-		for (LinePellet p : intersection_points) {
-			ScaffoldPellet sp = new ScaffoldPellet(p);
-			Main.new_pellets_to_add_to_world.add(sp);
-		}
-		intersection_points.clear();
-		*/
-
 		current_line = new LineScaffold();
 		Main.geometry_v.add(current_line);
 		System.out.println("making new line");
