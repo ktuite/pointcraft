@@ -135,9 +135,11 @@ public class VerticalLinePellet extends Pellet {
 			List<Vector3f> line_pellets = new LinkedList<Vector3f>();
 			line_pellets.add(top_pellet.pos);
 			line_pellets.add(bottom_pellet.pos);
-			PrimitiveVertex g = new PrimitiveVertex(GL_LINES, line_pellets, 3);
+			/*
+			Scaffold g = new Scaffold(GL_LINES, line_pellets, 3);
 			g.setLine(line_pellets.get(0), line_pellets.get(1));
 			Main.geometry_v.add(g);
+			*/
 		}
 	}
 

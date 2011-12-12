@@ -71,7 +71,7 @@ public class Main {
 	// TODO: move out of here and put somewhere else since this is a certain
 	// kind of geometry
 	public static Stack<Primitive> geometry;
-	public static Stack<PrimitiveVertex> geometry_v;
+	public static Stack<Scaffold> geometry_v;
 
 	public static boolean draw_points = true;
 	public static boolean draw_scaffolding = true;
@@ -243,7 +243,9 @@ public class Main {
 		// TODO: Move this crap elsewhere... init the different geometry
 		// containers individually
 		geometry = new Stack<Primitive>();
-		geometry_v = new Stack<PrimitiveVertex>();
+		geometry_v = new Stack<Scaffold>();
+		geometry_v.push(LinePellet.current_line);
+		//geometry_v.push(PlanePellet.current_plane);
 
 		try {
 			launch_effect = AudioLoader.getAudio("WAV",
@@ -725,7 +727,7 @@ public class Main {
 		}
 
 		if (draw_scaffolding) {
-			for (PrimitiveVertex geom : geometry_v) {
+			for (Scaffold geom : geometry_v) {
 				geom.draw();
 			}
 		}
@@ -867,6 +869,7 @@ public class Main {
 
 	private void DrawPellets() {
 		// temp
+		/*
 		for (LinePellet pellet : LinePellet.intersection_points) {
 			if (pellet.alive) {
 				glPushMatrix();
@@ -888,6 +891,7 @@ public class Main {
 				all_dead_pellets_in_world.add(pellet);
 			}
 		}
+		*/
 
 		for (Pellet pellet : all_pellets_in_world) {
 			if (pellet.alive) {

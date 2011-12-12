@@ -2,19 +2,39 @@ package edu.washington.cs.games.ktuite.pointcraft;
 
 import static org.lwjgl.opengl.GL11.*;
 
-import java.io.Serializable;
 import java.util.List;
+import java.util.Stack;
 
 import org.lwjgl.util.vector.Vector3f;
 
 /* these primitives built out of pellets...
  * keep a list of pellets and then draw lines or polygons between them.
  */
-public class PrimitiveVertex implements Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -6613817266342660991L;
+public class Scaffold {
+	public List<Pellet> pellets;
+	public List<Pellet> intersection_pellets; 
+	
+	public Scaffold(){
+		pellets = new Stack<Pellet>();
+	}
+	
+	public float distanceToPoint(Vector3f pos) {
+		return -100;
+	}
+	
+	public Vector3f closestPoint(Vector3f pos) {
+		return null;
+	}
+	
+	public void draw() {
+		// to be overwritten
+	}
+	
+	public void addNewPellet(Pellet p){
+		
+	}
+	
+	/*
 	private int gl_type;
 	private List<Vector3f> vertices;
 	private float line_width = 5f;
@@ -22,12 +42,12 @@ public class PrimitiveVertex implements Serializable {
 	public Vector3f pt_2;
 	public float a, b, c, d;
 
-	public PrimitiveVertex(int _gl_type, List<Vector3f> _vertices) {
+	public Scaffold(int _gl_type, List<Vector3f> _vertices) {
 		gl_type = _gl_type;
 		vertices = _vertices;
 	}
 
-	public PrimitiveVertex(int _gl_type, List<Vector3f> _vertices,
+	public Scaffold(int _gl_type, List<Vector3f> _vertices,
 			float _line_width) {
 		gl_type = _gl_type;
 		vertices = _vertices;
@@ -172,5 +192,5 @@ public class PrimitiveVertex implements Serializable {
 
 		return i;
 	}
-
+*/
 }

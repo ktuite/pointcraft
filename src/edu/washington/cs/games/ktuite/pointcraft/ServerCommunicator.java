@@ -72,8 +72,9 @@ public class ServerCommunicator {
 			}
 		}
 
+		/*
 		message += "&lines=";
-		for (PrimitiveVertex geom : Main.geometry_v) {
+		for (Scaffold geom : Main.geometry_v) {
 			if (geom.isLine()) {
 				Vector3f v;
 				v = geom.pt_1;
@@ -84,14 +85,15 @@ public class ServerCommunicator {
 		}
 
 		message += "&planes=";
-		for (PrimitiveVertex geom : Main.geometry_v) {
+		for (Scaffold geom : Main.geometry_v) {
 			if (geom.isPlane()) {
 				message += geom.a + "," + geom.b + "," + geom.c + "," + geom.d;
 
 			}
 		}
+		*/
 
-		sendMessage(message);
+		//sendMessage(message);
 
 	}
 

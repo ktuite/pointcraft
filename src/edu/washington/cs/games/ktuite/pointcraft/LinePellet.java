@@ -11,10 +11,10 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class LinePellet extends Pellet {
 
-	public static List<LinePellet> current_line = new LinkedList<LinePellet>();
+	public static LineScaffold current_line = new LineScaffold();
 
 	// temporary holder of intersection pellets
-	public static List<LinePellet> intersection_points = new LinkedList<LinePellet>();
+	//public static List<LinePellet> intersection_points = new LinkedList<LinePellet>();
 
 	private boolean is_intersection = false;
 
@@ -57,13 +57,14 @@ public class LinePellet extends Pellet {
 					pos.set(neighbor_pellet.pos);
 					alive = false;
 					current_line.add(this);
-					fitLine();
+					current_line.fitLine();
 				} else if (closest_point != null) {
 					System.out.println("pellet stuck to some geometry");
 					constructing = true;
 					pos.set(closest_point);
 					current_line.add(this);
-					fitLine();
+					current_line.fitLine();
+					stickPelletToScaffolding();
 				} else {
 					// it didn't hit some existing geometry or pellet
 					// so check the point cloud
@@ -75,9 +76,12 @@ public class LinePellet extends Pellet {
 						constructing = true;
 						setInPlace();
 						current_line.add(this);
-						fitLine();
+						current_line.fitLine();
 					}
 				}
+				
+				if (current_line.pellets.size() >= 2)
+					startNewLine();
 
 			}
 		} else {
@@ -89,7 +93,31 @@ public class LinePellet extends Pellet {
 		}
 	}
 
+	/*
+	private boolean pelletHitActiveLine() {
+		for (Scaffold geom : Main.geometry_v) {
+			if (geom.isLine()){
+				if (radius > geom.distanceToPoint(pos)) {
+					Vector3f current_direction = new Vector3f();
+					Vector3f checked_direction = new Vector3f();
+					Vector3f.sub(geom.pt_1, geom.pt_2, checked_direction);
+					Vector3f.sub(current_line.get(0).pos, current_line.get(1).pos, current_direction);
+					checked_direction.normalise();
+					current_direction.normalise();
+					if (Vector3f.dot(current_direction, checked_direction) == 1.0){
+						System.out.println("hit active line: " + Vector3f.dot(current_direction, checked_direction));
+						return true;
+					}					
+				}
+			}
+		}
+		
+		return false;
+	}
+*/
+	
 	public void delete() {
+		/*
 		super.delete();
 		if (current_line.size() == 2 || current_line.size() == 3)
 			Main.geometry_v.remove(Main.geometry_v.size() - 1);
@@ -97,6 +125,7 @@ public class LinePellet extends Pellet {
 			current_line.remove(this);
 			fitLine();
 		}
+		*/
 	}
 
 	public void draw() {
@@ -114,67 +143,12 @@ public class LinePellet extends Pellet {
 		}
 	}
 
-	private void fitLine() {
-		int n = current_line.size();
-		if (n < 2)
-			return;
-
-		DoubleBuffer line_points = BufferUtils.createDoubleBuffer(n * 3);
-		for (Pellet pellet : current_line) {
-			line_points.put(pellet.pos.x);
-			line_points.put(pellet.pos.y);
-			line_points.put(pellet.pos.z);
-		}
-		
-		float f = findLineExtent();
-
-		Vector3f line_direction = new Vector3f();
-		Vector3f.sub(current_line.get(0).pos, current_line.get(1).pos, line_direction);
-		line_direction.normalise();
-
-		Vector3f center = new Vector3f();
-		for (Pellet pellet : current_line) {
-			Vector3f.add(center, pellet.pos, center);
-		}
-		center.scale(1f/n);
-
-		List<Vector3f> line_pellets = new LinkedList<Vector3f>();
-		line_direction.scale(f);
-		Vector3f.add(center, line_direction, center);
-		line_pellets.add(new Vector3f(center));
-		line_direction.scale(-2);
-		Vector3f.add(center, line_direction, center);
-		line_pellets.add(new Vector3f(center));
-
-		if (Main.geometry_v.size() > 0 && current_line.size() > 2) {
-			Main.geometry_v.remove(Main.geometry_v.size() - 1);
-			System.out.println("removed some geometry");
-		}
-		PrimitiveVertex g = new PrimitiveVertex(GL_LINES, line_pellets, 3);
-		g.setLine(line_pellets.get(0), line_pellets.get(1));
-		Main.geometry_v.add(g);
-
-		checkForIntersections(line_pellets.get(0), line_pellets.get(1));
-	}
-
-	private float findLineExtent() {
-		float max_distance = 0;
-		Vector3f dist = new Vector3f();
-		for (Pellet a : current_line) {
-			for (Pellet b : current_line) {
-				Vector3f.sub(a.pos, b.pos, dist);
-				float d = dist.length();
-				if (d > max_distance)
-					max_distance = d;
-			}
-		}
-		return max_distance;
-	}
 
 	private void checkForIntersections(Vector3f p1, Vector3f p2) {
+		/*
 		intersection_points.clear();
 		System.out.println("checking for new line-plane interesction");
-		for (PrimitiveVertex geom : Main.geometry_v) {
+		for (Scaffold geom : Main.geometry_v) {
 			Vector3f intersect = geom.checkForIntersectionLineWithPlane(p1, p2);
 			if (intersect != null) {
 				LinePellet i = new LinePellet(main_pellets);
@@ -187,16 +161,20 @@ public class LinePellet extends Pellet {
 				intersection_points.add(i);
 			}
 		}
+		*/
 	}
 
 	public static void startNewLine() {
+		/*
 		for (LinePellet p : intersection_points) {
 			ScaffoldPellet sp = new ScaffoldPellet(p);
-			Main.all_pellets_in_world.add(sp);
+			Main.new_pellets_to_add_to_world.add(sp);
 		}
 		intersection_points.clear();
+		*/
 
-		current_line.clear();
+		current_line = new LineScaffold();
+		Main.geometry_v.add(current_line);
 		System.out.println("making new line");
 	}
 }

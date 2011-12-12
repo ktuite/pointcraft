@@ -113,9 +113,8 @@ public class Pellet {
 		if (!Main.draw_scaffolding)
 			return null;
 
-		// TODO: make this return the actual point of intersection
 		Vector3f closest_point = null;
-		for (PrimitiveVertex geom : Main.geometry_v) {
+		for (Scaffold geom : Main.geometry_v) {
 			if (radius > geom.distanceToPoint(pos)) {
 				closest_point = geom.closestPoint(pos);
 				break;
@@ -123,12 +122,23 @@ public class Pellet {
 		}
 		return closest_point;
 	}
+	
+	public Vector3f stickPelletToScaffolding() {
+		Vector3f closest_point = null;
+		for (Scaffold geom : Main.geometry_v) {
+			if (radius > geom.distanceToPoint(pos)) {
+				geom.addNewPellet(this);
+				break;
+			}
+		}
+		return closest_point;
+	}
 
-	public PrimitiveVertex getIntersectedScaffoldGeometry() {
+	public Scaffold getIntersectedScaffoldGeometry() {
 		if (!Main.draw_scaffolding)
 			return null;
 
-		for (PrimitiveVertex geom : Main.geometry_v) {
+		for (Scaffold geom : Main.geometry_v) {
 			if (radius > geom.distanceToPoint(pos)) {
 				return geom;
 			}

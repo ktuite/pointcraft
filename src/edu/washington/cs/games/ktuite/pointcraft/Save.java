@@ -76,7 +76,7 @@ public class Save {
 				try {
 					Main.all_pellets_in_world = (Stack<Pellet>) in.readObject();
 					Main.geometry = (Stack<Primitive>) in.readObject();
-					Main.geometry_v = (Stack<PrimitiveVertex>) in.readObject();
+					Main.geometry_v = (Stack<Scaffold>) in.readObject();
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
 				}

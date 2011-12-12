@@ -32,14 +32,16 @@ public class DestructorPellet extends Pellet {
 				alive = false;
 				neighbor_pellet.delete();
 			} else {
-				PrimitiveVertex geom = getIntersectedScaffoldGeometry();
+				Scaffold geom = getIntersectedScaffoldGeometry();
 				if (geom != null) {
+					/*
 					if (geom.isLine())
 						LinePellet.current_line.clear();
 					else if (geom.isPlane())
 						PlanePellet.current_plane.clear();
 					Main.geometry_v.remove(geom);
 					alive = false;
+					*/
 				}
 				else {
 					Primitive poly = getIntersectedPolygon();

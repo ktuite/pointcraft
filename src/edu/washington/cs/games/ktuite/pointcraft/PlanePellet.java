@@ -251,9 +251,9 @@ public class PlanePellet extends Pellet {
 			Main.geometry_v.remove(Main.geometry_v.size() - 1);
 			System.out.println("removed some geometry");
 		}
-		PrimitiveVertex g = new PrimitiveVertex(GL_LINES, boundary_pellets, 1);
-		g.setPlane(a, b, c, d);
-		Main.geometry_v.add(g);
+		//Scaffold g = new Scaffold(GL_LINES, boundary_pellets, 1);
+		//g.setPlane(a, b, c, d);
+		//Main.geometry_v.add(g);
 
 		checkForIntersections(a, b, c, d);
 
@@ -283,9 +283,10 @@ public class PlanePellet extends Pellet {
 	}
 
 	private void checkForIntersections(float a, float b, float c, float d) {
+		/*
 		intersection_points.clear();
 		System.out.println("checking for new plane-line interesction");
-		for (PrimitiveVertex geom : Main.geometry_v) {
+		for (Scaffold geom : Main.geometry_v) {
 			Vector3f intersect = geom.checkForIntersectionPlaneWithLine(a, b,
 					c, d);
 			if (intersect != null) {
@@ -299,6 +300,7 @@ public class PlanePellet extends Pellet {
 				intersection_points.add(i);
 			}
 		}
+		*/
 	}
 
 	public static void startNewPlane() {
