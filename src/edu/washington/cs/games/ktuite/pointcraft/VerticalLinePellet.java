@@ -83,7 +83,6 @@ public class VerticalLinePellet extends Pellet {
 					if (last_good_position != null) {
 						constructing = true;
 						pos.set(last_good_position);
-						tryMakingFullLine();
 					} else {
 						alive = false;
 					}
@@ -102,7 +101,6 @@ public class VerticalLinePellet extends Pellet {
 						// constructing = true
 						// call some makeactualline-or-try-to function
 						constructing = true;
-						tryMakingFullLine();
 					} else {
 						// it didn't hit some existing geometry or pellet
 						// so check the point cloud
@@ -114,9 +112,22 @@ public class VerticalLinePellet extends Pellet {
 
 						} else {
 							pos.set(last_good_position);
-							constructing = true;
-							tryMakingFullLine();
+							if (last_good_position.x !=0 && last_good_position.y != 0 && last_good_position.z != 0)
+								constructing = true;
+							else {
+								alive = false;
+								if (is_downward_pellet)
+									bottom_pellet = null;
+								if (is_upward_pellet)
+									top_pellet = null;
+							}
 						}
+					}
+					
+					if (constructing && alive)
+						ActionTracker.newVerticalLinePellet(this);
+					if (top_pellet != null && bottom_pellet != null && top_pellet.constructing && top_pellet.alive && bottom_pellet.constructing && bottom_pellet.alive){
+						ActionTracker.newVerticalHeightSet();
 					}
 				}
 			}
@@ -126,20 +137,6 @@ public class VerticalLinePellet extends Pellet {
 			if (radius < max_radius) {
 				radius *= 1.1;
 			}
-		}
-	}
-
-	private static void tryMakingFullLine() {
-		if (bottom_pellet != null & top_pellet != null
-				&& bottom_pellet.constructing && top_pellet.constructing) {
-			List<Vector3f> line_pellets = new LinkedList<Vector3f>();
-			line_pellets.add(top_pellet.pos);
-			line_pellets.add(bottom_pellet.pos);
-			/*
-			Scaffold g = new Scaffold(GL_LINES, line_pellets, 3);
-			g.setLine(line_pellets.get(0), line_pellets.get(1));
-			Main.geometry_v.add(g);
-			*/
 		}
 	}
 
@@ -190,7 +187,6 @@ public class VerticalLinePellet extends Pellet {
 
 			top_pellet = new_top_pellet;
 			bottom_pellet = new_bottom_pellet;
-			tryMakingFullLine();
 		}
 		alive = false;
 	}

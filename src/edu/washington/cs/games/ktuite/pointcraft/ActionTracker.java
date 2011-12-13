@@ -7,7 +7,7 @@ public class ActionTracker {
 	// The different types of actions
 	public enum ActionType {
 		NEW_PELLET, PARTIAL_POLYGON, POLYGON_LINE, COMPLETED_POLYGON, PARTIAL_LINE, COMPLETED_LINE, 
-		PARTIAL_PLANE, COMPLETED_PLANE, NEW_VERTICAL_LINE, NEW_VERTICAL_WALL, 
+		PARTIAL_PLANE, COMPLETED_PLANE, VERTICAL_HEIGHT_SET, NEW_VERTICAL_LINE_PELLET, NEW_VERTICAL_WALL, 
 		DELETED_PELLET, DELETED_LINE, DELETED_PLANE, DELETED_POYLGON, EXTENDED_LINE, EXTENDED_PLANE,
 		LINE_PLANE_INTERSECTION
 	}
@@ -20,6 +20,10 @@ public class ActionTracker {
 		public Primitive primitive;
 		public Stack<PolygonPellet> current_poly;
 		public Scaffold scaffold;
+		
+		public Action(ActionType at){
+			action_type = at;
+		}
 		
 		public Action(ActionType at, Pellet p){
 			pellet = p;
@@ -150,6 +154,16 @@ public class ActionTracker {
 		else if (last_action.action_type == ActionType.LINE_PLANE_INTERSECTION){
 			Main.all_dead_pellets_in_world.add(last_action.pellet);
 		}
+		else if (last_action.action_type == ActionType.NEW_VERTICAL_LINE_PELLET){
+			Main.all_dead_pellets_in_world.add(last_action.pellet);
+		}
+		else if (last_action.action_type == ActionType.VERTICAL_HEIGHT_SET){
+			VerticalLinePellet.clearAllVerticalLines();
+			if (undo_stack.size() > 0 && undo_stack.peek().action_type == ActionType.NEW_VERTICAL_LINE_PELLET){
+				undo();
+				undo();
+			}
+		}
 	}
 	
 	// Here are the new actions to be tracked and undone!
@@ -196,5 +210,13 @@ public class ActionTracker {
 	
 	public static void newLinePlaneIntersection(Pellet p){
 		undo_stack.add(new Action(ActionType.LINE_PLANE_INTERSECTION, p));
+	}
+	
+	public static void newVerticalLinePellet(Pellet p){
+		undo_stack.add(new Action(ActionType.NEW_VERTICAL_LINE_PELLET, p));
+	}
+	
+	public static void newVerticalHeightSet(){
+		undo_stack.add(new Action(ActionType.VERTICAL_HEIGHT_SET));
 	}
 }
