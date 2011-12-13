@@ -20,8 +20,10 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.*;
 import org.lwjgl.util.Timer;
+import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.util.vector.Vector4f;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.openal.Audio;
 import org.newdawn.slick.openal.AudioLoader;
@@ -38,6 +40,8 @@ public class Main {
 	private float FOG_COLOR[] = new float[] { .89f, .89f, .89f, 1.0f };
 	public static Audio launch_effect;
 	public static Audio attach_effect;
+	
+	public static Vector3f up_vec = new Vector3f(0, 1, 0);//0.05343333f, 0.0966372f, -0.062121693f);
 
 	// stuff about the display
 	private static float point_size = 2;
@@ -177,10 +181,11 @@ public class Main {
 		proj_persp = BufferUtils.createDoubleBuffer(16);
 		glGetDouble(GL_PROJECTION_MATRIX, proj_persp);
 		proj_intermediate = BufferUtils.createDoubleBuffer(16);
-
+		
 		// glOrtho(-800.0f / 600.0f, 800.0f / 600.0f, -1f, 1f, 0.001f, 1000.0f);
 		// gluLookAt(0, 0, 0, 0, 0, -1, 0.05343333f, 0.9966372f, -0.062121693f);
 		glMatrixMode(GL_MODELVIEW);
+		
 
 		// fog
 		FloatBuffer fogColorBuffer = ByteBuffer.allocateDirect(4 * 4)
@@ -260,8 +265,8 @@ public class Main {
 	}
 
 	private void InitData() {
-		KdTreeOfPoints
-				.load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
+		KdTreeOfPoints.load("assets/models/lewis-hall.ply");
+		//		.load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 		
 		world_scale =  (float) ((float) ((KdTreeOfPoints.max_corner[1] - KdTreeOfPoints.min_corner[1])) / 0.071716);
 		// lewis hall height for scale ref...
@@ -277,7 +282,7 @@ public class Main {
 		fog_density /= world_scale;
 		glFogf(GL_FOG_DENSITY, fog_density);
 		
-		// load("assets/models/lewis-hall.ply");
+		
 
 		num_points = KdTreeOfPoints.num_points;
 		point_positions = KdTreeOfPoints.point_positions;
@@ -589,6 +594,13 @@ public class Main {
 				if (Keyboard.getEventKey() == Keyboard.KEY_X) {
 					ActionTracker.printStack();
 				}
+				
+				if (Keyboard.getEventKey() == Keyboard.KEY_M) {
+					computeGunDirection();
+					up_vec.set(gun_direction);
+					up_vec.scale(-1);
+					pos.set(0,0,0);
+				}
 
 			}
 		}
@@ -720,6 +732,13 @@ public class Main {
 		glScalef(overhead_scale, overhead_scale, overhead_scale);
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
 
+		// TODO: figure out up vec stuff
+		// this goes here to make the points appear as they should
+		// with new up vector
+		// but gun direction and gun origin is wrong
+		gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
+		
+		
 		glEnable(GL_FOG);
 		if (draw_points)
 			DrawPoints(); // draw the actual 3d things
@@ -801,6 +820,8 @@ public class Main {
 		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
 
+		gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
+		
 		// draw polygons for picking
 		for (int i = 0; i < geometry.size(); i++) {
 			Primitive g = geometry.get(i);
@@ -1173,7 +1194,23 @@ public class Main {
 			pellet.vel.set(gun_direction);
 			pellet.vel.scale(gun_speed);
 			pellet.vel.scale(pellet_scale);
-			pellet.pos.set(pos);
+			
+			float angle = Vector3f.angle(new Vector3f(up_vec.x, up_vec.y, 0), new Vector3f(0,1,0));
+			
+			Matrix4f mat = new Matrix4f();
+			mat.setIdentity();
+			mat.rotate(angle, new Vector3f(0,0,-1));
+		
+
+			Vector4f new_pos = new Vector4f();
+			new_pos.set(pos.x, pos.y, pos.z, 1);
+			Matrix4f.transform(mat, new_pos, new_pos);
+			
+			//System.out.println("old position: " + pos);
+			//System.out.println("new position: " + new_pos);
+			
+			pellet.pos.set(new_pos.x, new_pos.y, new_pos.z);
+			
 			all_pellets_in_world.add(pellet);
 		}
 	}
@@ -1185,7 +1222,21 @@ public class Main {
 		pellet.vel.set(gun_direction);
 		pellet.vel.scale(gun_speed);
 		pellet.vel.scale(pellet_scale);
-		pellet.pos.set(pos);
+		
+		float angle = Vector3f.angle(new Vector3f(up_vec.x, up_vec.y, 0), new Vector3f(0,1,0));
+		
+		Matrix4f mat = new Matrix4f();
+		mat.setIdentity();
+		mat.rotate(angle, new Vector3f(0,0,-1));
+	
+		Vector4f new_pos = new Vector4f();
+		new_pos.set(pos.x, pos.y, pos.z, 1);
+		Matrix4f.transform(mat, new_pos, new_pos);
+		
+		//System.out.println("old position: " + pos);
+		//System.out.println("new position: " + new_pos);
+		
+		pellet.pos.set(new_pos.x, new_pos.y, new_pos.z);
 		all_pellets_in_world.add(pellet);
 
 	}
@@ -1202,6 +1253,18 @@ public class Main {
 		gun_direction.z = horiz.y;
 		gun_direction.y = -1 * (float) Math.sin(tilt_angle * 3.14159 / 180f);
 		gun_direction.normalise();
+		
+		float angle = Vector3f.angle(new Vector3f(up_vec.x, up_vec.y, 0), new Vector3f(0,1,0));
+		
+		Matrix4f mat = new Matrix4f();
+		mat.setIdentity();
+		mat.rotate(angle, new Vector3f(0,0,-1));
+	
+		Vector4f new_direction = new Vector4f();
+		new_direction.set(gun_direction.x, gun_direction.y, gun_direction.z, 1);
+		Matrix4f.transform(mat, new_direction, new_direction);
+		gun_direction.set(new_direction);
+		
 		// System.out.println("gun direction:" + gun_direction);
 		// calculateUpVectorAdjustment(new Vector3f(gun_direction));
 	}
