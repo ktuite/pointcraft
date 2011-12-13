@@ -8,7 +8,8 @@ public class ActionTracker {
 	public enum ActionType {
 		NEW_PELLET, PARTIAL_POLYGON, POLYGON_LINE, COMPLETED_POLYGON, PARTIAL_LINE, COMPLETED_LINE, 
 		PARTIAL_PLANE, COMPLETED_PLANE, NEW_VERTICAL_LINE, NEW_VERTICAL_WALL, 
-		DELETED_PELLET, DELETED_LINE, DELETED_PLANE, DELETED_POYLGON, EXTENDED_LINE, EXTENDED_PLANE
+		DELETED_PELLET, DELETED_LINE, DELETED_PLANE, DELETED_POYLGON, EXTENDED_LINE, EXTENDED_PLANE,
+		LINE_PLANE_INTERSECTION
 	}
 	
 	// A little holder-class for the actions
@@ -125,6 +126,9 @@ public class ActionTracker {
 				PlanePellet.current_plane.pellets.pop();
 			else if (undo_stack.size() > 0 && undo_stack.peek().action_type == ActionType.PARTIAL_PLANE){
 				undo();
+				if (undo_stack.size() > 0 && undo_stack.peek().action_type == ActionType.PARTIAL_PLANE){
+					undo();
+				}
 			}
 		}
 		else if (last_action.action_type == ActionType.COMPLETED_PLANE){
@@ -142,6 +146,9 @@ public class ActionTracker {
 			if (undo_stack.size() > 0 && undo_stack.peek().action_type == ActionType.PARTIAL_PLANE){
 				undo();
 			}
+		}
+		else if (last_action.action_type == ActionType.LINE_PLANE_INTERSECTION){
+			Main.all_dead_pellets_in_world.add(last_action.pellet);
 		}
 	}
 	
@@ -185,5 +192,9 @@ public class ActionTracker {
 	
 	public static void extendedPlane(Scaffold s){
 		undo_stack.add(new Action(ActionType.EXTENDED_PLANE, s));
+	}
+	
+	public static void newLinePlaneIntersection(Pellet p){
+		undo_stack.add(new Action(ActionType.LINE_PLANE_INTERSECTION, p));
 	}
 }

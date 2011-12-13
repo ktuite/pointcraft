@@ -51,26 +51,34 @@ public class PlanePellet extends Pellet {
 
 				// did it hit a line or plane?
 				Vector3f closest_point = queryScaffoldGeometry();
+				
 				if (neighbor_pellet != null) {
 					System.out.println("pellet stuck to another pellet");
 					pos.set(neighbor_pellet.pos);
 					alive = false;
 					ActionTracker.newPlanePellet(this);
 					current_plane.add(this);
-					current_plane.fitPlane();
-					if (current_plane.pellets.size() == 3)
+					if (current_plane.pellets.size() >= 3)
 						ActionTracker.newPlane(current_plane);
+					current_plane.fitPlane();
+
 				} else if (closest_point != null) {
 					System.out.println("pellet stuck to some geometry");
 					constructing = true;
 					pos.set(closest_point);
 					ActionTracker.newPlanePellet(this);
-					current_plane.add(this);
-					current_plane.fitPlane();
-					if (current_plane.pellets.size() == 3)
-						ActionTracker.newPlane(current_plane);
+					
+					if (!isAnotherPlane()){
+						current_plane.add(this);
+						
+						if (current_plane.pellets.size() >= 3)
+							ActionTracker.newPlane(current_plane);
+						current_plane.fitPlane();
+					}
+					
+					
 					stickPelletToScaffolding();
-				} else {
+				} else if (Main.draw_points) {
 					// it didn't hit some existing geometry or pellet
 					// so check the point cloud
 					int neighbors = queryKdTree(pos.x, pos.y, pos.z, radius);
@@ -82,9 +90,9 @@ public class PlanePellet extends Pellet {
 						setInPlace();
 						ActionTracker.newPlanePellet(this);
 						current_plane.add(this);
-						current_plane.fitPlane();
-						if (current_plane.pellets.size() == 3)
+						if (current_plane.pellets.size() >= 3)
 							ActionTracker.newPlane(current_plane);
+						current_plane.fitPlane();
 					}
 				}
 				
@@ -99,6 +107,17 @@ public class PlanePellet extends Pellet {
 		}
 	}
 
+	private boolean isAnotherPlane() {
+		for (Scaffold geom : Main.geometry_v) {
+			if (radius > geom.distanceToPoint(pos)) {
+				geom.addNewPellet(this);
+				if (geom instanceof PlaneScaffold)
+					return true;
+			}
+		}
+		return false;
+	}
+
 	public void delete() {
 		super.delete();
 	}
@@ -106,7 +125,7 @@ public class PlanePellet extends Pellet {
 	public void draw() {
 		if (is_intersection) {
 			float alpha = 1 - radius / max_radius * .2f;
-			glColor4f(.1f, .4f, .7f, alpha);
+			glColor4f(.15f, .45f, .75f, alpha);
 			sphere.draw(radius, 32, 32);
 		} else if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;

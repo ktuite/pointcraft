@@ -62,21 +62,23 @@ public class LinePellet extends Pellet {
 					alive = false;
 					ActionTracker.newLinePellet(this);
 					current_line.add(this);
-					current_line.fitLine();
-					if (current_line.pellets.size() == 2)
+					
+					if (current_line.pellets.size() >= 2)
 						ActionTracker.newLine(current_line);
+					current_line.fitLine();
 				} else if (closest_point != null) {
 					System.out.println("pellet stuck to some geometry");
 					constructing = true;
 					pos.set(closest_point);
 					ActionTracker.newLinePellet(this);
 					current_line.add(this);
-					current_line.fitLine();
-					if (current_line.pellets.size() == 2)
+					
+					if (current_line.pellets.size() >= 2)
 						ActionTracker.newLine(current_line);
+					current_line.fitLine();
 					stickPelletToScaffolding();
 					
-				} else {
+				} else if (Main.draw_points) {
 					// it didn't hit some existing geometry or pellet
 					// so check the point cloud
 					int neighbors = queryKdTree(pos.x, pos.y, pos.z, radius);
@@ -88,9 +90,9 @@ public class LinePellet extends Pellet {
 						setInPlace();
 						ActionTracker.newLinePellet(this);
 						current_line.add(this);
-						current_line.fitLine();
-						if (current_line.pellets.size() == 2)
+						if (current_line.pellets.size() >= 2)
 							ActionTracker.newLine(current_line);
+						current_line.fitLine();
 					}
 				}
 			
@@ -113,7 +115,7 @@ public class LinePellet extends Pellet {
 	public void draw() {
 		if (is_intersection) {
 			float alpha = 1 - radius / max_radius * .2f;
-			glColor4f(.1f, .4f, .7f, alpha);
+			glColor4f(.15f, .45f, .75f, alpha);
 			sphere.draw(radius, 32, 32);
 		} else if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;

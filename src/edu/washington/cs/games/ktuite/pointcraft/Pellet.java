@@ -114,7 +114,7 @@ public class Pellet {
 	public Vector3f queryScaffoldGeometry() {
 		if (!Main.draw_scaffolding)
 			return null;
-
+		
 		Vector3f closest_point = null;
 		for (Scaffold geom : Main.geometry_v) {
 			if (radius > geom.distanceToPoint(pos)) {

@@ -41,6 +41,10 @@ public class LineScaffold extends Scaffold {
 
 		Vector3f line_direction = new Vector3f();
 		Vector3f.sub(pellets.get(0).pos, pellets.get(1).pos, line_direction);
+		
+		if (line_direction.lengthSquared() == 0)
+			return;
+		
 		line_direction.normalise();
 
 		Vector3f center = new Vector3f();
@@ -75,6 +79,7 @@ public class LineScaffold extends Scaffold {
 
 					pellets.add(i);
 					Main.new_pellets_to_add_to_world.add(i);
+					ActionTracker.newLinePlaneIntersection(i);
 				}
 			}
 		}

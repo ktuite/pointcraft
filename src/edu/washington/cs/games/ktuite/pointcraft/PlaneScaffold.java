@@ -34,6 +34,7 @@ public class PlaneScaffold extends Scaffold {
 		if (pellets.contains(p)) {
 			System.out.println("the line already contains this pellet");
 		} else {
+			System.out.println("A NEW THING ADDED TO THE PLANE!");
 			pellets.add(p);
 		}
 		fitPlane();
@@ -46,14 +47,15 @@ public class PlaneScaffold extends Scaffold {
 		if (center != null) {
 			Vector3f dist_to_center = new Vector3f();
 			Vector3f.sub(pos, center, dist_to_center);
-			if (dist_to_center.length() > plane_extent)
+			if (dist_to_center.length() > plane_extent * 1.2)
 				return dist;
 
 			if (!(a == 0 && b == 0 && c == 0 && d == 0)) {
 				dist = (float) ((a * pos.x + b * pos.y + c * pos.z + d) / Math
-						.sqrt(a * a + b * b + d * d));
+						.sqrt(a * a + b * b + c * c));
 			}
 		}
+		
 		return Math.abs(dist);
 	}
 
@@ -63,7 +65,6 @@ public class PlaneScaffold extends Scaffold {
 		norm.normalise();
 		norm.scale(signedDistanceToPlane(pos));
 		Vector3f.sub(pos, norm, pt);
-		System.out.println("closest point to this plane" + pt);
 		return pt;
 	}
 
@@ -208,7 +209,6 @@ public class PlaneScaffold extends Scaffold {
 		}
 
 		checkForIntersections();
-
 	}
 
 	private void checkForIntersections() {
@@ -226,6 +226,7 @@ public class PlaneScaffold extends Scaffold {
 
 					pellets.add(i);
 					Main.new_pellets_to_add_to_world.add(i);
+					ActionTracker.newLinePlaneIntersection(i);
 				}
 			}
 		}
@@ -266,6 +267,11 @@ public class PlaneScaffold extends Scaffold {
 				i.x = p1.x + u * (p2.x - p1.x);
 				i.y = p1.y + u * (p2.y - p1.y);
 				i.z = p1.z + u * (p2.z - p1.z);
+				
+				Vector3f dist = new Vector3f();
+				Vector3f.sub(i, center, dist);
+				if (dist.length() > plane_extent)
+					return null;
 			}
 		}
 
