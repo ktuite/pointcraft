@@ -61,7 +61,7 @@ public class Main {
 
 	// stuff about general guns and general list of pellets/things shot
 	private Vector3f gun_direction;
-	final private float gun_speed = 0.001f * world_scale;
+	private float gun_speed = 0.001f * world_scale;
 	public static float pellet_scale = 1f;
 	public static Timer timer = new Timer();
 	public static Stack<Pellet> all_pellets_in_world;
@@ -261,7 +261,15 @@ public class Main {
 
 	private void InitData() {
 		KdTreeOfPoints
-				.load("/Users/ktuite/Desktop/sketchymodeler/kidder_data/kidder-sparse.ply");
+				.load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
+		
+		world_scale =  (float) ((float) ((KdTreeOfPoints.max_corner[1] - KdTreeOfPoints.min_corner[1])) / 0.071716);
+		// lewis hall height for scale ref...
+
+		System.out.println("world scale: " + world_scale);
+		walkforce = 1 / 4000f * world_scale;
+		max_speed = 1 * world_scale;
+		gun_speed = 0.001f * world_scale;
 
 		// load("assets/models/lewis-hall.ply");
 
