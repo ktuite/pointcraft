@@ -265,8 +265,9 @@ public class Main {
 	}
 
 	private void InitData() {
-		KdTreeOfPoints.load("assets/models/lewis-hall.ply");
-		//		.load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
+		KdTreeOfPoints
+		//.load("assets/models/lewis-hall.ply");
+				.load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 		
 		world_scale =  (float) ((float) ((KdTreeOfPoints.max_corner[1] - KdTreeOfPoints.min_corner[1])) / 0.071716);
 		// lewis hall height for scale ref...
@@ -600,6 +601,7 @@ public class Main {
 					up_vec.set(gun_direction);
 					up_vec.scale(-1);
 					pos.set(0,0,0);
+					tilt_angle = 0;
 				}
 
 			}
