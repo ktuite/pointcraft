@@ -7,7 +7,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.CharBuffer;
 import java.nio.DoubleBuffer;
 import java.util.ArrayList;
 
@@ -30,7 +29,7 @@ public class KdTreeOfPoints {
 			-1 * Float.MAX_VALUE, -1 * Float.MAX_VALUE };
 
 	public static void loadRandom() {
-		num_points = 200;
+		num_points = 2000;
 		point_colors = BufferUtils.createDoubleBuffer(num_points * 3);
 		point_positions = BufferUtils.createDoubleBuffer(num_points * 3);
 
@@ -40,6 +39,13 @@ public class KdTreeOfPoints {
 				point_positions.put(i * 3 + k, Math.random() * 0.01 - 0.005);
 			}
 		}
+		point_colors.rewind();
+		point_positions.rewind();
+		for (int k = 0; k < 3; k++) {
+			min_corner[k] = -0.005f;
+			max_corner[k] = 0.005f;
+		}
+		buildLookupTree();
 	}
 
 	public static void load(String filename) {
@@ -92,7 +98,6 @@ public class KdTreeOfPoints {
 
 		tree = new PointOctree(center, max_span);
 		tree.setMinNodeSize(max_span / 5);
-		
 
 		for (int i = 0; i < num_points; i++) {
 			tree.addPoint(new Vec3D((float) point_positions.get(i * 3 + 0),
@@ -105,12 +110,16 @@ public class KdTreeOfPoints {
 
 	private static void parsePlyFile(BufferedReader buf, String filename) {
 		try {
-			int r_idx, g_idx, b_idx;
+			int r_idx, g_idx, b_idx, a_idx;
 			int x_idx, y_idx, z_idx;
 			r_idx = g_idx = b_idx = x_idx = y_idx = z_idx = 0;
+			a_idx = -1;
 
 			boolean binary = false;
 			int chars_read = 0;
+			int len = 0;
+			boolean vert_properties_started = false;
+			boolean vert_properties_finished = false;
 
 			int count = 0;
 			String line = buf.readLine();
@@ -119,24 +128,39 @@ public class KdTreeOfPoints {
 				if (line.startsWith("element vertex")) {
 					num_points = Integer.parseInt(line.split("\\s+")[2]);
 					count = 0;
+					vert_properties_started = true;
+				} else if (line.startsWith("element")) {
+					if (vert_properties_started) {
+						vert_properties_finished = true;
+					}
 				}
+
 				if (line.contains("binary_little_endian")) {
 					binary = true;
 				}
+
 				if (line.contains(" x"))
 					x_idx = count;
 				else if (line.contains(" y"))
 					y_idx = count;
 				else if (line.contains(" z"))
 					z_idx = count;
-				else if (line.contains("red"))
+				else if (line.contains("red")) {
 					r_idx = count;
-				else if (line.contains("green"))
+					len -= 3;
+				} else if (line.contains("green")) {
 					g_idx = count;
-				else if (line.contains("blue"))
+					len -= 3;
+				} else if (line.contains("blue")) {
 					b_idx = count;
+					len -= 3;
+				} else if (line.contains("alpha")) {
+					a_idx = count;
+					len -= 3;
+				}
 
-				if (line.contains("property"))
+				if (line.contains("property") && vert_properties_started
+						&& !vert_properties_finished)
 					count++;
 
 				line = buf.readLine();
@@ -151,6 +175,8 @@ public class KdTreeOfPoints {
 			point_positions = BufferUtils.createDoubleBuffer(num_points * 3);
 			point_colors.rewind();
 			point_positions.rewind();
+
+			len += count * 4;
 
 			if (!binary) {
 				int i = 0;
@@ -191,7 +217,6 @@ public class KdTreeOfPoints {
 				byte[] header = new byte[chars_read];
 				stream.read(header, 0, chars_read);
 
-				int len = count * 4 - 9;
 				byte[] pt = new byte[len];
 				ByteBuffer bb = BufferUtils.createByteBuffer(len);
 				bb.order(ByteOrder.LITTLE_ENDIAN);
@@ -216,6 +241,8 @@ public class KdTreeOfPoints {
 						} else if (i == b_idx) {
 							b = bb.get();
 							// System.out.print(b + ", ");
+						} else if (i == a_idx) {
+							bb.get();
 						} else if (i == x_idx) {
 							x = bb.getFloat();
 						} else if (i == y_idx) {
@@ -223,21 +250,21 @@ public class KdTreeOfPoints {
 						} else if (i == z_idx) {
 							z = bb.getFloat();
 						} else {
-							float f = bb.getFloat();
+							bb.getFloat();
 							// System.out.print(f + ", ");
 						}
 					}
 					// System.out.println("");
 
-		
-					point_colors.put(r / 255.0);
-					point_colors.put(g / 255.0);
-					point_colors.put(b / 255.0);
+					
+					point_colors.put((r & 0xFF) / 255.0);
+					point_colors.put((g & 0xFF)  / 255.0);
+					point_colors.put((b & 0xFF)  / 255.0);
 
 					point_positions.put(x);
 					point_positions.put(y);
 					point_positions.put(z);
-					
+
 					for (int k = 0; k < 3; k++) {
 						if (point_positions.get(h * 3 + k) < min_corner[k]) {
 							min_corner[k] = (float) point_positions.get(h * 3
@@ -249,10 +276,10 @@ public class KdTreeOfPoints {
 						}
 					}
 
-					if (h % 10000 == 0){
+					if (h % 10000 == 0) {
 						System.out.println("points loaded: " + h + "/"
 								+ num_points);
-						
+						//System.out.println(" " + r + "," + g + "," + b );
 
 					}
 				}

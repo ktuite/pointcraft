@@ -40,8 +40,10 @@ public class Main {
 	private float FOG_COLOR[] = new float[] { .89f, .89f, .89f, 1.0f };
 	public static Audio launch_effect;
 	public static Audio attach_effect;
-	
-	public static Vector3f up_vec = new Vector3f(0, 1, 0);//0.05343333f, 0.0966372f, -0.062121693f);
+
+	public static Vector3f up_vec = new Vector3f(0, 1, 0);// 0.05343333f,
+															// 0.0966372f,
+															// -0.062121693f);
 
 	// stuff about the display
 	private static float point_size = 2;
@@ -103,6 +105,7 @@ public class Main {
 	private GUI onscreen_gui;
 	private GUI instructional_gui;
 	private OnscreenOverlay onscreen_overlay;
+	private InstructionalOverlay instruction_overlay;
 
 	public static void main(String[] args) {
 		Main main = new Main();
@@ -111,6 +114,7 @@ public class Main {
 		main.InitGUI();
 		main.InitGraphics();
 
+		main.LoadData();
 		main.InitData();
 		main.InitGameVariables();
 
@@ -124,7 +128,7 @@ public class Main {
 			Display.setVSyncEnabled(true);
 			Display.create();
 			Display.setTitle("PointCraft FPS-3D-Modeler");
-			Mouse.setGrabbed(true);
+			Mouse.setGrabbed(false);
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 			System.out.println("ERROR running InitDisplay... game exiting");
@@ -145,7 +149,9 @@ public class Main {
 					renderer);
 			onscreen_gui.applyTheme(themeManager);
 
-			instructional_gui = new GUI(new InstructionalOverlay(), renderer);
+			instruction_overlay = new InstructionalOverlay();
+			instruction_overlay.setPointerToMainProgram(this);
+			instructional_gui = new GUI(instruction_overlay, renderer);
 			URL url2 = new File("assets/theme/guiTheme.xml").toURL();
 			ThemeManager themeManager2 = ThemeManager.createThemeManager(url2,
 					renderer);
@@ -181,11 +187,10 @@ public class Main {
 		proj_persp = BufferUtils.createDoubleBuffer(16);
 		glGetDouble(GL_PROJECTION_MATRIX, proj_persp);
 		proj_intermediate = BufferUtils.createDoubleBuffer(16);
-		
+
 		// glOrtho(-800.0f / 600.0f, 800.0f / 600.0f, -1f, 1f, 0.001f, 1000.0f);
 		// gluLookAt(0, 0, 0, 0, 0, -1, 0.05343333f, 0.9966372f, -0.062121693f);
 		glMatrixMode(GL_MODELVIEW);
-		
 
 		// fog
 		FloatBuffer fogColorBuffer = ByteBuffer.allocateDirect(4 * 4)
@@ -264,12 +269,22 @@ public class Main {
 
 	}
 
-	private void InitData() {
+	public void loadNewPointCloud(File file) {
+		System.out.println("attempting to load new point cloud : "
+				+ file.getAbsolutePath());
+		KdTreeOfPoints.load(file.getAbsolutePath());
+		InitData();
+	}
+
+	private void LoadData() {
 		KdTreeOfPoints
-		//.load("assets/models/lewis-hall.ply");
-				.load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
-		
-		world_scale =  (float) ((float) ((KdTreeOfPoints.max_corner[1] - KdTreeOfPoints.min_corner[1])) / 0.071716);
+		//.loadRandom();
+		.load("assets/models/lewis-hall-binary.ply");
+		//.load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
+	}
+
+	private void InitData() {
+		world_scale = (float) ((float) ((KdTreeOfPoints.max_corner[1] - KdTreeOfPoints.min_corner[1])) / 0.071716);
 		// lewis hall height for scale ref...
 
 		System.out.println("world scale: " + world_scale);
@@ -277,52 +292,14 @@ public class Main {
 		max_speed = 1 * world_scale;
 		gun_speed = 0.001f * world_scale;
 
-
 		glFogf(GL_FOG_END, 3.0f * world_scale);
 		glFogf(GL_FOG_START, .25f * world_scale);
 		fog_density /= world_scale;
 		glFogf(GL_FOG_DENSITY, fog_density);
-		
-		
 
 		num_points = KdTreeOfPoints.num_points;
 		point_positions = KdTreeOfPoints.point_positions;
 		point_colors = KdTreeOfPoints.point_colors;
-
-		/*
-		 * // data of the point cloud itself, loaded in from C++
-		 * 
-		 * LibPointCloud //
-		 * .load("/Users/ktuite/Desktop/sketchymodeler/server_code/Uris.bin");
-		 * .load("assets/models/lewis-hall.bin"); //
-		 * .loadBundle("/Users/ktuite/Desktop/sketchymodeler/models/lewis.bundle"
-		 * ); // .load(
-		 * "/Users/ktuite/Desktop/sketchymodeler/instances/lewis-hall/model.bin"
-		 * ); //
-		 * .load("/Users/ktuite/Desktop/sketchymodeler/server_code/Parr.bin");
-		 * // .loadBundle(
-		 * "/Users/ktuite/Desktop/sketchymodeler/texviewer/cse/bundle.out"); //
-		 * .
-		 * load("/Users/ktuite/Desktop/sketchymodeler/server_code/SageChapel.bin"
-		 * ); //
-		 * .load("/Users/ktuite/Desktop/sketchymodeler/server_code/HOC_culdesac.bin"
-		 * ); //
-		 * .load("/Users/ktuite/Desktop/sketchymodeler/server_code/fountainplus.bin"
-		 * ); System.out.println("number of points: " +
-		 * LibPointCloud.getNumPoints());
-		 * 
-		 * num_points = LibPointCloud.getNumPoints(); point_positions =
-		 * LibPointCloud.getPointPositions() .getByteBuffer(0, num_points * 3 *
-		 * 8).asDoubleBuffer(); point_colors = LibPointCloud.getPointColors()
-		 * .getByteBuffer(0, num_points * 3 * 8).asDoubleBuffer();
-		 * 
-		 * System.out.println("first point: " + point_positions.get(0));
-		 * System.out.println("first color: " + point_colors.get(0));
-		 * 
-		 * // FindMinMaxOfWorld();
-		 * 
-		 * LibPointCloud.makeKdTree();
-		 */
 	}
 
 	@SuppressWarnings("unused")
@@ -576,15 +553,15 @@ public class Main {
 				}
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_LBRACKET) {
-					fog_density -= 5/world_scale;
+					fog_density -= 5 / world_scale;
 					if (fog_density < 0)
 						fog_density = 0;
 					glFogf(GL_FOG_DENSITY, fog_density);
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_RBRACKET) {
-					fog_density += 5/world_scale;
-					if (fog_density > 50/world_scale)
-						fog_density = 50/world_scale;
+					fog_density += 5 / world_scale;
+					if (fog_density > 50 / world_scale)
+						fog_density = 50 / world_scale;
 					glFogf(GL_FOG_DENSITY, fog_density);
 				}
 
@@ -595,13 +572,19 @@ public class Main {
 				if (Keyboard.getEventKey() == Keyboard.KEY_X) {
 					ActionTracker.printStack();
 				}
-				
+
 				if (Keyboard.getEventKey() == Keyboard.KEY_M) {
-					computeGunDirection();
-					up_vec.set(gun_direction);
-					up_vec.scale(-1);
-					pos.set(0,0,0);
-					tilt_angle = 0;
+					if (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29)) {
+						up_vec.set(0,1,0);
+						pos.set(0, 0, 0);
+						tilt_angle = 0;
+					} else {
+						computeGunDirection();
+						up_vec.set(gun_direction);
+						up_vec.scale(-1);
+						pos.set(0, 0, 0);
+						tilt_angle = 0;
+					}
 				}
 
 			}
@@ -739,8 +722,7 @@ public class Main {
 		// with new up vector
 		// but gun direction and gun origin is wrong
 		gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
-		
-		
+
 		glEnable(GL_FOG);
 		if (draw_points)
 			DrawPoints(); // draw the actual 3d things
@@ -823,7 +805,7 @@ public class Main {
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
 
 		gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
-		
+
 		// draw polygons for picking
 		for (int i = 0; i < geometry.size(); i++) {
 			Primitive g = geometry.get(i);
@@ -1196,23 +1178,23 @@ public class Main {
 			pellet.vel.set(gun_direction);
 			pellet.vel.scale(gun_speed);
 			pellet.vel.scale(pellet_scale);
-			
-			float angle = Vector3f.angle(new Vector3f(up_vec.x, up_vec.y, 0), new Vector3f(0,1,0));
-			
+
+			float angle = Vector3f.angle(new Vector3f(up_vec.x, up_vec.y, 0),
+					new Vector3f(0, 1, 0));
+
 			Matrix4f mat = new Matrix4f();
 			mat.setIdentity();
-			mat.rotate(angle, new Vector3f(0,0,-1));
-		
+			mat.rotate(angle, new Vector3f(0, 0, -1));
 
 			Vector4f new_pos = new Vector4f();
 			new_pos.set(pos.x, pos.y, pos.z, 1);
 			Matrix4f.transform(mat, new_pos, new_pos);
-			
-			//System.out.println("old position: " + pos);
-			//System.out.println("new position: " + new_pos);
-			
+
+			// System.out.println("old position: " + pos);
+			// System.out.println("new position: " + new_pos);
+
 			pellet.pos.set(new_pos.x, new_pos.y, new_pos.z);
-			
+
 			all_pellets_in_world.add(pellet);
 		}
 	}
@@ -1224,20 +1206,21 @@ public class Main {
 		pellet.vel.set(gun_direction);
 		pellet.vel.scale(gun_speed);
 		pellet.vel.scale(pellet_scale);
-		
-		float angle = Vector3f.angle(new Vector3f(up_vec.x, up_vec.y, 0), new Vector3f(0,1,0));
-		
+
+		float angle = Vector3f.angle(new Vector3f(up_vec.x, up_vec.y, 0),
+				new Vector3f(0, 1, 0));
+
 		Matrix4f mat = new Matrix4f();
 		mat.setIdentity();
-		mat.rotate(angle, new Vector3f(0,0,-1));
-	
+		mat.rotate(angle, new Vector3f(0, 0, -1));
+
 		Vector4f new_pos = new Vector4f();
 		new_pos.set(pos.x, pos.y, pos.z, 1);
 		Matrix4f.transform(mat, new_pos, new_pos);
-		
-		//System.out.println("old position: " + pos);
-		//System.out.println("new position: " + new_pos);
-		
+
+		// System.out.println("old position: " + pos);
+		// System.out.println("new position: " + new_pos);
+
 		pellet.pos.set(new_pos.x, new_pos.y, new_pos.z);
 		all_pellets_in_world.add(pellet);
 
@@ -1255,18 +1238,19 @@ public class Main {
 		gun_direction.z = horiz.y;
 		gun_direction.y = -1 * (float) Math.sin(tilt_angle * 3.14159 / 180f);
 		gun_direction.normalise();
-		
-		float angle = Vector3f.angle(new Vector3f(up_vec.x, up_vec.y, 0), new Vector3f(0,1,0));
-		
+
+		float angle = Vector3f.angle(new Vector3f(up_vec.x, up_vec.y, 0),
+				new Vector3f(0, 1, 0));
+
 		Matrix4f mat = new Matrix4f();
 		mat.setIdentity();
-		mat.rotate(angle, new Vector3f(0,0,-1));
-	
+		mat.rotate(angle, new Vector3f(0, 0, -1));
+
 		Vector4f new_direction = new Vector4f();
 		new_direction.set(gun_direction.x, gun_direction.y, gun_direction.z, 1);
 		Matrix4f.transform(mat, new_direction, new_direction);
 		gun_direction.set(new_direction);
-		
+
 		// System.out.println("gun direction:" + gun_direction);
 		// calculateUpVectorAdjustment(new Vector3f(gun_direction));
 	}

@@ -85,7 +85,7 @@ public class ServerCommunicator {
 		}
 		*/
 
-		//sendMessage(message);
+		sendMessage(message);
 
 	}
 

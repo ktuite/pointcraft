@@ -20,6 +20,25 @@ public class Save {
 
 	private static JFileChooser fc;
 
+	
+	public static File loadPointCloud() {
+		boolean mouseGrabbed = Mouse.isGrabbed();
+		Mouse.setGrabbed(false);
+		if (fc == null) {
+			fc = new JFileChooser();
+		}
+		int returnVal = fc.showOpenDialog(fc);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = fc.getSelectedFile();
+			Mouse.setGrabbed(mouseGrabbed);
+			return file;
+		}
+		else{
+			Mouse.setGrabbed(mouseGrabbed);
+			return null;
+		}
+	}
+	
 	public static void attemptToSavePly() {
 		Mouse.setGrabbed(false);
 		System.out.println("save");
