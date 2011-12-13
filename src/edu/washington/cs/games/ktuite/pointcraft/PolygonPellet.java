@@ -63,7 +63,7 @@ public class PolygonPellet extends Pellet {
 						neighbor_pellet = new PolygonPellet(neighbor_pellet);
 						Main.new_pellets_to_add_to_world.add(neighbor_pellet);
 					}
-					
+
 					// if neighbor pellet's class is not PolygonPellet...
 					// neighbor_pellet = new PolygonPellet(neighbor_pellet)
 					// copy the position and stuff from the line/plane
@@ -75,13 +75,17 @@ public class PolygonPellet extends Pellet {
 					// then add the new one to the end
 
 					current_cycle.add((PolygonPellet) neighbor_pellet);
-					if (current_cycle.size() > 1)
+					if (current_cycle.size() > 1) {
 						makeLine();
+					}
 
 					if (current_cycle.size() > 2
 							&& current_cycle.get(0) == current_cycle
-									.get(current_cycle.size() - 1))
+									.get(current_cycle.size() - 1)) {
 						makePolygon();
+					} else {
+						ActionTracker.newPolygonPellet(this);
+					}
 
 				} else if (closest_point != null) {
 					System.out.println("pellet stuck to some geometry");
@@ -124,6 +128,10 @@ public class PolygonPellet extends Pellet {
 
 				if (current_cycle.size() > 0)
 					current_cycle.get(0).setAsFirstInCycle();
+
+				if (constructing == true) {
+					ActionTracker.newPolygonPellet(this);
+				}
 			}
 		} else {
 			// the pellet has stuck... here we just give it a nice growing
@@ -139,7 +147,11 @@ public class PolygonPellet extends Pellet {
 		List<Pellet> last_two = new LinkedList<Pellet>();
 		last_two.add(current_cycle.get(current_cycle.size() - 2));
 		last_two.add(current_cycle.get(current_cycle.size() - 1));
-		Main.geometry.add(new Primitive(GL_LINES, last_two));
+
+		Primitive line = new Primitive(GL_LINES, last_two);
+		Main.geometry.add(line);
+
+		ActionTracker.newPolygonLine(line);
 	}
 
 	public void makePolygon() {
@@ -152,6 +164,9 @@ public class PolygonPellet extends Pellet {
 		polygon.setPlayerPositionAndViewingDirection(pos, vel);
 		Main.geometry.add(polygon);
 		Main.server.newPolygon();
+
+		ActionTracker.newPolygon(polygon,
+				(Stack<PolygonPellet>) current_cycle.clone());
 
 		current_cycle.clear();
 	}

@@ -18,6 +18,7 @@ public class Pellet {
 	public float radius;
 	public float max_radius;
 	public boolean alive;
+	public boolean visible;
 	public boolean constructing;
 	public float birthday;
 	protected List<Pellet> main_pellets;
@@ -50,6 +51,7 @@ public class Pellet {
 		max_radius = radius * 1.5f;
 		birthday = Main.timer.getTime();
 		alive = true;
+		visible = true;
 		constructing = false;
 		main_pellets = _pellets;
 		id = ID;

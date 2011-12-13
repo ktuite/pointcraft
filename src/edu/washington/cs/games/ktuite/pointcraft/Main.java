@@ -120,7 +120,7 @@ public class Main {
 			Display.setVSyncEnabled(true);
 			Display.create();
 			Display.setTitle("PointCraft FPS-3D-Modeler");
-			Mouse.setGrabbed(false);
+			Mouse.setGrabbed(true);
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 			System.out.println("ERROR running InitDisplay... game exiting");
@@ -260,7 +260,10 @@ public class Main {
 	}
 
 	private void InitData() {
-		KdTreeOfPoints.load("assets/models/lewis-hall.ply");
+		KdTreeOfPoints
+				.load("/Users/ktuite/Desktop/sketchymodeler/kidder_data/kidder-sparse.ply");
+
+		// load("assets/models/lewis-hall.ply");
 
 		num_points = KdTreeOfPoints.num_points;
 		point_positions = KdTreeOfPoints.point_positions;
@@ -369,29 +372,20 @@ public class Main {
 		InitGraphics();
 
 	}
-/*
-	private static void undoLastPellet() {
-		if (PolygonPellet.current_cycle.size() > 0) {
-			PolygonPellet.current_cycle.pop();
-			// all_pellets_in_world.pop();
-		}
-		if (geometry.size() > 0 && geometry.peek().isPolygon()) {
-			Primitive last_poly = geometry.pop();
-			for (int i = 0; i < last_poly.numVertices() - 1; i++) {
-				geometry.pop();
-				if (all_pellets_in_world.size() > 0) {
-					// all_pellets_in_world.pop();
-				}
-			}
-			PolygonPellet.current_cycle.clear();
-		} else if (geometry.size() > 0) {
-			geometry.pop();
-		}
-		// TODO: horribly broke undoing for making cycles except it wasnt that
-		// great to begin with
 
-	}
-*/
+	/*
+	 * private static void undoLastPellet() { if
+	 * (PolygonPellet.current_cycle.size() > 0) {
+	 * PolygonPellet.current_cycle.pop(); // all_pellets_in_world.pop(); } if
+	 * (geometry.size() > 0 && geometry.peek().isPolygon()) { Primitive
+	 * last_poly = geometry.pop(); for (int i = 0; i < last_poly.numVertices() -
+	 * 1; i++) { geometry.pop(); if (all_pellets_in_world.size() > 0) { //
+	 * all_pellets_in_world.pop(); } } PolygonPellet.current_cycle.clear(); }
+	 * else if (geometry.size() > 0) { geometry.pop(); } // TODO: horribly broke
+	 * undoing for making cycles except it wasnt that // great to begin with
+	 * 
+	 * }
+	 */
 	private void UpdateGameObjects() {
 		for (Pellet pellet : all_pellets_in_world) {
 			pellet.update();
@@ -577,9 +571,10 @@ public class Main {
 				if (Keyboard.getEventKey() == Keyboard.KEY_U) {
 					WiggleTool.fixModel();
 				}
-				
-				if (Keyboard.getEventKey() == Keyboard.KEY_Z) {
-					System.out.println("Last action: " + ActionTracker.showLatestAction());
+
+				if (Keyboard.getEventKey() == Keyboard.KEY_X) {
+					System.out.println("Last action: "
+							+ ActionTracker.showLatestAction());
 				}
 
 			}
@@ -748,7 +743,8 @@ public class Main {
 		if (onscreen_gui != null) {
 			onscreen_overlay.label_current_mode.setText("Current Gun: "
 					+ which_gun);
-			onscreen_overlay.label_last_action.setText("Last Action: " + ActionTracker.showLatestAction());
+			onscreen_overlay.label_last_action.setText("Last Action: "
+					+ ActionTracker.showLatestAction());
 			onscreen_gui.update();
 		}
 	}
@@ -884,10 +880,12 @@ public class Main {
 
 		for (Pellet pellet : all_pellets_in_world) {
 			if (pellet.alive) {
-				glPushMatrix();
-				glTranslatef(pellet.pos.x, pellet.pos.y, pellet.pos.z);
-				pellet.draw();
-				glPopMatrix();
+				if (pellet.visible) {
+					glPushMatrix();
+					glTranslatef(pellet.pos.x, pellet.pos.y, pellet.pos.z);
+					pellet.draw();
+					glPopMatrix();
+				}
 			} else {
 				all_dead_pellets_in_world.add(pellet);
 			}
