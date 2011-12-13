@@ -58,6 +58,11 @@ public class PolygonPellet extends Pellet {
 				if (neighbor_pellet != null) {
 					alive = false;
 
+					if (neighbor_pellet == current_cycle.lastElement()){
+						System.out.println("shot at same pellet");
+						return;
+					}
+					
 					if (!(neighbor_pellet instanceof PolygonPellet)) {
 						Main.all_dead_pellets_in_world.add(neighbor_pellet);
 						neighbor_pellet = new PolygonPellet(neighbor_pellet);

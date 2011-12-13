@@ -193,6 +193,8 @@ public class Primitive {
 		Vector3f.sub(vertices.get(0).pos, vertices.get(2).pos, v2);
 		Vector3f norm = new Vector3f();
 		Vector3f.cross(v1, v2, norm);
+		if (norm.lengthSquared() == 0)
+			return 0;
 		norm.normalise();
 
 		float a = norm.x;
