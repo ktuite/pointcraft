@@ -130,6 +130,7 @@ public class Pellet {
 		for (Scaffold geom : Main.geometry_v) {
 			if (radius > geom.distanceToPoint(pos)) {
 				geom.addNewPellet(this);
+				ActionTracker.extendedLine(geom);
 				break;
 			}
 		}

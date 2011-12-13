@@ -56,6 +56,7 @@ public class LineScaffold extends Scaffold {
 		Vector3f.add(center, line_direction, center);
 		pt_2.set(center);
 
+
 		checkForIntersections();
 	}
 
@@ -174,4 +175,13 @@ public class LineScaffold extends Scaffold {
 		}
 	}
 
+	public void nullifyLine() {
+		pt_1 = null;
+		pt_2 = null;
+	}
+	
+	public void removeLastPointAndRefit(){
+		pellets.pop();
+		fitLine();
+	}
 }

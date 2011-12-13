@@ -154,6 +154,7 @@ public class PolygonPellet extends Pellet {
 		ActionTracker.newPolygonLine(line);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void makePolygon() {
 		// make the polygon
 		List<Pellet> cycle = new LinkedList<Pellet>();

@@ -9,7 +9,7 @@ import org.lwjgl.util.vector.Vector3f;
  * keep a list of pellets and then draw lines or polygons between them.
  */
 public class Scaffold {
-	public List<Pellet> pellets;
+	public Stack<Pellet> pellets;
 	public List<Pellet> intersection_pellets; 
 	
 	public Scaffold(){

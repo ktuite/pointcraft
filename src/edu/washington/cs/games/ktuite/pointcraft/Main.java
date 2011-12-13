@@ -573,8 +573,7 @@ public class Main {
 				}
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_X) {
-					System.out.println("Last action: "
-							+ ActionTracker.showLatestAction());
+					ActionTracker.printStack();
 				}
 
 			}

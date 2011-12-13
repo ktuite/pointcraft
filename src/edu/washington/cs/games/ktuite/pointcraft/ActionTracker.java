@@ -8,7 +8,7 @@ public class ActionTracker {
 	public enum ActionType {
 		NEW_PELLET, PARTIAL_POLYGON, POLYGON_LINE, COMPLETED_POLYGON, PARTIAL_LINE, COMPLETED_LINE, 
 		PARTIAL_PLANE, COMPLETED_PLANE, NEW_VERTICAL_LINE, NEW_VERTICAL_WALL, 
-		DELETED_PELLET, DELETED_LINE, DELETED_PLANE, DELETED_POYLGON, PELLET_TYPE_CHANGED
+		DELETED_PELLET, DELETED_LINE, DELETED_PLANE, DELETED_POYLGON, EXTENDED_LINE
 	}
 	
 	// A little holder-class for the actions
@@ -16,18 +16,12 @@ public class ActionTracker {
 	public static class Action {
 		public ActionType action_type;
 		public Pellet pellet;
-		public Pellet pellet2;
 		public Primitive primitive;
 		public Stack<PolygonPellet> current_poly;
+		public Scaffold scaffold;
 		
 		public Action(ActionType at, Pellet p){
 			pellet = p;
-			action_type = at;
-		}
-		
-		public Action(ActionType at, Pellet p, Pellet p2){
-			pellet = p;
-			pellet2 = p2;
 			action_type = at;
 		}
 		
@@ -41,6 +35,11 @@ public class ActionTracker {
 			action_type = at;
 			current_poly = curr;
 		}
+		
+		public Action(ActionType at, Scaffold s){
+			scaffold = s;
+			action_type = at;
+		}
 	}
 
 	private static Stack<Action> undo_stack = new Stack<Action>();
@@ -51,6 +50,13 @@ public class ActionTracker {
 			return "No actions yet";
 		else 
 			return undo_stack.peek().action_type.toString().replace("_", " ");
+	}
+	
+	public static void printStack(){
+		System.out.println("Undo stack: ");
+		for (Action a : undo_stack){
+			System.out.println("\t" + a.action_type.toString());
+		}
 	}
 	
 	public static void undo(){
@@ -71,9 +77,6 @@ public class ActionTracker {
 		else if (last_action.action_type == ActionType.PARTIAL_POLYGON){
 			Main.all_dead_pellets_in_world.add(last_action.pellet);
 			PolygonPellet.current_cycle.pop();
-			//if (undo_stack.size() > 0 && undo_stack.peek().action_type == ActionType.COMPLETED_POLYGON){
-			//	undo();
-			//}
 			if (undo_stack.size() > 0 && undo_stack.peek().action_type == ActionType.POLYGON_LINE){
 				undo();
 			}
@@ -92,10 +95,25 @@ public class ActionTracker {
 				undo();
 			}
 		}
-		else if (last_action.action_type == ActionType.PELLET_TYPE_CHANGED){
-			last_action.pellet.visible = true;
-			last_action.pellet2.alive = false;
-			undo(); // this pellet changing action doesn't happen on its own...
+		else if (last_action.action_type == ActionType.PARTIAL_LINE){
+			Main.all_dead_pellets_in_world.add(last_action.pellet);
+			LinePellet.current_line.pellets.pop();
+		}
+		else if (last_action.action_type == ActionType.COMPLETED_LINE){
+			if (last_action.scaffold != null){
+				((LineScaffold) last_action.scaffold).nullifyLine();
+			}
+			if (undo_stack.size() > 0 && undo_stack.peek().action_type == ActionType.PARTIAL_LINE){
+				undo();
+			}
+		}
+		else if (last_action.action_type == ActionType.EXTENDED_LINE){
+			if (last_action.scaffold != null){
+				((LineScaffold) last_action.scaffold).removeLastPointAndRefit();
+			}
+			if (undo_stack.size() > 0 && undo_stack.peek().action_type == ActionType.PARTIAL_LINE){
+				undo();
+			}
 		}
 	}
 	
@@ -117,7 +135,15 @@ public class ActionTracker {
 		undo_stack.add(new Action(ActionType.COMPLETED_POLYGON, p, curr));
 	}
 	
-	public static void pelletChanged(Pellet old_p, Pellet new_p){
-		undo_stack.add(new Action(ActionType.PELLET_TYPE_CHANGED, old_p, new_p));
+	public static void newLinePellet(Pellet p){
+		undo_stack.add(new Action(ActionType.PARTIAL_LINE, p));
+	}
+	
+	public static void newLine(Scaffold s){
+		undo_stack.add(new Action(ActionType.COMPLETED_LINE, s));
+	}
+	
+	public static void extendedLine(Scaffold s){
+		undo_stack.add(new Action(ActionType.EXTENDED_LINE, s));
 	}
 }

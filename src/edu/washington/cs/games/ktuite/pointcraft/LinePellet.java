@@ -60,12 +60,16 @@ public class LinePellet extends Pellet {
 					System.out.println("pellet stuck to another pellet");
 					pos.set(neighbor_pellet.pos);
 					alive = false;
+					ActionTracker.newLinePellet(this);
 					current_line.add(this);
 					current_line.fitLine();
+					if (current_line.pellets.size() == 2)
+						ActionTracker.newLine(current_line);
 				} else if (closest_point != null) {
 					System.out.println("pellet stuck to some geometry");
 					constructing = true;
 					pos.set(closest_point);
+					ActionTracker.newLinePellet(this);
 					current_line.add(this);
 					current_line.fitLine();
 					stickPelletToScaffolding();
@@ -79,10 +83,15 @@ public class LinePellet extends Pellet {
 						snapToCenterOfPoints();
 						constructing = true;
 						setInPlace();
+						ActionTracker.newLinePellet(this);
 						current_line.add(this);
 						current_line.fitLine();
+						if (current_line.pellets.size() == 2)
+							ActionTracker.newLine(current_line);
 					}
 				}
+			
+					
 
 			}
 		} else {
