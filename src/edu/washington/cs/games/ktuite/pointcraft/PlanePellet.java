@@ -55,14 +55,20 @@ public class PlanePellet extends Pellet {
 					System.out.println("pellet stuck to another pellet");
 					pos.set(neighbor_pellet.pos);
 					alive = false;
+					ActionTracker.newPlanePellet(this);
 					current_plane.add(this);
 					current_plane.fitPlane();
+					if (current_plane.pellets.size() == 3)
+						ActionTracker.newPlane(current_plane);
 				} else if (closest_point != null) {
 					System.out.println("pellet stuck to some geometry");
 					constructing = true;
 					pos.set(closest_point);
+					ActionTracker.newPlanePellet(this);
 					current_plane.add(this);
 					current_plane.fitPlane();
+					if (current_plane.pellets.size() == 3)
+						ActionTracker.newPlane(current_plane);
 					stickPelletToScaffolding();
 				} else {
 					// it didn't hit some existing geometry or pellet
@@ -74,8 +80,11 @@ public class PlanePellet extends Pellet {
 						snapToCenterOfPoints();
 						constructing = true;
 						setInPlace();
+						ActionTracker.newPlanePellet(this);
 						current_plane.add(this);
 						current_plane.fitPlane();
+						if (current_plane.pellets.size() == 3)
+							ActionTracker.newPlane(current_plane);
 					}
 				}
 				

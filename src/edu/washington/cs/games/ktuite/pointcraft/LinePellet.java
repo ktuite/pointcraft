@@ -72,7 +72,10 @@ public class LinePellet extends Pellet {
 					ActionTracker.newLinePellet(this);
 					current_line.add(this);
 					current_line.fitLine();
+					if (current_line.pellets.size() == 2)
+						ActionTracker.newLine(current_line);
 					stickPelletToScaffolding();
+					
 				} else {
 					// it didn't hit some existing geometry or pellet
 					// so check the point cloud

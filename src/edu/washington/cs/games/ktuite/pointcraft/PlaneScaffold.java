@@ -285,4 +285,16 @@ public class PlaneScaffold extends Scaffold {
 		}
 	}
 
+	public void nullifyPlane() {
+		a = 0;
+		b = 0;
+		c = 0;
+		d = 0;
+		grid_vertices = null;
+	}
+	
+	public void removeLastPointAndRefit(){
+		pellets.pop();
+		fitPlane();
+	}
 }

@@ -8,7 +8,7 @@ public class ActionTracker {
 	public enum ActionType {
 		NEW_PELLET, PARTIAL_POLYGON, POLYGON_LINE, COMPLETED_POLYGON, PARTIAL_LINE, COMPLETED_LINE, 
 		PARTIAL_PLANE, COMPLETED_PLANE, NEW_VERTICAL_LINE, NEW_VERTICAL_WALL, 
-		DELETED_PELLET, DELETED_LINE, DELETED_PLANE, DELETED_POYLGON, EXTENDED_LINE
+		DELETED_PELLET, DELETED_LINE, DELETED_PLANE, DELETED_POYLGON, EXTENDED_LINE, EXTENDED_PLANE
 	}
 	
 	// A little holder-class for the actions
@@ -97,7 +97,11 @@ public class ActionTracker {
 		}
 		else if (last_action.action_type == ActionType.PARTIAL_LINE){
 			Main.all_dead_pellets_in_world.add(last_action.pellet);
-			LinePellet.current_line.pellets.pop();
+			if (LinePellet.current_line.pellets.size() > 0)
+				LinePellet.current_line.pellets.pop();
+			else if (undo_stack.size() > 0 && undo_stack.peek().action_type == ActionType.PARTIAL_LINE){
+				undo();
+			}
 		}
 		else if (last_action.action_type == ActionType.COMPLETED_LINE){
 			if (last_action.scaffold != null){
@@ -112,6 +116,30 @@ public class ActionTracker {
 				((LineScaffold) last_action.scaffold).removeLastPointAndRefit();
 			}
 			if (undo_stack.size() > 0 && undo_stack.peek().action_type == ActionType.PARTIAL_LINE){
+				undo();
+			}
+		}
+		else if (last_action.action_type == ActionType.PARTIAL_PLANE){
+			Main.all_dead_pellets_in_world.add(last_action.pellet);
+			if (PlanePellet.current_plane.pellets.size() > 0)
+				PlanePellet.current_plane.pellets.pop();
+			else if (undo_stack.size() > 0 && undo_stack.peek().action_type == ActionType.PARTIAL_PLANE){
+				undo();
+			}
+		}
+		else if (last_action.action_type == ActionType.COMPLETED_PLANE){
+			if (last_action.scaffold != null){
+				((PlaneScaffold) last_action.scaffold).nullifyPlane();
+			}
+			if (undo_stack.size() > 0 && undo_stack.peek().action_type == ActionType.PARTIAL_PLANE){
+				undo();
+			}
+		}
+		else if (last_action.action_type == ActionType.EXTENDED_PLANE){
+			if (last_action.scaffold != null){
+				((PlaneScaffold) last_action.scaffold).removeLastPointAndRefit();
+			}
+			if (undo_stack.size() > 0 && undo_stack.peek().action_type == ActionType.PARTIAL_PLANE){
 				undo();
 			}
 		}
@@ -145,5 +173,17 @@ public class ActionTracker {
 	
 	public static void extendedLine(Scaffold s){
 		undo_stack.add(new Action(ActionType.EXTENDED_LINE, s));
+	}
+	
+	public static void newPlanePellet(Pellet p){
+		undo_stack.add(new Action(ActionType.PARTIAL_PLANE, p));
+	}
+	
+	public static void newPlane(Scaffold s){
+		undo_stack.add(new Action(ActionType.COMPLETED_PLANE, s));
+	}
+	
+	public static void extendedPlane(Scaffold s){
+		undo_stack.add(new Action(ActionType.EXTENDED_PLANE, s));
 	}
 }
