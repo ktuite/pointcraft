@@ -28,17 +28,19 @@ public class DestructorPellet extends Pellet {
 			// existing pellet
 			Pellet neighbor_pellet = queryOtherPellets();
 			if (neighbor_pellet != null) {
-				// TODO: delete the thing it hit
 				alive = false;
+				ActionTracker.deletedPellet(neighbor_pellet);
 				neighbor_pellet.delete();
 			} else {
 				Scaffold geom = getIntersectedScaffoldGeometry();
 				if (geom != null) {
 					Main.geometry_v.remove(geom);
+					ActionTracker.deletedScaffolding(geom);
 					alive = false;
 				} else {
 					Primitive poly = getIntersectedPolygon();
 					if (poly != null) {
+						ActionTracker.deletedPrimitive(poly);
 						int idx = Main.geometry.indexOf(poly);
 						int lines_to_remove = poly.numVertices() - 1;
 						int start_deleting = idx - lines_to_remove;

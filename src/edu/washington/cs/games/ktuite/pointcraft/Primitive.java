@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.URL;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.lwjgl.util.vector.Vector2f;
@@ -113,6 +114,18 @@ public class Primitive {
 		glEnd();
 
 		glDisable(GL_TEXTURE_2D);
+		
+		// draw a border around the polygons
+		glColor3f(0, 0, 0);
+		glLineWidth(3);
+		glBegin(GL_LINE_LOOP);
+		for (int i = 0; i < vertices.size() && i < tex_coords.length; i++) {
+			Pellet pellet = vertices.get(i);
+			Vector3f vertex = pellet.pos;
+			glTexCoord2f(tex_coords[i].x, tex_coords[i].y);
+			glVertex3f(vertex.x, vertex.y, vertex.z);
+		}
+		glEnd();
 	}
 
 	public void startDownloadingTexture() {
@@ -194,5 +207,21 @@ public class Primitive {
 				.sqrt(a * a + b * b + c * c));
 		
 		return Math.abs(distance);
+	}
+
+	public static void addBackDeletedPrimitive(Primitive primitive) {
+		// TODO: add the lines
+		/*
+		for (int i = 0; i < primitive.vertices.size() - 1; i++){
+			List<Pellet> last_two = new LinkedList<Pellet>();
+			last_two.add(primitive.getVertices().get(i));
+			last_two.add(primitive.getVertices().get(i+1));
+
+			Primitive line = new Primitive(GL_LINES, last_two);
+			Main.geometry.add(line);
+		}
+		*/
+		
+		Main.geometry.add(primitive);
 	}
 }

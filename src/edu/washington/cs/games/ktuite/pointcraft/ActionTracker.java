@@ -8,7 +8,7 @@ public class ActionTracker {
 	public enum ActionType {
 		NEW_PELLET, PARTIAL_POLYGON, POLYGON_LINE, COMPLETED_POLYGON, PARTIAL_LINE, COMPLETED_LINE, 
 		PARTIAL_PLANE, COMPLETED_PLANE, VERTICAL_HEIGHT_SET, NEW_VERTICAL_LINE_PELLET, NEW_VERTICAL_WALL, 
-		DELETED_PELLET, DELETED_LINE, DELETED_PLANE, DELETED_POYLGON, EXTENDED_LINE, EXTENDED_PLANE,
+		PELLET_DELETED, SCAFFOLDING_DELETED, POLYGON_DELETED, EXTENDED_LINE, EXTENDED_PLANE,
 		LINE_PLANE_INTERSECTION
 	}
 	
@@ -164,6 +164,22 @@ public class ActionTracker {
 				undo();
 			}
 		}
+		else if (last_action.action_type == ActionType.PELLET_DELETED){
+			if (last_action.pellet != null){
+				last_action.pellet.alive = true;
+				Main.new_pellets_to_add_to_world.add(last_action.pellet);
+			}
+		}
+		else if (last_action.action_type == ActionType.SCAFFOLDING_DELETED){
+			if (last_action.scaffold != null){
+				Main.geometry_v.add(last_action.scaffold);
+			}
+		}
+		else if (last_action.action_type == ActionType.POLYGON_DELETED){
+			if (last_action.primitive != null){
+				Primitive.addBackDeletedPrimitive(last_action.primitive);
+			}
+		}
 	}
 	
 	// Here are the new actions to be tracked and undone!
@@ -218,5 +234,17 @@ public class ActionTracker {
 	
 	public static void newVerticalHeightSet(){
 		undo_stack.add(new Action(ActionType.VERTICAL_HEIGHT_SET));
+	}
+	
+	public static void deletedPellet(Pellet p){
+		undo_stack.add(new Action(ActionType.PELLET_DELETED, p));
+	}
+	
+	public static void deletedScaffolding(Scaffold s){
+		undo_stack.add(new Action(ActionType.SCAFFOLDING_DELETED, s));
+	}
+	
+	public static void deletedPrimitive(Primitive p){
+		undo_stack.add(new Action(ActionType.POLYGON_DELETED, p));
 	}
 }
