@@ -271,6 +271,12 @@ public class Main {
 		max_speed = 1 * world_scale;
 		gun_speed = 0.001f * world_scale;
 
+
+		glFogf(GL_FOG_END, 3.0f * world_scale);
+		glFogf(GL_FOG_START, .25f * world_scale);
+		fog_density /= world_scale;
+		glFogf(GL_FOG_DENSITY, fog_density);
+		
 		// load("assets/models/lewis-hall.ply");
 
 		num_points = KdTreeOfPoints.num_points;
@@ -564,15 +570,15 @@ public class Main {
 				}
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_LBRACKET) {
-					fog_density -= 5;
+					fog_density -= 5/world_scale;
 					if (fog_density < 0)
 						fog_density = 0;
 					glFogf(GL_FOG_DENSITY, fog_density);
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_RBRACKET) {
-					fog_density += 5;
-					if (fog_density > 50)
-						fog_density = 50;
+					fog_density += 5/world_scale;
+					if (fog_density > 50/world_scale)
+						fog_density = 50/world_scale;
 					glFogf(GL_FOG_DENSITY, fog_density);
 				}
 

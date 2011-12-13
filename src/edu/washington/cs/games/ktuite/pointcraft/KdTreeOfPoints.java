@@ -204,7 +204,7 @@ public class KdTreeOfPoints {
 					bb.put(pt, 0, len);
 					bb.rewind();
 
-					int r = 0, g = 0, b = 0;
+					byte r = 0, g = 0, b = 0;
 					double x = 0, y = 0, z = 0;
 					for (int i = 0; i < count; i++) {
 						if (i == r_idx) {
@@ -229,6 +229,7 @@ public class KdTreeOfPoints {
 					}
 					// System.out.println("");
 
+		
 					point_colors.put(r / 255.0);
 					point_colors.put(g / 255.0);
 					point_colors.put(b / 255.0);
@@ -248,9 +249,12 @@ public class KdTreeOfPoints {
 						}
 					}
 
-					if (h % 10000 == 0)
+					if (h % 10000 == 0){
 						System.out.println("points loaded: " + h + "/"
 								+ num_points);
+						
+
+					}
 				}
 
 			}
