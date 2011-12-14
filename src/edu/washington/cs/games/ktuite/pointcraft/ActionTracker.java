@@ -196,7 +196,8 @@ public class ActionTracker {
 	} 
 	
 	public static void newPolygon(Primitive p, Stack<PolygonPellet> curr){
-		curr.pop();
+		if (curr != null && curr.size() > 0)
+			curr.pop();
 		undo_stack.add(new Action(ActionType.COMPLETED_POLYGON, p, curr));
 	}
 	

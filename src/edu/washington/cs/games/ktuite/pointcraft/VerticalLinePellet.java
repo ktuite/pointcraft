@@ -2,7 +2,6 @@ package edu.washington.cs.games.ktuite.pointcraft;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import org.lwjgl.util.vector.Vector3f;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -184,6 +183,7 @@ public class VerticalLinePellet extends Pellet {
 			Primitive polygon = new Primitive(GL_POLYGON, cycle);
 			polygon.setPlayerPositionAndViewingDirection(pos, vel);
 			Main.geometry.add(polygon);
+			ActionTracker.newPolygon(polygon, null);
 
 			top_pellet = new_top_pellet;
 			bottom_pellet = new_bottom_pellet;
