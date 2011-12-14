@@ -2,6 +2,8 @@ package edu.washington.cs.games.ktuite.pointcraft;
 
 import java.util.Stack;
 
+import org.lwjgl.util.vector.Vector3f;
+
 public class ActionTracker {
 	
 	// The different types of actions
@@ -9,7 +11,7 @@ public class ActionTracker {
 		NEW_PELLET, PARTIAL_POLYGON, POLYGON_LINE, COMPLETED_POLYGON, PARTIAL_LINE, COMPLETED_LINE, 
 		PARTIAL_PLANE, COMPLETED_PLANE, VERTICAL_HEIGHT_SET, NEW_VERTICAL_LINE_PELLET, NEW_VERTICAL_WALL, 
 		PELLET_DELETED, SCAFFOLDING_DELETED, POLYGON_DELETED, EXTENDED_LINE, EXTENDED_PLANE,
-		LINE_PLANE_INTERSECTION
+		LINE_PLANE_INTERSECTION, COMBINED_PELLETS;
 	}
 	
 	// A little holder-class for the actions
@@ -20,6 +22,7 @@ public class ActionTracker {
 		public Primitive primitive;
 		public Stack<PolygonPellet> current_poly;
 		public Scaffold scaffold;
+		public Vector3f old_pos;
 		
 		public Action(ActionType at){
 			action_type = at;
@@ -43,6 +46,12 @@ public class ActionTracker {
 		
 		public Action(ActionType at, Scaffold s){
 			scaffold = s;
+			action_type = at;
+		}
+		
+		public Action(ActionType at, Pellet p, Vector3f pos){
+			pellet = p;
+			old_pos = pos;
 			action_type = at;
 		}
 	}
@@ -180,6 +189,12 @@ public class ActionTracker {
 				Primitive.addBackDeletedPrimitive(last_action.primitive);
 			}
 		}
+		else if (last_action.action_type == ActionType.COMBINED_PELLETS){
+			if (last_action.pellet != null && last_action.old_pos != null){
+				last_action.pellet.visible = true;
+				last_action.pellet.pos.set(last_action.old_pos);
+			}
+		}
 	}
 	
 	// Here are the new actions to be tracked and undone!
@@ -247,5 +262,9 @@ public class ActionTracker {
 	
 	public static void deletedPrimitive(Primitive p){
 		undo_stack.add(new Action(ActionType.POLYGON_DELETED, p));
+	}
+	
+	public static void combinedPellet(Pellet p, Vector3f old_pos){
+		undo_stack.add(new Action(ActionType.COMBINED_PELLETS, p, old_pos));
 	}
 }

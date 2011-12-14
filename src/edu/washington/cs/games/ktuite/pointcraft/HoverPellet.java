@@ -2,6 +2,8 @@ package edu.washington.cs.games.ktuite.pointcraft;
 
 import java.util.List;
 
+import org.lwjgl.util.vector.Vector3f;
+
 public class HoverPellet extends Pellet {
 
 	public static int hover_pellet;
@@ -23,8 +25,11 @@ public class HoverPellet extends Pellet {
 			}
 			else if (destination_pellet == null){
 				destination_pellet = Main.all_pellets_in_world.get(hover_pellet);
+				
+				ActionTracker.combinedPellet(target_pellet, new Vector3f(target_pellet.pos));
+
 				target_pellet.pos.set(destination_pellet.pos);
-				destination_pellet.visible = false;
+				target_pellet.visible = false;
 				
 				target_pellet = null;
 				destination_pellet = null;
