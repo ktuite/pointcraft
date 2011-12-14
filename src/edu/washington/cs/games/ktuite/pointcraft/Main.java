@@ -51,10 +51,10 @@ public class Main {
 
 	// stuff about the world and how you move around
 	public static float world_scale = 1f;
-	private Vector3f pos;
+	public static Vector3f pos;
 	private Vector3f vel;
-	private float tilt_angle;
-	private float pan_angle;
+	public static float tilt_angle;
+	public static float pan_angle;
 	private float veldecay = .90f;
 	private static float walkforce = 1 / 4000f * world_scale;
 	private double max_speed = 1 * world_scale;
@@ -66,7 +66,7 @@ public class Main {
 	private DoubleBuffer point_colors;
 
 	// stuff about general guns and general list of pellets/things shot
-	private Vector3f gun_direction;
+	public static Vector3f gun_direction;
 	private float gun_speed = 0.001f * world_scale;
 	public static float pellet_scale = 1f;
 	public static Timer timer = new Timer();
@@ -97,7 +97,7 @@ public class Main {
 	public float overhead_scale = 1;
 
 	public enum GunMode {
-		PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE
+		PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT
 	}
 
 	public GunMode which_gun;
@@ -384,6 +384,10 @@ public class Main {
 	 * }
 	 */
 	private void UpdateGameObjects() {
+		if (which_gun == GunMode.DRAG_TO_EDIT)
+			computeGunDirection();
+			HoverPellet.handleDrag();
+		
 		for (Pellet pellet : all_pellets_in_world) {
 			pellet.update();
 		}
@@ -509,6 +513,10 @@ public class Main {
 				if (Keyboard.getEventKey() == Keyboard.KEY_6) {
 					which_gun = GunMode.COMBINE;
 					System.out.println("hover edit gun");
+				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_7) {
+					which_gun = GunMode.DRAG_TO_EDIT;
+					System.out.println("drag edit gun");
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_9) {
 					which_gun = GunMode.ORB;
@@ -636,11 +644,9 @@ public class Main {
 
 		while (Mouse.next()) {
 			if (Mouse.getEventButtonState()) {
-				if (Mouse.getEventButton() == 0) {
-					ShootGun();
-				} else if (Mouse.getEventButton() == 1) {
-					ShootDeleteGun();
-				}
+				handleMouseDown();
+			} else {
+				handleMouseUp();
 			}
 		}
 
@@ -665,6 +671,28 @@ public class Main {
 			}
 		}
 
+	}
+
+	private void handleMouseDown() {
+		if (Mouse.getEventButton() == 0) {
+			if (which_gun == GunMode.COMBINE) {
+				HoverPellet.click();
+			} else if (which_gun == GunMode.DRAG_TO_EDIT){
+				HoverPellet.startDrag();
+			} else {
+				ShootGun();
+			}
+		} else if (Mouse.getEventButton() == 1) {
+			ShootDeleteGun();
+		}
+	}
+
+	private void handleMouseUp() {
+		if (Mouse.getEventButton() == 0) {
+			if (which_gun == GunMode.DRAG_TO_EDIT) {
+				HoverPellet.endDrag();
+			}
+		}
 	}
 
 	private void animateTilt() {
@@ -747,8 +775,8 @@ public class Main {
 		glPopMatrix();
 
 		pickPolygon();
-		
-		if (which_gun == GunMode.COMBINE){
+
+		if (which_gun == GunMode.COMBINE || which_gun == GunMode.DRAG_TO_EDIT) {
 			HoverPellet.dimAllPellets();
 			pickPellet();
 			HoverPellet.illuminatePellet();
@@ -823,7 +851,7 @@ public class Main {
 					pellet.coloredDraw();
 					glPopMatrix();
 				}
-			} 
+			}
 		}
 
 		glPopMatrix();
@@ -834,11 +862,13 @@ public class Main {
 
 		hits = glRenderMode(GL_RENDER);
 		selectBuffer.get(selectBuf);
-		HoverPellet.hover_pellet = processHits(hits, selectBuf); // which polygon actually
-														// selected
-		
+		HoverPellet.hover_pellet = processHits(hits, selectBuf); // which
+																	// polygon
+																	// actually
+		// selected
+
 	}
-	
+
 	private void pickPolygon() {
 		int x = Display.getDisplayMode().getWidth() / 2;
 		int y = Display.getDisplayMode().getHeight() / 2;
@@ -1164,6 +1194,7 @@ public class Main {
 			glEnd();
 			break;
 		case COMBINE:
+		case DRAG_TO_EDIT:
 			glBegin(GL_LINES);
 			glVertex2f(0, f * .6f);
 			glVertex2f(0, -f * .6f);
@@ -1210,9 +1241,6 @@ public class Main {
 			new_pellet.constructing = true;
 			all_pellets_in_world.add(new_pellet);
 			System.out.println(all_pellets_in_world);
-		}
-		else if (which_gun == GunMode.COMBINE) {
-			HoverPellet.click();
 		} else if (which_gun != GunMode.ORB) {
 			System.out.println("shooting gun");
 
