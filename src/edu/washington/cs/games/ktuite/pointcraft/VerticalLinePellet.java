@@ -191,7 +191,7 @@ public class VerticalLinePellet extends Pellet {
 		alive = false;
 	}
 
-	public void draw() {
+	public void coloredDraw() {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
 			glColor4f(.3f, .4f, .7f, alpha);

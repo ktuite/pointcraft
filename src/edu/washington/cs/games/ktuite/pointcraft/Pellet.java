@@ -19,6 +19,8 @@ public class Pellet {
 	public float max_radius;
 	public boolean alive;
 	public boolean visible;
+	public boolean hover;
+	public int[] color = new int[3];
 	public boolean constructing;
 	public float birthday;
 	protected List<Pellet> main_pellets;
@@ -61,8 +63,8 @@ public class Pellet {
 		// if (Main.launch_effect != null)
 		// Main.launch_effect.playAsSoundEffect(1.0f, 1.0f, false);
 	}
-	
-	public String getType(){
+
+	public String getType() {
 		return pellet_type.toString();
 	}
 
@@ -80,7 +82,7 @@ public class Pellet {
 	}
 
 	public void setInPlace() {
-		if (Main.attach_effect != null){
+		if (Main.attach_effect != null) {
 			Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
 			Main.server.newPellet(this);
 		}
@@ -114,7 +116,7 @@ public class Pellet {
 	public Vector3f queryScaffoldGeometry() {
 		if (!Main.draw_scaffolding)
 			return null;
-		
+
 		Vector3f closest_point = null;
 		for (Scaffold geom : Main.geometry_v) {
 			if (radius > geom.distanceToPoint(pos)) {
@@ -124,7 +126,7 @@ public class Pellet {
 		}
 		return closest_point;
 	}
-	
+
 	public Vector3f stickPelletToScaffolding() {
 		Vector3f closest_point = null;
 		for (Scaffold geom : Main.geometry_v) {
@@ -166,7 +168,7 @@ public class Pellet {
 		return null;
 	}
 
-	public void draw() {
+	public void coloredDraw() {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
 			glColor4f(.2f, .2f, .2f, alpha);
@@ -175,6 +177,15 @@ public class Pellet {
 		} else {
 			glColor4f(.3f, .3f, .3f, 1f);
 			sphere.draw(radius, 32, 32);
+		}
+	}
+
+	public void draw() {
+		if (hover) {
+			glColor4f(1f, 1f, .3f, .5f);
+			sphere.draw(radius, 32, 32);
+		} else {
+			coloredDraw();
 		}
 	}
 }

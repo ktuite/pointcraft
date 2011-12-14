@@ -55,7 +55,7 @@ public class DestructorPellet extends Pellet {
 		}
 	}
 
-	public void draw() {
+	public void coloredDraw() {
 		glColor4f(.6f, 0f, 0f, .3f);
 		sphere.draw(radius, 32, 32);
 	}

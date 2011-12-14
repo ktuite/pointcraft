@@ -97,7 +97,7 @@ public class ScaffoldPellet extends Pellet {
 		}
 	}
 
-	public void draw() {
+	public void coloredDraw() {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
 			glColor4f(.2f, .7f, .7f, alpha);

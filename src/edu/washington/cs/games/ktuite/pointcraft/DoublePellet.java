@@ -19,7 +19,7 @@ public class DoublePellet extends Pellet {
 	 */
 	public DoublePellet(List<Pellet> _pellets) {
 		super(_pellets);
-		pellet_type = Main.GunMode.DOUBLE;
+		pellet_type = Main.GunMode.COMBINE;
 	}
 
 	@Override
@@ -104,7 +104,7 @@ public class DoublePellet extends Pellet {
 		Main.new_pellets_to_add_to_world.add(second_pellet);
 	}
 
-	public void draw() {
+	public void coloredDraw() {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
 			glColor4f(.1f, .5f, .5f, alpha);

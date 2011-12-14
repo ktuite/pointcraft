@@ -181,7 +181,7 @@ public class PolygonPellet extends Pellet {
 		first_in_cycle = true;
 	}
 
-	public void draw() {
+	public void coloredDraw() {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
 			glColor4f(.9f, .1f, .4f, alpha);

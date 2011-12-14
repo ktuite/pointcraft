@@ -62,7 +62,7 @@ public class OrbPellet extends PolygonPellet {
 		}
 	}
 
-	public void draw() {
+	public void coloredDraw() {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
 			glColor4f(0f, .4f, .8f, alpha);
@@ -92,7 +92,7 @@ public class OrbPellet extends PolygonPellet {
 	public static void drawOrbPellet() {
 		glPushMatrix();
 		glTranslatef(orb_pellet.pos.x, orb_pellet.pos.y, orb_pellet.pos.z);
-		orb_pellet.draw();
+		orb_pellet.coloredDraw();
 		glPopMatrix();
 	}
 }

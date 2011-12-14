@@ -112,7 +112,7 @@ public class LinePellet extends Pellet {
 		super.delete();
 	}
 
-	public void draw() {
+	public void coloredDraw() {
 		if (is_intersection) {
 			float alpha = 1 - radius / max_radius * .2f;
 			glColor4f(.15f, .45f, .75f, alpha);

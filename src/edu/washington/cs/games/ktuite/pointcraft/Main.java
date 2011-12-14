@@ -97,7 +97,7 @@ public class Main {
 	public float overhead_scale = 1;
 
 	public enum GunMode {
-		PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, DOUBLE
+		PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE
 	}
 
 	public GunMode which_gun;
@@ -278,9 +278,9 @@ public class Main {
 
 	private void LoadData() {
 		KdTreeOfPoints
-		//.loadRandom();
-		.load("assets/models/lewis-hall-binary.ply");
-		//.load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
+		// .loadRandom();
+				.load("assets/models/lewis-hall-binary.ply");
+		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 	}
 
 	private void InitData() {
@@ -507,8 +507,8 @@ public class Main {
 					System.out.println("vertical line pellet gun selected");
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_6) {
-					which_gun = GunMode.DOUBLE;
-					System.out.println("double pellet gun");
+					which_gun = GunMode.COMBINE;
+					System.out.println("hover edit gun");
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_9) {
 					which_gun = GunMode.ORB;
@@ -575,7 +575,7 @@ public class Main {
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_M) {
 					if (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29)) {
-						up_vec.set(0,1,0);
+						up_vec.set(0, 1, 0);
 						pos.set(0, 0, 0);
 						tilt_angle = 0;
 					} else {
@@ -747,6 +747,12 @@ public class Main {
 		glPopMatrix();
 
 		pickPolygon();
+		
+		if (which_gun == GunMode.COMBINE){
+			HoverPellet.dimAllPellets();
+			pickPellet();
+			HoverPellet.illuminatePellet();
+		}
 
 		DrawHud();
 
@@ -773,6 +779,66 @@ public class Main {
 		Display.update();
 	}
 
+	private void pickPellet() {
+		int x = Display.getDisplayMode().getWidth() / 2;
+		int y = Display.getDisplayMode().getHeight() / 2;
+		final int BUFSIZE = 512;
+		int[] selectBuf = new int[BUFSIZE];
+		IntBuffer selectBuffer = BufferUtils.createIntBuffer(BUFSIZE);
+		IntBuffer viewport = BufferUtils.createIntBuffer(16);
+		int hits;
+
+		glGetInteger(GL_VIEWPORT, viewport);
+		glSelectBuffer(selectBuffer);
+		glRenderMode(GL_SELECT);
+
+		glInitNames();
+		glPushName(-1);
+
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		/* create 5x5 pixel picking region near cursor location */
+		gluPickMatrix((float) x, (float) (viewport.get(3) - y), 5.0f, 5.0f,
+				viewport);
+		gluPerspective(60, Display.getDisplayMode().getWidth()
+				/ Display.getDisplayMode().getHeight(), .001f, 1000.0f);
+
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glRotatef(tilt_angle, 1.0f, 0.0f, 0.0f); // rotate our camera up/down
+		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
+		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
+
+		gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
+
+		// draw polygons for picking
+		for (int i = 0; i < all_pellets_in_world.size(); i++) {
+			Pellet pellet = all_pellets_in_world.get(i);
+			if (pellet.alive) {
+				if (pellet.visible) {
+					glPushMatrix();
+					glTranslatef(pellet.pos.x, pellet.pos.y, pellet.pos.z);
+					glLoadName(i);
+					pellet.coloredDraw();
+					glPopMatrix();
+				}
+			} 
+		}
+
+		glPopMatrix();
+		glMatrixMode(GL_PROJECTION);
+
+		glPopMatrix();
+		glFlush();
+
+		hits = glRenderMode(GL_RENDER);
+		selectBuffer.get(selectBuf);
+		HoverPellet.hover_pellet = processHits(hits, selectBuf); // which polygon actually
+														// selected
+		
+	}
+	
 	private void pickPolygon() {
 		int x = Display.getDisplayMode().getWidth() / 2;
 		int y = Display.getDisplayMode().getHeight() / 2;
@@ -1097,22 +1163,12 @@ public class Main {
 			}
 			glEnd();
 			break;
-		case DOUBLE:
-			glBegin(GL_LINE_LOOP);
-			for (int i = 0; i < n; i++) {
-				float angle = (float) (Math.PI * 2 * i / n);
-				float x = (float) (Math.cos(angle) * f * 0.45 * 600 / 800);
-				float y = (float) (Math.sin(angle) * f * 0.45 + f / 2);
-				glVertex2f(x, y);
-			}
-			glEnd();
-			glBegin(GL_LINE_LOOP);
-			for (int i = 0; i < n; i++) {
-				float angle = (float) (Math.PI * 2 * i / n);
-				float x = (float) (Math.cos(angle) * f * 0.45 * 600 / 800);
-				float y = (float) (Math.sin(angle) * f * 0.45 - f / 2);
-				glVertex2f(x, y);
-			}
+		case COMBINE:
+			glBegin(GL_LINES);
+			glVertex2f(0, f * .6f);
+			glVertex2f(0, -f * .6f);
+			glVertex2f(f * 600 / 800 * .6f, 0);
+			glVertex2f(-f * 600 / 800 * .6f, 0);
 			glEnd();
 			break;
 		default:
@@ -1154,6 +1210,9 @@ public class Main {
 			new_pellet.constructing = true;
 			all_pellets_in_world.add(new_pellet);
 			System.out.println(all_pellets_in_world);
+		}
+		else if (which_gun == GunMode.COMBINE) {
+			HoverPellet.click();
 		} else if (which_gun != GunMode.ORB) {
 			System.out.println("shooting gun");
 
@@ -1168,8 +1227,6 @@ public class Main {
 				pellet = new LinePellet(all_pellets_in_world);
 			} else if (which_gun == GunMode.VERTICAL_LINE) {
 				pellet = new VerticalLinePellet(all_pellets_in_world);
-			} else if (which_gun == GunMode.DOUBLE) {
-				pellet = new DoublePellet(all_pellets_in_world);
 			} else if (which_gun == GunMode.DESTRUCTOR) {
 				pellet = new DestructorPellet(all_pellets_in_world);
 			} else {
