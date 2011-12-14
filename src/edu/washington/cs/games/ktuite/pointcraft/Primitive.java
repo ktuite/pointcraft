@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.URL;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.lwjgl.util.vector.Vector2f;
@@ -33,8 +32,8 @@ public class Primitive {
 	private void readObject(ObjectInputStream ois)
 			throws ClassNotFoundException, IOException {
 		ois.defaultReadObject();
-		if (texture_url != null){
-			//texture_url = "dont_texture-" + texture_url;
+		if (texture_url != null) {
+			// texture_url = "dont_texture-" + texture_url;
 			startDownloadingTexture();
 		}
 	}
@@ -72,8 +71,8 @@ public class Primitive {
 	public int numVertices() {
 		return vertices.size();
 	}
-	
-	public List<Pellet> getVertices(){
+
+	public List<Pellet> getVertices() {
 		return vertices;
 	}
 
@@ -104,25 +103,35 @@ public class Primitive {
 		Vector2f[] tex_coords = new Vector2f[] { new Vector2f(0, 0),
 				new Vector2f(1, 0), new Vector2f(1, 1), new Vector2f(0, 1) };
 
-		glBegin(gl_type);
-		for (int i = 0; i < vertices.size() && i < tex_coords.length; i++) {
-			Pellet pellet = vertices.get(i);
-			Vector3f vertex = pellet.pos;
-			glTexCoord2f(tex_coords[i].x, tex_coords[i].y);
-			glVertex3f(vertex.x, vertex.y, vertex.z);
+		if (vertices.size() > 5) {
+			glDisable(GL_TEXTURE_2D);
+			glBegin(gl_type);
+			for (int i = 0; i < vertices.size(); i++) {
+				Pellet pellet = vertices.get(i);
+				Vector3f vertex = pellet.pos;
+				glVertex3f(vertex.x, vertex.y, vertex.z);
+			}
+			glEnd();
+		} else {
+			glBegin(gl_type);
+			for (int i = 0; i < vertices.size() && i < tex_coords.length; i++) {
+				Pellet pellet = vertices.get(i);
+				Vector3f vertex = pellet.pos;
+				glTexCoord2f(tex_coords[i].x, tex_coords[i].y);
+				glVertex3f(vertex.x, vertex.y, vertex.z);
+			}
+			glEnd();
 		}
-		glEnd();
 
 		glDisable(GL_TEXTURE_2D);
-		
+
 		// draw a border around the polygons
 		glColor3f(0, 0, 0);
 		glLineWidth(3);
 		glBegin(GL_LINE_LOOP);
-		for (int i = 0; i < vertices.size() && i < tex_coords.length; i++) {
+		for (int i = 0; i < vertices.size(); i++) {
 			Pellet pellet = vertices.get(i);
 			Vector3f vertex = pellet.pos;
-			glTexCoord2f(tex_coords[i].x, tex_coords[i].y);
 			glVertex3f(vertex.x, vertex.y, vertex.z);
 		}
 		glEnd();
@@ -130,7 +139,7 @@ public class Primitive {
 
 	public void startDownloadingTexture() {
 		if (texture_url == null) {
-			texture_url = "http://excelso.cs.washington.edu:8081/texture.png?&v=";
+			texture_url = "http://mazagran.cs.washington.edu:8080/texture.png?&v=";
 			for (Pellet p : vertices) {
 				Vector3f v = p.pos;
 				texture_url += v.x + "," + v.y + "," + v.z + ",";
@@ -185,8 +194,8 @@ public class Primitive {
 		}
 		System.out.println("");
 	}
-	
-	public float distanceToPolygonPlane(Vector3f pos){
+
+	public float distanceToPolygonPlane(Vector3f pos) {
 		Vector3f v1 = new Vector3f();
 		Vector3f.sub(vertices.get(0).pos, vertices.get(1).pos, v1);
 		Vector3f v2 = new Vector3f();
@@ -201,29 +210,27 @@ public class Primitive {
 		float b = norm.y;
 		float c = norm.z;
 		float d = -1
-				* (a * vertices.get(0).pos.x + b
-						* vertices.get(0).pos.y + c
+				* (a * vertices.get(0).pos.x + b * vertices.get(0).pos.y + c
 						* vertices.get(0).pos.z);
 
 		float distance = (float) ((a * pos.x + b * pos.y + c * pos.z + d) / Math
 				.sqrt(a * a + b * b + c * c));
-		
+
 		return Math.abs(distance);
 	}
 
 	public static void addBackDeletedPrimitive(Primitive primitive) {
 		// TODO: add the lines
 		/*
-		for (int i = 0; i < primitive.vertices.size() - 1; i++){
-			List<Pellet> last_two = new LinkedList<Pellet>();
-			last_two.add(primitive.getVertices().get(i));
-			last_two.add(primitive.getVertices().get(i+1));
+		 * for (int i = 0; i < primitive.vertices.size() - 1; i++){ List<Pellet>
+		 * last_two = new LinkedList<Pellet>();
+		 * last_two.add(primitive.getVertices().get(i));
+		 * last_two.add(primitive.getVertices().get(i+1));
+		 * 
+		 * Primitive line = new Primitive(GL_LINES, last_two);
+		 * Main.geometry.add(line); }
+		 */
 
-			Primitive line = new Primitive(GL_LINES, last_two);
-			Main.geometry.add(line);
-		}
-		*/
-		
 		Main.geometry.add(primitive);
 	}
 }
