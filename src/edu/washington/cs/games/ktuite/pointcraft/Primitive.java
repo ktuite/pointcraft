@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.URL;
 import java.util.List;
+import java.util.Vector;
 
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
@@ -23,11 +24,14 @@ public class Primitive {
 	private int gl_type;
 	private List<Pellet> vertices;
 	private float line_width = 5f;
-	private byte[] texture_data = null;
-	private transient Texture texture = null;
+	private Vector<byte[]> texture_data = null;
+	private transient Vector<Texture> textures = null;
 	private Vector3f player_position;
 	private Vector3f player_viewing_direction;
-	private String texture_url = null;
+	private String[] texture_url = null;
+	private int num_triangles = 0;
+	private boolean textures_loaded;
+	private int texture_count;
 
 	private void readObject(ObjectInputStream ois)
 			throws ClassNotFoundException, IOException {
@@ -41,23 +45,31 @@ public class Primitive {
 	public Primitive(int _gl_type, List<Pellet> _vertices) {
 		gl_type = _gl_type;
 		vertices = _vertices;
+		textures_loaded = false;
 		if (gl_type == GL_POLYGON) {
+			num_triangles = vertices.size() - 3;
+			texture_data = new Vector<byte[]>();
+			texture_data.setSize(num_triangles);
+			textures = new Vector<Texture>();
+			textures.setSize(num_triangles);
 			System.out.println("making new polygon Primitive");
 			System.out.println("number of vertices: " + vertices.size());
 		}
+
 	}
 
 	public Primitive(int _gl_type, List<Pellet> _vertices, float _line_width) {
 		gl_type = _gl_type;
 		vertices = _vertices;
 		line_width = _line_width;
+		num_triangles = vertices.size() - 3;
 	}
 
 	public void setPlayerPositionAndViewingDirection(Vector3f pos, Vector3f view) {
 		player_position = new Vector3f(pos);
 		player_viewing_direction = new Vector3f(view);
 		player_viewing_direction.normalise();
-		if (vertices.size() > 4)
+		if (vertices.size() >= 4)
 			startDownloadingTexture();
 	}
 
@@ -80,18 +92,32 @@ public class Primitive {
 		if (gl_type == GL_LINES) {
 			glColor3f(0, 0, 0);
 			glLineWidth(line_width);
+
+			glBegin(gl_type);
+			for (Pellet p : vertices) {
+				Vector3f vertex = p.pos;
+				glVertex3f(vertex.x, vertex.y, vertex.z);
+			}
+			glEnd();
+
 		} else if (gl_type == GL_POLYGON) {
 			glColor4f(.9f, .9f, .9f, .9f);
-			if (texture != null) {
+			if (textures_loaded) {
 				glEnable(GL_TEXTURE_2D);
-				texture.bind();
 			} else {
 				glDisable(GL_TEXTURE_2D);
-				if (texture_data != null) {
+				if (texture_count == num_triangles) {
 					try {
-						texture = TextureLoader.getTexture("PNG",
-								new ByteArrayInputStream(texture_data));
-						texture_data = null;
+						for (int i = 0; i < num_triangles; i++) {
+							System.out.println(" texture set!!");
+							textures.set(i, TextureLoader.getTexture(
+									"PNG",
+									new ByteArrayInputStream(texture_data
+											.get(i))));
+
+						}
+						texture_data.clear();
+						textures_loaded = true;
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -101,78 +127,104 @@ public class Primitive {
 		}
 
 		Vector2f[] tex_coords = new Vector2f[] { new Vector2f(0, 0),
-				new Vector2f(1, 0), new Vector2f(1, 1), new Vector2f(0, 1) };
+				new Vector2f(1, 0), new Vector2f(0, 1) };// , new Vector2f(0, 1)
+															// };
 
-		if (vertices.size() > 5) {
-			glDisable(GL_TEXTURE_2D);
+		for (int h = 0; h < num_triangles; h++) {
+			if (textures_loaded) {
+				textures.get(h).bind();
+			}
+
 			glBegin(gl_type);
-			for (int i = 0; i < vertices.size(); i++) {
-				Pellet pellet = vertices.get(i);
-				Vector3f vertex = pellet.pos;
+			Pellet pellet;
+			Vector3f vertex;
+			for (int i = 0; i < tex_coords.length - 1; i++) {
+				pellet = vertices.get(i + h + 1);
+				vertex = pellet.pos;
+				glTexCoord2f(tex_coords[i + 1].x, tex_coords[i + 1].y);
 				glVertex3f(vertex.x, vertex.y, vertex.z);
 			}
-			glEnd();
-		} else {
-			glBegin(gl_type);
-			for (int i = 0; i < vertices.size() && i < tex_coords.length; i++) {
-				Pellet pellet = vertices.get(i);
-				Vector3f vertex = pellet.pos;
-				glTexCoord2f(tex_coords[i].x, tex_coords[i].y);
-				glVertex3f(vertex.x, vertex.y, vertex.z);
-			}
-			glEnd();
-		}
-
-		glDisable(GL_TEXTURE_2D);
-
-		// draw a border around the polygons
-		glColor3f(0, 0, 0);
-		glLineWidth(3);
-		glBegin(GL_LINE_LOOP);
-		for (int i = 0; i < vertices.size(); i++) {
-			Pellet pellet = vertices.get(i);
-			Vector3f vertex = pellet.pos;
+			pellet = vertices.get(0);
+			vertex = pellet.pos;
+			glTexCoord2f(tex_coords[0].x, tex_coords[0].y);
 			glVertex3f(vertex.x, vertex.y, vertex.z);
+			glEnd();
+
 		}
-		glEnd();
+		
+		// draw a border around the polygons
+		for (int h = 0; h < num_triangles; h++) {
+			glDisable(GL_TEXTURE_2D);
+			glColor3f(0, 0, 0);
+			glLineWidth(3);
+			Pellet pellet;
+			Vector3f vertex;
+			glBegin(GL_LINE_LOOP);
+			for (int i = 0; i < tex_coords.length - 1; i++) {
+				pellet = vertices.get(i + h + 1);
+				vertex = pellet.pos;
+				glVertex3f(vertex.x, vertex.y, vertex.z);
+			}
+			pellet = vertices.get(0);
+			vertex = pellet.pos;
+			glVertex3f(vertex.x, vertex.y, vertex.z);
+			glEnd();
+		}
 	}
 
 	public void startDownloadingTexture() {
 		if (texture_url == null) {
-			texture_url = "http://mazagran.cs.washington.edu:8080/texture.png?&v=";
-			for (Pellet p : vertices) {
-				Vector3f v = p.pos;
-				texture_url += v.x + "," + v.y + "," + v.z + ",";
-			}
-			texture_url += "garbage,&w=128,&h=128,";
-			if (player_position != null && player_viewing_direction != null) {
-				texture_url += "&p=" + player_position.x + ","
-						+ player_position.y + "," + player_position.z + ",";
-				texture_url += "&e=" + player_viewing_direction.x + ","
-						+ player_viewing_direction.y + ","
-						+ player_viewing_direction.z + ",";
-			}
-		}
-		System.out.println(texture_url);
-		final String final_url_string = texture_url;
-		new Thread() {
-			public void run() {
+			texture_url = new String[num_triangles];
+			for (int i = 0; i < num_triangles; i++) {
+				texture_url[i] = "http://mazagran.cs.washington.edu:8081/texture.png?&v=";
 
-				try {
-					URL url = new URL(final_url_string);
-					InputStream is = url.openStream();
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					byte[] bytes = new byte[4096];
-					int n;
-					while ((n = is.read(bytes)) != -1) {
-						baos.write(bytes, 0, n);
-					}
-					texture_data = baos.toByteArray();
-				} catch (Exception e) {
-					e.printStackTrace();
+				// triangle fan going on here
+				Pellet p = vertices.get(0);
+				Vector3f v = p.pos;
+				texture_url[i] += v.x + "," + v.y + "," + v.z + ",";
+
+				for (int j = i + 1; j < i + 3; j++) {
+					p = vertices.get(j);
+					v = p.pos;
+					texture_url[i] += v.x + "," + v.y + "," + v.z + ",";
+				}
+				texture_url[i] += "garbage,&w=128,&h=128,";
+				if (player_position != null && player_viewing_direction != null) {
+					texture_url[i] += "&p=" + player_position.x + ","
+							+ player_position.y + "," + player_position.z + ",";
+					texture_url[i] += "&e=" + player_viewing_direction.x + ","
+							+ player_viewing_direction.y + ","
+							+ player_viewing_direction.z + ",";
 				}
 			}
-		}.start();
+		}
+
+		texture_count = 0;
+		for (int i = 0; i < num_triangles; i++) {
+			final int f_i = i;
+			System.out.println(texture_url[f_i]);
+			final String final_url_string = texture_url[f_i];
+			new Thread() {
+				public void run() {
+
+					try {
+						URL url = new URL(final_url_string);
+						InputStream is = url.openStream();
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						byte[] bytes = new byte[4096];
+						int n;
+						while ((n = is.read(bytes)) != -1) {
+							baos.write(bytes, 0, n);
+						}
+						byte[] tex_byte_data = baos.toByteArray();
+						texture_data.set(f_i, tex_byte_data);
+						texture_count++;
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}.start();
+		}
 	}
 
 	public String plyFace() {
@@ -220,16 +272,6 @@ public class Primitive {
 	}
 
 	public static void addBackDeletedPrimitive(Primitive primitive) {
-		// TODO: add the lines
-		/*
-		 * for (int i = 0; i < primitive.vertices.size() - 1; i++){ List<Pellet>
-		 * last_two = new LinkedList<Pellet>();
-		 * last_two.add(primitive.getVertices().get(i));
-		 * last_two.add(primitive.getVertices().get(i+1));
-		 * 
-		 * Primitive line = new Primitive(GL_LINES, last_two);
-		 * Main.geometry.add(line); }
-		 */
 
 		Main.geometry.add(primitive);
 	}
