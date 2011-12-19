@@ -107,6 +107,9 @@ public class Main {
 	private OnscreenOverlay onscreen_overlay;
 	private InstructionalOverlay instruction_overlay;
 
+	public static boolean is_logged_in = false;
+	private GUI login_gui;
+
 	public static void main(String[] args) {
 		Main main = new Main();
 
@@ -156,6 +159,12 @@ public class Main {
 			ThemeManager themeManager2 = ThemeManager.createThemeManager(url2,
 					renderer);
 			instructional_gui.applyTheme(themeManager2);
+
+			login_gui = new GUI(new LoginOverlay(), renderer);
+			URL url3 = new File("assets/theme/login.xml").toURL();
+			ThemeManager themeManager3 = ThemeManager.createThemeManager(url3,
+					renderer);
+			login_gui.applyTheme(themeManager3);
 
 		} catch (LWJGLException e) {
 			e.printStackTrace();
@@ -278,8 +287,8 @@ public class Main {
 
 	private void LoadData() {
 		KdTreeOfPoints
-		// .loadRandom();
-				.load("assets/models/lewis-hall-binary.ply");
+		 .loadRandom();
+		//		.load("assets/models/lewis-hall-binary.ply");
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 	}
 
@@ -334,20 +343,27 @@ public class Main {
 		while (!Display.isCloseRequested()) {
 			Timer.tick();
 
-			if (Mouse.isGrabbed()) {
-				EventLoop(); // input like mouse and keyboard
-				UpdateGameObjects();
-				DisplayLoop(); // draw things on the screen
-
+			if (!is_logged_in) {
+				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+				glClearColor(1, 1, 1, 1);
+				login_gui.update();
+				Display.update();
 			} else {
-				UpdateInstructionalGui();
-				InstructionalEventLoop();
-			}
+				if (Mouse.isGrabbed()) {
+					EventLoop(); // input like mouse and keyboard
+					UpdateGameObjects();
+					DisplayLoop(); // draw things on the screen
 
-			if ((Display.getWidth() != Display.getDisplayMode().getWidth() || Display
-					.getHeight() != Display.getDisplayMode().getHeight())
-					&& Mouse.isButtonDown(0)) {
-				dealWithDisplayResize();
+				} else {
+					UpdateInstructionalGui();
+					InstructionalEventLoop();
+				}
+
+				if ((Display.getWidth() != Display.getDisplayMode().getWidth() || Display
+						.getHeight() != Display.getDisplayMode().getHeight())
+						&& Mouse.isButtonDown(0)) {
+					dealWithDisplayResize();
+				}
 			}
 
 		}
@@ -386,8 +402,8 @@ public class Main {
 	private void UpdateGameObjects() {
 		if (which_gun == GunMode.DRAG_TO_EDIT)
 			computeGunDirection();
-			HoverPellet.handleDrag();
-		
+		HoverPellet.handleDrag();
+
 		for (Pellet pellet : all_pellets_in_world) {
 			pellet.update();
 		}
@@ -677,7 +693,7 @@ public class Main {
 		if (Mouse.getEventButton() == 0) {
 			if (which_gun == GunMode.COMBINE) {
 				HoverPellet.click();
-			} else if (which_gun == GunMode.DRAG_TO_EDIT){
+			} else if (which_gun == GunMode.DRAG_TO_EDIT) {
 				HoverPellet.startDrag();
 			} else {
 				ShootGun();

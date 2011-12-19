@@ -53,25 +53,25 @@
         </grid>
         <select name="eforen.button.background">
             <animation if="armed" timeSource="armed">
-                <frame ref="-eforen.button" tint="#AA00AA" duration="300"/>
-                <frame ref="-eforen.button" tint="#660066" duration="300"/>
+                <frame ref="-eforen.button" tint="#8800AA" duration="300"/>
+                <frame ref="-eforen.button" tint="#330066" duration="300"/>
             </animation>
             <animation if="pressed" timeSource="pressed">
                 <frame ref="-eforen.button" tint="#000077" duration="500"/>
-                <frame ref="-eforen.button" tint="#AA00AA" duration="500"/>
+                <frame ref="-eforen.button" tint="#8800AA" duration="500"/>
             </animation>
             <animation if="keyboardFocus + hover" timeSource="hover">
-                <frame ref="-eforen.button" tint="#660066" duration="100"/>
+                <frame ref="-eforen.button" tint="#330066" duration="100"/>
                 <repeat>
-                    <frame ref="-eforen.button" tint="#AA00AA" duration="500"/>
-                    <frame ref="-eforen.button" tint="#660066" duration="1000"/>
+                    <frame ref="-eforen.button" tint="#8800AA" duration="500"/>
+                    <frame ref="-eforen.button" tint="#330066" duration="1000"/>
                 </repeat>
             </animation>
             <animation if="hover" timeSource="hover">
                 <frame ref="-eforen.button" tint="#FFFFFF" duration="100"/>
                 <repeat>
                     <frame ref="-eforen.button" tint="#AA00AA" duration="500"/>
-                    <frame ref="-eforen.button" tint="#660066" duration="1000"/>
+                    <frame ref="-eforen.button" tint="#330066" duration="1000"/>
                 </repeat>
             </animation>
             <alias ref="-eforen.button" tint="#FFFFFF" if="keyboardFocus"/>
@@ -80,8 +80,8 @@
 
         <select name="eforen.togglebutton.background">
             <animation if="armed" timeSource="armed">
-                <frame ref="-eforen.button" tint="#AA00AA" duration="300"/>
-                <frame ref="-eforen.button" tint="#660066" duration="300"/>
+                <frame ref="-eforen.button" tint="#8800AA" duration="300"/>
+                <frame ref="-eforen.button" tint="#330066" duration="300"/>
             </animation>
             <animation if="selected + pressed" timeSource="pressed">
                 <frame ref="-eforen.button" tint="#777700" duration="500"/>
