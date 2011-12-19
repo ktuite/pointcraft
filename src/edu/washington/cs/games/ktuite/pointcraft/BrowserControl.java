@@ -8,6 +8,7 @@ public class BrowserControl {
 	 * 
 	 * @param url
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked", "unused" })
 	public static void openUrl(String url) {
 		String os = System.getProperty("os.name");
 		Runtime runtime = Runtime.getRuntime();
@@ -29,7 +30,7 @@ public class BrowserControl {
 				String[] browsers = { "firefox", "opera", "konqueror",
 						"epiphany", "mozilla", "netscape" };
 				String browser = null;
-				for (int count = 0; count < browser.length() && browser == null; count++)
+				for (int count = 0; count < browsers.length && browser == null; count++)
 					if (runtime.exec(new String[] { "which", browsers[count] })
 							.waitFor() == 0)
 						browser = browsers[count];
