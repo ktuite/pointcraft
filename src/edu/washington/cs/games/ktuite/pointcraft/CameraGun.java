@@ -3,13 +3,22 @@ package edu.washington.cs.games.ktuite.pointcraft;
 import static org.lwjgl.opengl.GL11.*;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import javax.imageio.*;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
+
 
 public class CameraGun {
 	
@@ -25,16 +34,82 @@ public class CameraGun {
 		glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 
 		String filename = "pointcraft_" + Main.server.player_id + "_" + Main.server.session_id + "_" + count + ".png";
-		File file = new File(filename);
+		
 		BufferedImage bi = transformPixelsRGBBuffer2ARGB_ByHand(pixels);
+		
 		try {
-			ImageIO.write(bi, "png", file);
-		} catch (IOException e) {
+			//File file = new File(filename);
+			//ImageIO.write(bi, "png", file);
+			upload(bi, filename);
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+	
+	// stolen from my sketchabit code
+	public static boolean upload(BufferedImage bi, String filename) throws Exception {
+		final String BOUNDARY = "====CATSCATSCATS====";
+		//URL url = new URL("http://www.postbin.org/q7oqzc");
+		URL url = new URL("http://phci03.cs.washington.edu/pointcraft/upload.php?player_id="+Main.server.player_id);
+		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+		conn.setDoOutput(true);
+		conn.setRequestMethod("POST");
+		conn.setRequestProperty("Content-Type", "multipart/form-data;boundary="+BOUNDARY);
+		DataOutputStream outStream = new DataOutputStream(conn.getOutputStream());
+		outStream.writeBytes("--"+BOUNDARY+"\r\n");
+		outStream.writeBytes("Content-Disposition: form-data; name=\"photo\";filename=\"" + filename + "\"\r\n");
+		outStream.writeBytes("Content-Type: image/png\r\n");
+		outStream.writeBytes("\r\n");
+		
+		ImageIO.write(bi, "png", outStream);
+		
+		
+		outStream.writeBytes("\r\n");
+		outStream.writeBytes("--"+BOUNDARY+"--\r\n");
+		if(conn.getResponseCode() == 200) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
+	public static boolean uploadBitmap(File image_file) throws Exception {
+		final String BOUNDARY = "====CATSCATSCATS==";
+		//URL url = new URL("http://www.postbin.org/q7oqzc");
+		URL url = new URL("http://phci03.cs.washington.edu/pointcraft/upload.php?player_id="+Main.server.player_id);
+		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+		conn.setDoOutput(true);
+		conn.setRequestMethod("POST");
+		conn.setRequestProperty("Content-Type", "multipart/form-data;boundary="+BOUNDARY);
+		DataOutputStream outStream = new DataOutputStream(conn.getOutputStream());
+		outStream.writeBytes("--"+BOUNDARY+"\r\n");
+		outStream.writeBytes("Content-Disposition: form-data; name=\"photo\";filename=\"upload.png\"\r\n");
+		outStream.writeBytes("Content-Type: image/png\r\n");
+		outStream.writeBytes("\r\n");
+		
+		FileInputStream inStream = new FileInputStream(image_file);
+		
+		int buf_size = 1024;
+		int temp_size;
+		byte[] buf = new byte[buf_size];
+		while (inStream.available() > 0){
+			temp_size = Math.min(buf_size, inStream.available());
+			inStream.read(buf, 0, temp_size);
+			outStream.write(buf, 0, temp_size);
+			System.out.println("transmitting bytes " + temp_size);
+		}
+		
+		
+		outStream.writeBytes("\r\n");
+		outStream.writeBytes("--"+BOUNDARY+"--\r\n");
+		if(conn.getResponseCode() == 200) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	// taken from: http://www.felixgers.de/teaching/jogl/imagingProg.html
 	private static BufferedImage transformPixelsRGBBuffer2ARGB_ByHand(
 			ByteBuffer pixelsRGB) {
