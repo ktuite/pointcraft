@@ -97,7 +97,7 @@ public class Main {
 	public float overhead_scale = 1;
 
 	public enum GunMode {
-		PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT
+		PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA
 	}
 
 	public GunMode which_gun;
@@ -107,7 +107,7 @@ public class Main {
 	private OnscreenOverlay onscreen_overlay;
 	private InstructionalOverlay instruction_overlay;
 
-	public static boolean is_logged_in = false;
+	public static boolean is_logged_in = true;
 	private GUI login_gui;
 
 	public static void main(String[] args) {
@@ -486,6 +486,9 @@ public class Main {
 				 * Save.saveHeckaData(); } if (Keyboard.getEventKey() ==
 				 * Keyboard.KEY_L) { Save.loadHeckaData(); }
 				 */
+				
+				System.out.println("Key: " + Keyboard.getEventKey());
+				
 				if (Keyboard.getEventKey() == Keyboard.KEY_Z
 						&& (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29))) {
 					ActionTracker.undo();
@@ -539,9 +542,13 @@ public class Main {
 					System.out
 							.println("orb gun (where you can just place pellets in space without them sticking to things) selected");
 				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_0) {
+				if (Keyboard.getEventKey() == Keyboard.KEY_DELETE || Keyboard.getEventKey() == Keyboard.KEY_BACK) {
 					which_gun = GunMode.DESTRUCTOR;
 					System.out.println("the gun that deletes things");
+				}
+				if (Keyboard.getEventKey() == Keyboard.KEY_0) {
+					which_gun = GunMode.CAMERA;
+					System.out.println("capture a screenshot");
 				}
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_T) {
@@ -746,6 +753,51 @@ public class Main {
 		glMatrixMode(GL_PROJECTION);
 		glLoadMatrix(proj_intermediate);
 		glMatrixMode(GL_MODELVIEW);
+	}
+	
+	public void renderForCamera() {
+		glClearColor(FOG_COLOR[0], FOG_COLOR[1], FOG_COLOR[2], 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glPushMatrix();
+
+		glRotatef(tilt_angle, 1.0f, 0.0f, 0.0f); // rotate our camera up/down
+		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
+
+		DrawSkybox(); // draw skybox before translate
+
+		glScalef(overhead_scale, overhead_scale, overhead_scale);
+		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
+
+		// TODO: figure out up vec stuff
+		// this goes here to make the points appear as they should
+		// with new up vector
+		// but gun direction and gun origin is wrong
+		gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
+
+		glEnable(GL_FOG);
+		if (draw_points)
+			DrawPoints(); // draw the actual 3d things
+
+		if (draw_pellets) {
+			DrawPellets();
+			if (which_gun == GunMode.ORB)
+				OrbPellet.drawOrbPellet();
+		}
+
+		for (Primitive geom : geometry) {
+			geom.draw();
+		}
+
+		if (draw_scaffolding) {
+			for (Scaffold geom : geometry_v) {
+				geom.draw();
+			}
+		}
+		glDisable(GL_FOG);
+
+		glPopMatrix();
+
+		Display.update();
 	}
 
 	private void DisplayLoop() {
@@ -1209,6 +1261,30 @@ public class Main {
 			}
 			glEnd();
 			break;
+		case CAMERA:
+			glBegin(GL_LINE_LOOP);
+			glVertex2f(f, f);
+			glVertex2f(-f, f);
+			glVertex2f(-f, -f);
+			glVertex2f(f, -f);
+			glEnd();
+			
+			glBegin(GL_LINE_LOOP);
+			glVertex2f(f*.90f, -f);
+			glVertex2f(f*.35f, -f);
+			glVertex2f(f*.35f, f*-1.30f);
+			glVertex2f(f*.90f, f*-1.30f);
+			glEnd();
+
+			glBegin(GL_LINE_LOOP);
+			for (int i = 0; i < n; i++) {
+				float angle = (float) (Math.PI * 2 * i / n);
+				float x = (float) (Math.cos(angle) * f * 0.55 * 600 / 800);
+				float y = (float) (Math.sin(angle) * f * 0.55);
+				glVertex2f(x, y);
+			}
+			glEnd();
+			break;
 		case COMBINE:
 		case DRAG_TO_EDIT:
 			glBegin(GL_LINES);
@@ -1257,6 +1333,9 @@ public class Main {
 			new_pellet.constructing = true;
 			all_pellets_in_world.add(new_pellet);
 			System.out.println(all_pellets_in_world);
+		} else if (which_gun == GunMode.CAMERA){
+			System.out.println("catpure and send a screenshot");
+			CameraGun.takeSnapshot(this);
 		} else if (which_gun != GunMode.ORB) {
 			System.out.println("shooting gun");
 
