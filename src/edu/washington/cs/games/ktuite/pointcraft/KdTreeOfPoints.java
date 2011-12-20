@@ -48,6 +48,74 @@ public class KdTreeOfPoints {
 		buildLookupTree();
 	}
 
+	public static void loadCube() {
+		int n = 50000;
+		num_points = n * 6;
+		float s = 0.05f;
+		point_colors = BufferUtils.createDoubleBuffer(num_points * 3);
+		point_positions = BufferUtils.createDoubleBuffer(num_points * 3);
+
+		for (int i = 0; i < num_points; i++) {
+			double[] pos = new double[3];
+			for (int k = 0; k < 3; k++) {
+				pos[k] = Math.random();
+			}
+
+			for (int k = 0; k < 3; k++) {
+				double b = pos[k] * 2 * s - s;
+				point_positions.put(i * 3 + k, b);
+			}
+
+		}
+
+		for (int i = n * 0; i < n * 1; i++) {
+			point_positions.put(i * 3 + 0, -s);
+			double[] color = {0.6, .33, 0.6};
+			for (int k = 0; k < 3; k++) {
+				point_colors.put(i * 3 + k, color[k]);
+			}
+		}
+		for (int i = n * 1; i < n * 2; i++) {
+			point_positions.put(i * 3 + 0, s);
+			double[] color = {1, 1, 1};
+			for (int k = 0; k < 3; k++) {
+				point_colors.put(i * 3 + k, color[k]);
+			}
+		}
+		for (int i = n * 2; i < n * 3; i++) {
+			point_positions.put(i * 3 + 1, -s);
+			double[] color = {.46, .33, 0.533};
+			for (int k = 0; k < 3; k++) {
+				point_colors.put(i * 3 + k, color[k]);
+			}
+		}
+		for (int i = n * 3; i < n * 4; i++) {
+			point_positions.put(i * 3 + 1, s);
+			double[] color = {.2, .1, 0.2};
+			for (int k = 0; k < 3; k++) {
+				point_colors.put(i * 3 + k, color[k]);
+			}
+		}
+		for (int i = n * 4; i < n * 5; i++) {
+			point_positions.put(i * 3 + 2, -s);
+			double[] color = {.46, .4, 0.533};
+			for (int k = 0; k < 3; k++) {
+				point_colors.put(i * 3 + k, color[k]);
+			}
+		}
+		for (int i = n * 5; i < n * 6; i++) {
+			point_positions.put(i * 3 + 2, s);
+		}
+
+		point_colors.rewind();
+		point_positions.rewind();
+		for (int k = 0; k < 3; k++) {
+			min_corner[k] = (-1 * s) * 2;
+			max_corner[k] = s * 2;
+		}
+		buildLookupTree();
+	}
+
 	public static void load(String filename) {
 		try {
 			BufferedReader buf = new BufferedReader(new FileReader(filename));
@@ -97,7 +165,7 @@ public class KdTreeOfPoints {
 			max_span = max_corner[2] - min_corner[2];
 
 		tree = new PointOctree(center, max_span);
-		tree.setMinNodeSize(max_span / 5);
+		tree.setMinNodeSize(max_span / 2);
 
 		for (int i = 0; i < num_points; i++) {
 			tree.addPoint(new Vec3D((float) point_positions.get(i * 3 + 0),
@@ -256,10 +324,9 @@ public class KdTreeOfPoints {
 					}
 					// System.out.println("");
 
-					
 					point_colors.put((r & 0xFF) / 255.0);
-					point_colors.put((g & 0xFF)  / 255.0);
-					point_colors.put((b & 0xFF)  / 255.0);
+					point_colors.put((g & 0xFF) / 255.0);
+					point_colors.put((b & 0xFF) / 255.0);
 
 					point_positions.put(x);
 					point_positions.put(y);
@@ -279,7 +346,7 @@ public class KdTreeOfPoints {
 					if (h % 10000 == 0) {
 						System.out.println("points loaded: " + h + "/"
 								+ num_points);
-						//System.out.println(" " + r + "," + g + "," + b );
+						// System.out.println(" " + r + "," + g + "," + b );
 
 					}
 				}

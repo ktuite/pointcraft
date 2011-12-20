@@ -36,6 +36,8 @@ import de.matthiasmann.twl.renderer.lwjgl.LWJGLRenderer;
 import de.matthiasmann.twl.theme.ThemeManager;
 
 public class Main {
+	private static boolean IS_RELEASE = true;
+	
 	// stuff about the atmosphere
 	private float FOG_COLOR[] = new float[] { .89f, .89f, .89f, 1.0f };
 	public static Audio launch_effect;
@@ -107,7 +109,7 @@ public class Main {
 	private OnscreenOverlay onscreen_overlay;
 	private InstructionalOverlay instruction_overlay;
 
-	public static boolean is_logged_in = true;
+	public static boolean is_logged_in = !IS_RELEASE;
 	private GUI login_gui;
 
 	public static void main(String[] args) {
@@ -131,7 +133,7 @@ public class Main {
 			Display.setVSyncEnabled(true);
 			Display.create();
 			Display.setTitle("PointCraft FPS-3D-Modeler");
-			Mouse.setGrabbed(false);
+			Mouse.setGrabbed(!IS_RELEASE);
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 			System.out.println("ERROR running InitDisplay... game exiting");
@@ -286,8 +288,8 @@ public class Main {
 	}
 
 	private void LoadData() {
-		KdTreeOfPoints
-		 .loadRandom();
+		KdTreeOfPoints.loadCube();
+		 //.loadRandom();
 		//		.load("assets/models/lewis-hall-binary.ply");
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 	}
@@ -487,7 +489,8 @@ public class Main {
 				 * Keyboard.KEY_L) { Save.loadHeckaData(); }
 				 */
 				
-				System.out.println("Key: " + Keyboard.getEventKey());
+				// PRINT KEY SO I CAN SEE THE KEY CODE
+				//System.out.println("Key: " + Keyboard.getEventKey());
 				
 				if (Keyboard.getEventKey() == Keyboard.KEY_Z
 						&& (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29))) {
@@ -604,19 +607,13 @@ public class Main {
 					ActionTracker.printStack();
 				}
 
-				if (Keyboard.getEventKey() == Keyboard.KEY_M) {
-					if (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29)) {
-						up_vec.set(0, 1, 0);
-						pos.set(0, 0, 0);
-						tilt_angle = 0;
-					} else {
-						computeGunDirection();
-						up_vec.set(gun_direction);
-						up_vec.scale(-1);
-						pos.set(0, 0, 0);
-						tilt_angle = 0;
-					}
-				}
+				/*
+				 * if (Keyboard.getEventKey() == Keyboard.KEY_M) { if
+				 * (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29)) {
+				 * up_vec.set(0, 1, 0); pos.set(0, 0, 0); tilt_angle = 0; } else
+				 * { computeGunDirection(); up_vec.set(gun_direction);
+				 * up_vec.scale(-1); pos.set(0, 0, 0); tilt_angle = 0; } }
+				 */
 
 			}
 		}

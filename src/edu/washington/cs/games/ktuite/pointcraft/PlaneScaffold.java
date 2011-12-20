@@ -11,6 +11,8 @@ import java.nio.DoubleBuffer;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONStringer;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -104,8 +106,6 @@ public class PlaneScaffold extends Scaffold {
 
 		float pts[] = new float[12];
 		plane_extent = findPlaneExtent();
-
-		System.out.println("plane abcd: " + a + "," + b + "," + c + "," + d);
 
 		center = findPlaneCenter();
 
@@ -208,10 +208,13 @@ public class PlaneScaffold extends Scaffold {
 			grid_vertices.add(end);
 		}
 
-		checkForIntersections();
+		//checkForIntersections();
 	}
 
-	private void checkForIntersections() {
+	public void checkForIntersections() {
+		if (pellets.size() < 3)
+			return;
+		
 		for (Scaffold geom : Main.geometry_v) {
 			if (geom instanceof LineScaffold) {
 				Vector3f intersect = ((LineScaffold) geom)
@@ -302,5 +305,33 @@ public class PlaneScaffold extends Scaffold {
 	public void removeLastPointAndRefit(){
 		pellets.pop();
 		fitPlane();
+	}
+	
+
+	@Override
+	public String toJSONString() {
+		JSONStringer s = new JSONStringer();
+		try {
+			s.object();
+			s.key("scaffold_type");
+			s.value("plane");
+			s.key("plane_parameters");
+			s.array();
+			s.value(a);
+			s.value(b);
+			s.value(c);
+			s.value(d);
+			s.endArray();
+			s.key("pellets");
+			s.array();
+			for (Pellet p : pellets){
+				s.value(p);
+			}
+			s.endArray();
+			s.endObject();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+        return s.toString();
 	}
 }

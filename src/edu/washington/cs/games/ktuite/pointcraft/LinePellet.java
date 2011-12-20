@@ -63,9 +63,10 @@ public class LinePellet extends Pellet {
 					ActionTracker.newLinePellet(this);
 					current_line.add(this);
 					
+					current_line.fitLine();
 					if (current_line.pellets.size() >= 2)
 						ActionTracker.newLine(current_line);
-					current_line.fitLine();
+					current_line.checkForIntersections();
 				} else if (closest_point != null) {
 					System.out.println("pellet stuck to some geometry");
 					constructing = true;
@@ -73,9 +74,10 @@ public class LinePellet extends Pellet {
 					ActionTracker.newLinePellet(this);
 					current_line.add(this);
 					
+					current_line.fitLine();
 					if (current_line.pellets.size() >= 2)
 						ActionTracker.newLine(current_line);
-					current_line.fitLine();
+					current_line.checkForIntersections();
 					stickPelletToScaffolding();
 					
 				} else if (Main.draw_points) {
@@ -90,9 +92,11 @@ public class LinePellet extends Pellet {
 						setInPlace();
 						ActionTracker.newLinePellet(this);
 						current_line.add(this);
+						
+						current_line.fitLine();
 						if (current_line.pellets.size() >= 2)
 							ActionTracker.newLine(current_line);
-						current_line.fitLine();
+						current_line.checkForIntersections();
 					}
 				}
 			

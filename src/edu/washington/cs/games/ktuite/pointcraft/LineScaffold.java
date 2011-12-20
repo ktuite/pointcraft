@@ -4,6 +4,8 @@ import static org.lwjgl.opengl.GL11.*;
 
 import java.nio.DoubleBuffer;
 
+import org.json.JSONException;
+import org.json.JSONStringer;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -61,10 +63,13 @@ public class LineScaffold extends Scaffold {
 		pt_2.set(center);
 
 
-		checkForIntersections();
+		//checkForIntersections();
 	}
 
-	private void checkForIntersections() {
+	public void checkForIntersections() {
+		if (pellets.size() < 2)
+			return;
+		
 		for (Scaffold geom : Main.geometry_v) {
 			if (geom instanceof PlaneScaffold) {
 				Vector3f intersect = ((PlaneScaffold) geom)
@@ -188,5 +193,29 @@ public class LineScaffold extends Scaffold {
 	public void removeLastPointAndRefit(){
 		pellets.pop();
 		fitLine();
+	}
+	
+	@Override
+	public String toJSONString() {
+		JSONStringer s = new JSONStringer();
+		try {
+			s.object();
+			s.key("scaffold_type");
+			s.value("line");
+			s.key("pt_1");
+			s.value(Pellet.JSONVector3f(pt_1));
+			s.key("pt_2");
+			s.value(Pellet.JSONVector3f(pt_2));
+			s.key("pellets");
+			s.array();
+			for (Pellet p : pellets){
+				s.value(p);
+			}
+			s.endArray();
+			s.endObject();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+        return s.toString();
 	}
 }

@@ -179,11 +179,14 @@ public class VerticalLinePellet extends Pellet {
 			cycle.add(new_bottom_pellet);
 			cycle.add(new_top_pellet);
 			cycle.add(top_pellet);
-
+			
 			Primitive polygon = new Primitive(GL_POLYGON, cycle);
 			polygon.setPlayerPositionAndViewingDirection(pos, vel);
 			Main.geometry.add(polygon);
 			ActionTracker.newPolygon(polygon, null);
+			
+
+			ActionTracker.newVerticalWall(top_pellet, bottom_pellet);
 
 			top_pellet = new_top_pellet;
 			bottom_pellet = new_bottom_pellet;

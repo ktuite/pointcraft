@@ -11,6 +11,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Vector;
 
+import org.json.JSONException;
+import org.json.JSONStringer;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.newdawn.slick.opengl.Texture;
@@ -19,7 +21,7 @@ import org.newdawn.slick.opengl.TextureLoader;
 /* these primitives built out of pellets...
  * keep a list of pellets and then draw lines or polygons between them.
  */
-public class Primitive {
+public class Primitive implements org.json.JSONString{
 
 	private int gl_type;
 	private List<Pellet> vertices;
@@ -171,6 +173,16 @@ public class Primitive {
 			glEnd();
 		}
 	}
+	
+	public void refreshTexture(){
+		texture_data = new Vector<byte[]>();
+		texture_data.setSize(num_triangles);
+		textures = new Vector<Texture>();
+		textures.setSize(num_triangles);
+		texture_url = null;
+		textures_loaded = false;
+		startDownloadingTexture();
+	}
 
 	public void startDownloadingTexture() {
 		if (texture_url == null) {
@@ -274,5 +286,29 @@ public class Primitive {
 	public static void addBackDeletedPrimitive(Primitive primitive) {
 
 		Main.geometry.add(primitive);
+	}
+
+	@Override
+	public String toJSONString() {
+		JSONStringer s = new JSONStringer();
+		try {
+			s.object();
+			s.key("gl_type");
+			s.value(gl_type);
+			s.key("is_polygon");
+			s.value(isPolygon());
+			s.key("vertices");
+			s.array();
+			for (Pellet p : vertices){
+				s.value(p);
+			}
+			s.endArray();
+			s.key("texture_url");
+			s.value(texture_url);
+			s.endObject();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+        return s.toString();
 	}
 }

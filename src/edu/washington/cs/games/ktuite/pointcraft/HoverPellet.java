@@ -11,6 +11,7 @@ public class HoverPellet extends Pellet {
 	public static Pellet destination_pellet;
 	private static boolean drag_started = false;
 	private static float dist_to_pellet;
+	public static Vector3f old_pos = null;
 
 	public HoverPellet(List<Pellet> _pellets) {
 		super(_pellets);
@@ -32,7 +33,9 @@ public class HoverPellet extends Pellet {
 						target_pellet.pos));
 
 				target_pellet.pos.set(destination_pellet.pos);
-				target_pellet.visible = false;
+				//target_pellet.visible = false;
+				
+				fixPolygonOfPellet(target_pellet);
 
 				target_pellet = null;
 				destination_pellet = null;
@@ -42,16 +45,29 @@ public class HoverPellet extends Pellet {
 
 	}
 
+	public static void fixPolygonOfPellet(Pellet p) {
+		for (Primitive g : Main.geometry){
+			if (g.isPolygon() && g.getVertices().contains(p)){
+				System.out.println("a polygon cotnains editied pellet");
+				g.refreshTexture();
+			}
+		}
+		
+	}
+
 	public static void startDrag() {
 		if (hover_pellet >= 0) {
 			drag_started = true;
 			target_pellet = Main.all_pellets_in_world.get(hover_pellet);
 			computeDistToPellet();
+			old_pos = new Vector3f(target_pellet.pos);
 		}
 	}
 
 	public static void endDrag() {
 		if (drag_started) {
+			ActionTracker.movedPellet(target_pellet, old_pos);
+			fixPolygonOfPellet(target_pellet);
 			drag_started = false;
 			target_pellet = null;
 		}

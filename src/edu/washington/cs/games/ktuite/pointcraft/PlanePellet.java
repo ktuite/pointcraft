@@ -58,9 +58,11 @@ public class PlanePellet extends Pellet {
 					alive = false;
 					ActionTracker.newPlanePellet(this);
 					current_plane.add(this);
+					
+					current_plane.fitPlane();
 					if (current_plane.pellets.size() >= 3)
 						ActionTracker.newPlane(current_plane);
-					current_plane.fitPlane();
+					current_plane.checkForIntersections();
 
 				} else if (closest_point != null) {
 					System.out.println("pellet stuck to some geometry");
@@ -71,9 +73,10 @@ public class PlanePellet extends Pellet {
 					if (!isAnotherPlane()){
 						current_plane.add(this);
 						
+						current_plane.fitPlane();
 						if (current_plane.pellets.size() >= 3)
 							ActionTracker.newPlane(current_plane);
-						current_plane.fitPlane();
+						current_plane.checkForIntersections();
 					}
 					
 					
@@ -90,9 +93,11 @@ public class PlanePellet extends Pellet {
 						setInPlace();
 						ActionTracker.newPlanePellet(this);
 						current_plane.add(this);
+						
+						current_plane.fitPlane();
 						if (current_plane.pellets.size() >= 3)
 							ActionTracker.newPlane(current_plane);
-						current_plane.fitPlane();
+						current_plane.checkForIntersections();
 					}
 				}
 				

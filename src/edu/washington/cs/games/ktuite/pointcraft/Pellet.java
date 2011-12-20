@@ -5,11 +5,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONStringer;
 import org.lwjgl.util.glu.Sphere;
 import org.lwjgl.util.vector.Vector3f;
 import static org.lwjgl.opengl.GL11.*;
 
-public class Pellet {
+public class Pellet implements org.json.JSONString {
 
 	static private int ID = 0;
 	public Vector3f pos;
@@ -84,7 +87,6 @@ public class Pellet {
 	public void setInPlace() {
 		if (Main.attach_effect != null) {
 			Main.attach_effect.playAsSoundEffect(1.0f, 1.0f, false);
-			Main.server.newPellet(this);
 		}
 	}
 
@@ -187,5 +189,34 @@ public class Pellet {
 		} else {
 			coloredDraw();
 		}
+	}
+
+	@Override
+	public String toJSONString() {
+		try {
+			return "{" + JSONObject.quote("pellet_type") + ":"
+					+ JSONObject.quote(pellet_type.toString()) + ","
+					+ JSONObject.quote("pos") + ":"
+					+ JSONObject.valueToString(JSONVector3f(pos)) + ","
+					+ JSONObject.quote("radius") + ":"
+					+ JSONObject.doubleToString(radius) + ", " + "}";
+		} catch (JSONException e) {
+			e.printStackTrace();
+			return "";
+		}
+	}
+
+	public static String JSONVector3f(Vector3f v) {
+		JSONStringer s = new JSONStringer();
+		try {
+			s.array();
+			s.value(v.x);
+			s.value(v.y);
+			s.value(v.z);
+			s.endArray();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return s.toString();
 	}
 }

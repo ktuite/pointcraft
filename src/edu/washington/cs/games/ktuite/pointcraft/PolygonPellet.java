@@ -169,7 +169,6 @@ public class PolygonPellet extends Pellet {
 		Primitive polygon = new Primitive(GL_POLYGON, cycle);
 		polygon.setPlayerPositionAndViewingDirection(pos, vel);
 		Main.geometry.add(polygon);
-		Main.server.newPolygon();
 
 		ActionTracker.newPolygon(polygon,
 				(Stack<PolygonPellet>) current_cycle.clone());
