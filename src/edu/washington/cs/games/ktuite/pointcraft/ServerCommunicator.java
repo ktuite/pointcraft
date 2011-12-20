@@ -115,5 +115,51 @@ public class ServerCommunicator {
 		}.start();
 
 	}
+	
+	public void undoUpdate() {
+		new Thread() {
+			public void run() {
+				try {
+					String data = "";
+					data += URLEncoder.encode("player_id", "UTF-8")
+							+ "="
+							+ URLEncoder.encode(Integer.toString(player_id),
+									"UTF-8");
+					data += "&"
+							+ URLEncoder.encode("session_id", "UTF-8")
+							+ "="
+							+ URLEncoder.encode(Integer.toString(session_id),
+									"UTF-8");
+					data += "&"
+							+ URLEncoder.encode("action_type", "UTF-8")
+							+ "="
+							+ URLEncoder.encode("UNDO",
+									"UTF-8");
+
+					URL url = new URL(server_url + "actionupdate.php");
+					URLConnection conn = url.openConnection();
+					conn.setDoOutput(true);
+					OutputStreamWriter wr = new OutputStreamWriter(
+							conn.getOutputStream());
+					wr.write(data);
+					wr.flush();
+
+					// Get the response
+					BufferedReader rd = new BufferedReader(
+							new InputStreamReader(conn.getInputStream()));
+					String line;
+					while ((line = rd.readLine()) != null) {
+						System.out.println(line);
+					}
+					wr.close();
+					rd.close();
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}.start();
+
+	}
 
 }

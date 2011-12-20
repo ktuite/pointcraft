@@ -133,6 +133,8 @@ public class ActionTracker {
 			return;
 		}
 
+		Main.server.undoUpdate();
+		
 		System.out.println("Undoing last action: " + showLatestAction());
 
 		Action last_action = undo_stack.pop();
