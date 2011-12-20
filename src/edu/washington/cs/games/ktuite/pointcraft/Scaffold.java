@@ -3,6 +3,8 @@ package edu.washington.cs.games.ktuite.pointcraft;
 import java.util.List;
 import java.util.Stack;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.lwjgl.util.vector.Vector3f;
 
 /* these primitives built out of pellets...
@@ -35,10 +37,24 @@ public class Scaffold implements org.json.JSONString{
 	public void add(Pellet p) {
 		pellets.add(p);
 	}
+	
+	public boolean isReady(){
+		return false;
+	}
 
 	@Override
 	public String toJSONString() {
 		// line and plane scaffolding methods should get called here instead
 		return null;
+	}
+
+	public static void loadFromJSON(JSONObject obj) throws JSONException {
+		String scaffold_type = obj.getString("scaffold_type");
+		if (scaffold_type.contains("line")){
+			LineScaffold.loadFromJSON(obj);
+		}
+		else if (scaffold_type.contains("plane")){
+			PlaneScaffold.loadFromJSON(obj);
+		}
 	}
 }

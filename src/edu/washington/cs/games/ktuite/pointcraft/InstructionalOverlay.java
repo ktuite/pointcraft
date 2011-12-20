@@ -50,13 +50,13 @@ public class InstructionalOverlay extends Widget {
 		
 		save_button.addCallback(new Runnable() {
 			public void run() {
-				Save.saveHeckaData();
+				Save.saveModel();
 			}
 		});
 
 		load_button.addCallback(new Runnable() {
 			public void run() {
-				Save.loadHeckaData();
+				Save.loadModel();
 			}
 		});
 		

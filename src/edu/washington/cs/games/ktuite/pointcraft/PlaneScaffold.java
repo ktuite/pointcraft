@@ -11,7 +11,9 @@ import java.nio.DoubleBuffer;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Vector3f;
@@ -30,6 +32,13 @@ public class PlaneScaffold extends Scaffold {
 		b = 0;
 		c = 0;
 		d = 0;
+	}
+	
+	public boolean isReady(){
+		if ((a == 0 && b == 0 && c == 0 && d == 0))
+			return false;
+		else
+			return true;
 	}
 
 	public void addNewPellet(Pellet p) {
@@ -52,7 +61,7 @@ public class PlaneScaffold extends Scaffold {
 			if (dist_to_center.length() > plane_extent * 1.2)
 				return dist;
 
-			if (!(a == 0 && b == 0 && c == 0 && d == 0)) {
+			if (isReady()) {
 				dist = (float) ((a * pos.x + b * pos.y + c * pos.z + d) / Math
 						.sqrt(a * a + b * b + c * c));
 			}
@@ -313,6 +322,8 @@ public class PlaneScaffold extends Scaffold {
 		JSONStringer s = new JSONStringer();
 		try {
 			s.object();
+			s.key("type");
+			s.value("scaffold");
 			s.key("scaffold_type");
 			s.value("plane");
 			s.key("plane_parameters");
@@ -333,5 +344,16 @@ public class PlaneScaffold extends Scaffold {
 			e.printStackTrace();
 		}
         return s.toString();
+	}
+	
+	public static void loadFromJSON(JSONObject obj) throws JSONException {
+		PlaneScaffold plane = new PlaneScaffold();
+		
+		JSONArray json_verts = obj.getJSONArray("pellets");
+		for (int i = 0; i < json_verts.length(); i++){
+			plane.pellets.add(Pellet.loadFromJSON(json_verts.getJSONObject(i)));
+		}
+		plane.fitPlane();
+		Main.geometry_v.add(plane);
 	}
 }

@@ -194,10 +194,13 @@ public class Pellet implements org.json.JSONString {
 	@Override
 	public String toJSONString() {
 		try {
-			return "{" + JSONObject.quote("pellet_type") + ":"
+			return "{" + JSONObject.quote("type") + ":"
+					+ JSONObject.quote("pellet") + ","
+					+ JSONObject.quote("pellet_type") + ":"
 					+ JSONObject.quote(pellet_type.toString()) + ","
-					+ JSONObject.quote("pos") + ":"
-					+ JSONObject.valueToString(JSONVector3f(pos)) + ","
+					+ JSONObject.quote("pos") + ":" + JSONVector3f(pos) + ","
+					+ JSONObject.quote("id") + ":"
+					+ JSONObject.numberToString(ID) + ","
 					+ JSONObject.quote("radius") + ":"
 					+ JSONObject.doubleToString(radius) + ", " + "}";
 		} catch (JSONException e) {
@@ -206,17 +209,46 @@ public class Pellet implements org.json.JSONString {
 		}
 	}
 
-	public static String JSONVector3f(Vector3f v) {
-		JSONStringer s = new JSONStringer();
-		try {
-			s.array();
-			s.value(v.x);
-			s.value(v.y);
-			s.value(v.z);
-			s.endArray();
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return s.toString();
+	public static JSONStringer JSONVector3f(Vector3f v) {
+		if (v != null) {
+			JSONStringer s = new JSONStringer();
+			try {
+				s.array();
+				s.value(v.x);
+				s.value(v.y);
+				s.value(v.z);
+				s.endArray();
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			return s;
+		} else
+			return null;
+	}
+
+	public static Pellet loadFromJSON(JSONObject obj) throws JSONException {
+		String pellet_type = obj.getString("pellet_type");
+		Pellet p = null;
+		if (pellet_type.contains("POLYGON"))
+			p = new PolygonPellet(Main.all_pellets_in_world);
+		else if (pellet_type.contains("LINE"))
+			p = new LinePellet(Main.all_pellets_in_world);
+		else if (pellet_type.contains("PLANE"))
+			p = new PlanePellet(Main.all_pellets_in_world);
+		else if (pellet_type.contains("VERTICAL_LINE"))
+			p = new VerticalLinePellet(Main.all_pellets_in_world);
+		else 
+			p = new ScaffoldPellet(Main.all_pellets_in_world);
+		
+		p.radius = (float) obj.getDouble("radius");
+		p.alive = true;
+		p.constructing = true;
+		p.visible = true;
+		p.pos = new Vector3f();
+		p.pos.x = (float) obj.getJSONArray("pos").getDouble(0);
+		p.pos.y = (float) obj.getJSONArray("pos").getDouble(1);
+		p.pos.z = (float) obj.getJSONArray("pos").getDouble(2);
+		Main.new_pellets_to_add_to_world.add(p);
+		return p;
 	}
 }

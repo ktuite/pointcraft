@@ -8,10 +8,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.net.URL;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
@@ -293,6 +296,8 @@ public class Primitive implements org.json.JSONString{
 		JSONStringer s = new JSONStringer();
 		try {
 			s.object();
+			s.key("type");
+			s.value("primitive");
 			s.key("gl_type");
 			s.value(gl_type);
 			s.key("is_polygon");
@@ -310,5 +315,19 @@ public class Primitive implements org.json.JSONString{
 			e.printStackTrace();
 		}
         return s.toString();
+	}
+
+	public static void loadFromJSON(JSONObject obj) throws JSONException {
+		JSONArray json_verts = obj.getJSONArray("vertices");
+		List<Pellet> vertices = new LinkedList<Pellet>();
+		for (int i = 0; i < json_verts.length(); i++){
+			vertices.add(Pellet.loadFromJSON(json_verts.getJSONObject(i)));
+		}
+		int gl_type = obj.getInt("gl_type");
+		Primitive p = new Primitive(gl_type, vertices);
+		p.startDownloadingTexture();
+		
+		Main.geometry.add(p);
+		
 	}
 }

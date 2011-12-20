@@ -4,7 +4,9 @@ import static org.lwjgl.opengl.GL11.*;
 
 import java.nio.DoubleBuffer;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Vector3f;
@@ -17,6 +19,13 @@ public class LineScaffold extends Scaffold {
 
 	public LineScaffold() {
 		super();
+	}
+	
+	public boolean isReady(){
+		if (pt_1 == null || pt_2 == null)
+			return false;
+		else
+			return true;
 	}
 
 	public void fitLine() {
@@ -93,7 +102,7 @@ public class LineScaffold extends Scaffold {
 	public Vector3f checkForIntersectionPlaneWithLine(float a, float b,
 			float c, float d) {
 		Vector3f i = null;
-		if (pt_1 == null || pt_2 == null)
+		if (!isReady())
 			return i;
 
 		float u_denom = a * (pt_1.x - pt_2.x) + b * (pt_1.y - pt_2.y) + c
@@ -200,6 +209,8 @@ public class LineScaffold extends Scaffold {
 		JSONStringer s = new JSONStringer();
 		try {
 			s.object();
+			s.key("type");
+			s.value("scaffold");
 			s.key("scaffold_type");
 			s.value("line");
 			s.key("pt_1");
@@ -217,5 +228,16 @@ public class LineScaffold extends Scaffold {
 			e.printStackTrace();
 		}
         return s.toString();
+	}
+	
+	public static void loadFromJSON(JSONObject obj) throws JSONException {
+		LineScaffold line = new LineScaffold();
+		
+		JSONArray json_verts = obj.getJSONArray("pellets");
+		for (int i = 0; i < json_verts.length(); i++){
+			line.pellets.add(Pellet.loadFromJSON(json_verts.getJSONObject(i)));
+		}
+		line.fitLine();
+		Main.geometry_v.add(line);
 	}
 }
