@@ -288,9 +288,9 @@ public class Main {
 	}
 
 	private void LoadData() {
-		KdTreeOfPoints.loadCube();
+		KdTreeOfPoints//.loadCube();
 		 //.loadRandom();
-		//		.load("assets/models/lewis-hall-binary.ply");
+				.load("assets/models/lewis-hall-binary.ply");
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 	}
 

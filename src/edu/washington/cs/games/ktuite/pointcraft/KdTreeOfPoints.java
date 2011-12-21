@@ -70,35 +70,35 @@ public class KdTreeOfPoints {
 
 		for (int i = n * 0; i < n * 1; i++) {
 			point_positions.put(i * 3 + 0, -s);
-			double[] color = {0.6, .33, 0.6};
+			double[] color = { 0.6, .33, 0.6 };
 			for (int k = 0; k < 3; k++) {
 				point_colors.put(i * 3 + k, color[k]);
 			}
 		}
 		for (int i = n * 1; i < n * 2; i++) {
 			point_positions.put(i * 3 + 0, s);
-			double[] color = {1, 1, 1};
+			double[] color = { 1, 1, 1 };
 			for (int k = 0; k < 3; k++) {
 				point_colors.put(i * 3 + k, color[k]);
 			}
 		}
 		for (int i = n * 2; i < n * 3; i++) {
 			point_positions.put(i * 3 + 1, -s);
-			double[] color = {.46, .33, 0.533};
+			double[] color = { .46, .33, 0.533 };
 			for (int k = 0; k < 3; k++) {
 				point_colors.put(i * 3 + k, color[k]);
 			}
 		}
 		for (int i = n * 3; i < n * 4; i++) {
 			point_positions.put(i * 3 + 1, s);
-			double[] color = {.2, .1, 0.2};
+			double[] color = { .2, .1, 0.2 };
 			for (int k = 0; k < 3; k++) {
 				point_colors.put(i * 3 + k, color[k]);
 			}
 		}
 		for (int i = n * 4; i < n * 5; i++) {
 			point_positions.put(i * 3 + 2, -s);
-			double[] color = {.46, .4, 0.533};
+			double[] color = { .46, .4, 0.533 };
 			for (int k = 0; k < 3; k++) {
 				point_colors.put(i * 3 + k, color[k]);
 			}
@@ -183,6 +183,9 @@ public class KdTreeOfPoints {
 			r_idx = g_idx = b_idx = x_idx = y_idx = z_idx = 0;
 			a_idx = -1;
 
+			if (Main.server != null)
+				Main.server.texture_server = null;
+
 			boolean binary = false;
 			int chars_read = 0;
 			int len = 0;
@@ -201,6 +204,9 @@ public class KdTreeOfPoints {
 					if (vert_properties_started) {
 						vert_properties_finished = true;
 					}
+				} else if (line.contains("cloud_id")) {
+					int cloud_id = Integer.parseInt(line.split(" ")[2]);
+					Main.server.setTextureServer(cloud_id);
 				}
 
 				if (line.contains("binary_little_endian")) {
@@ -236,8 +242,8 @@ public class KdTreeOfPoints {
 			}
 			chars_read += 4;
 
-			System.out.println(x_idx + "," + y_idx + "," + z_idx + "    "
-					+ r_idx + "," + g_idx + "," + b_idx);
+			//System.out.println(x_idx + "," + y_idx + "," + z_idx + "    "
+			//		+ r_idx + "," + g_idx + "," + b_idx);
 
 			point_colors = BufferUtils.createDoubleBuffer(num_points * 3);
 			point_positions = BufferUtils.createDoubleBuffer(num_points * 3);
@@ -289,8 +295,9 @@ public class KdTreeOfPoints {
 				ByteBuffer bb = BufferUtils.createByteBuffer(len);
 				bb.order(ByteOrder.LITTLE_ENDIAN);
 
-				System.out.println("reading " + count + " values with " + len
-						+ " bytes");
+				//System.out.println("reading " + count + " values with " + len
+				//		+ " bytes");
+				
 				for (int h = 0; h < num_points; h++) {
 					stream.read(pt, 0, len);
 					bb.rewind();

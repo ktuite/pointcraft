@@ -188,10 +188,13 @@ public class Primitive implements org.json.JSONString{
 	}
 
 	public void startDownloadingTexture() {
+		if (Main.server.texture_server == null)
+			return;
+		
 		if (texture_url == null) {
 			texture_url = new String[num_triangles];
 			for (int i = 0; i < num_triangles; i++) {
-				texture_url[i] = "http://mazagran.cs.washington.edu:8081/texture.png?&v=";
+				texture_url[i] = Main.server.texture_server + "texture.png?&v=";
 
 				// triangle fan going on here
 				Pellet p = vertices.get(0);

@@ -11,6 +11,8 @@ public class ServerCommunicator {
 
 	public int player_id, session_id;
 	private String server_url;
+	public int cloud_id = 0;
+	public String texture_server = null;
 
 	public ServerCommunicator(String _server_url) {
 		server_url = _server_url;
@@ -25,6 +27,31 @@ public class ServerCommunicator {
 		 * player_id); } catch (Exception e) {
 		 * System.out.println("no server available"); }
 		 */
+	}
+	
+	public void setTextureServer(int c_id){
+		cloud_id = c_id;
+		try {
+			URL url = new URL(server_url + "getTextureServer.php?cloud_id=" + cloud_id);
+			//System.out.println("getting texture server: " + url);
+			
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					url.openStream()));
+
+			String page_contents = in.readLine();
+			System.out.println(page_contents.length());
+
+			if (page_contents.length() > 0) {
+				texture_server = page_contents;
+				System.out.println("texture server set");
+			}
+			else{
+				texture_server = null;
+			}
+		
+		} catch (Exception e) {
+			System.out.println("no texture server available");
+		}
 	}
 
 	public boolean attemptLogin(String username, String password) {

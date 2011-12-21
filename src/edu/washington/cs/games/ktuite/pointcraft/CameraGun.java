@@ -28,14 +28,14 @@ public class CameraGun {
 		ByteBuffer pixels = BufferUtils.createByteBuffer(buf_size);
 		glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 
-		String filename = "pointcraft_" + Main.server.player_id + "_" + Main.server.session_id + "_" + count + ".png";
+		String base_filename = "pointcraft_" + Main.server.player_id + "_" + Main.server.session_id + "_" + count;
 		
 		BufferedImage bi = transformPixelsRGBBuffer2ARGB_ByHand(pixels);
 		
 		try {
 			//File file = new File(filename);
 			//ImageIO.write(bi, "png", file);
-			upload(bi, filename);
+			upload(bi, base_filename);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -43,25 +43,35 @@ public class CameraGun {
 	}
 	
 	// stolen from my sketchabit code
-	public static boolean upload(BufferedImage bi, String filename) throws Exception {
+	public static boolean upload(BufferedImage bi, String basename) throws Exception {
 		final String BOUNDARY = "====CATSCATSCATS====";
 		//URL url = new URL("http://www.postbin.org/q7oqzc");
-		URL url = new URL("http://phci03.cs.washington.edu/pointcraft/upload.php?player_id="+Main.server.player_id);
+		URL url = new URL("http://phci03.cs.washington.edu/pointcraft/upload.php?player_id="+Main.server.player_id+"&cloud_id="+Main.server.cloud_id);
 		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 		conn.setDoOutput(true);
 		conn.setRequestMethod("POST");
 		conn.setRequestProperty("Content-Type", "multipart/form-data;boundary="+BOUNDARY);
 		DataOutputStream outStream = new DataOutputStream(conn.getOutputStream());
+		
+		// png screenshot
 		outStream.writeBytes("--"+BOUNDARY+"\r\n");
-		outStream.writeBytes("Content-Disposition: form-data; name=\"photo\";filename=\"" + filename + "\"\r\n");
+		outStream.writeBytes("Content-Disposition: form-data; name=\"photo\";filename=\"" + basename + ".png\"\r\n");
 		outStream.writeBytes("Content-Type: image/png\r\n");
 		outStream.writeBytes("\r\n");
-		
 		ImageIO.write(bi, "png", outStream);
-		
-		
 		outStream.writeBytes("\r\n");
+		
+		// model file
+		outStream.writeBytes("--"+BOUNDARY+"\r\n");
+		outStream.writeBytes("Content-Disposition: form-data; name=\"modelfile\";filename=\"" + basename + ".txt\"\r\n");
+		outStream.writeBytes("Content-Type: text/plain\r\n");
+		outStream.writeBytes("\r\n");
+		Save.writeModel(outStream);
+		outStream.writeBytes("\r\n");
+		
 		outStream.writeBytes("--"+BOUNDARY+"--\r\n");
+		
+		
 		if(conn.getResponseCode() == 200) {
 			return true;
 		} else {

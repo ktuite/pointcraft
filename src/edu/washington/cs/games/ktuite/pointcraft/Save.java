@@ -64,7 +64,7 @@ public class Save {
 		Mouse.setGrabbed(mouseGrabbed);
 	}
 
-	private static void writeModel(OutputStream out) throws IOException {
+	public static void writeModel(OutputStream out) throws IOException {
 		for (Pellet p : Main.all_pellets_in_world) {
 			if (p.pellet_type == Main.GunMode.PELLET) {
 				out.write(p.toJSONString().getBytes());
