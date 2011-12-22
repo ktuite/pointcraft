@@ -132,7 +132,7 @@ public class Primitive implements org.json.JSONString{
 		}
 
 		Vector2f[] tex_coords = new Vector2f[] { new Vector2f(0, 0),
-				new Vector2f(1, 0), new Vector2f(0, 1) };// , new Vector2f(0, 1)
+				new Vector2f(1, 0), new Vector2f(1, 1)};
 															// };
 
 		for (int h = 0; h < num_triangles; h++) {

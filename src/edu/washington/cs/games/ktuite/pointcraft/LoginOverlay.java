@@ -36,16 +36,28 @@ public class LoginOverlay extends Widget {
 
 		Button signUp = new Button("Get an account online");
 		signUp.setTheme("boldLabel");
-		
+
+		Button newerVersion = new Button("");
+		if (!Main.server.is_up_to_date){
+			newerVersion.setText("A newer version of PointCraft is available online!! Go get it!!");
+		}
+		newerVersion.setTheme("attention");
+
 		errorLabel = new Label("");
 		errorLabel.setTheme("errorLabel");
-		
+
 		signUp.addCallback(new Runnable() {
 			public void run() {
 				openSignupPage();
 			}
 		});
-		
+
+		newerVersion.addCallback(new Runnable() {
+			public void run() {
+				openPointcraftPage();
+			}
+		});
+
 		btnLogin = new Button("LOGIN");
 		btnLogin.addCallback(new Runnable() {
 			public void run() {
@@ -57,38 +69,54 @@ public class LoginOverlay extends Widget {
 				lPassword);
 		DialogLayout.Group hFields = loginPanel.createParallelGroup(efName,
 				efPassword);
-		DialogLayout.Group hBtn = loginPanel.createSequentialGroup().addGap() 
+		DialogLayout.Group hBtn = loginPanel.createSequentialGroup().addGap()
 				.addWidget(btnLogin);
-		
-		DialogLayout.Group hSignUp = loginPanel.createSequentialGroup().addGap().addWidget(signUp).addGap();
-		DialogLayout.Group vSignUp = loginPanel.createSequentialGroup().addGap().addWidget(signUp);//.addGap(DialogLayout.LARGE_GAP);
-		
-		DialogLayout.Group hError = loginPanel.createSequentialGroup().addGap().addWidget(errorLabel).addGap();
-		DialogLayout.Group vError = loginPanel.createSequentialGroup().addGap().addWidget(errorLabel).addGap(DialogLayout.LARGE_GAP);
+
+		DialogLayout.Group hNewerVersion = loginPanel.createSequentialGroup()
+				.addGap().addWidget(newerVersion).addGap();
+		DialogLayout.Group vNewerVersion = loginPanel.createSequentialGroup()
+				.addGap().addWidget(newerVersion);//
+
+		if (!Main.server.is_up_to_date)
+			vNewerVersion = vNewerVersion.addGap(DialogLayout.LARGE_GAP);
+
+		DialogLayout.Group hSignUp = loginPanel.createSequentialGroup()
+				.addGap().addWidget(signUp).addGap();
+		DialogLayout.Group vSignUp = loginPanel.createSequentialGroup()
+				.addGap().addWidget(signUp);
+
+		DialogLayout.Group hError = loginPanel.createSequentialGroup().addGap()
+				.addWidget(errorLabel).addGap();
+		DialogLayout.Group vError = loginPanel.createSequentialGroup().addGap()
+				.addWidget(errorLabel).addGap(DialogLayout.LARGE_GAP);
 
 		loginPanel.setHorizontalGroup(loginPanel.createParallelGroup()
-				.addGroup(hSignUp)
-				.addGroup(hError)
+				.addGroup(hNewerVersion).addGroup(hSignUp).addGroup(hError)
 				.addGroup(loginPanel.createSequentialGroup(hLabels, hFields))
 				.addGroup(hBtn));
 		loginPanel
 				.setVerticalGroup(loginPanel
 						.createSequentialGroup()
+						.addGroup(vNewerVersion)
 						.addGroup(vSignUp)
 						.addGroup(vError)
 						.addGroup(loginPanel.createParallelGroup(lName, efName))
-						.addGroup(loginPanel.createParallelGroup(lPassword,
-										efPassword))
-						.addWidget(btnLogin));
+						.addGroup(
+								loginPanel.createParallelGroup(lPassword,
+										efPassword)).addWidget(btnLogin));
 
 		add(loginPanel);
 	}
 
-	
-	private void openSignupPage(){
-		BrowserControl.openUrl("http://phci03.cs.washington.edu/pointcraft/register.php");
+	private void openSignupPage() {
+		BrowserControl
+				.openUrl("http://www.photocitygame.com/pointcraft/register.php");
 	}
-	
+
+	private void openPointcraftPage() {
+		BrowserControl.openUrl("http://www.photocitygame.com/pointcraft/");
+	}
+
 	public static String toHex(byte[] bytes) {
 		BigInteger bi = new BigInteger(1, bytes);
 		return String.format("%0" + (bytes.length << 1) + "X", bi);
@@ -101,7 +129,7 @@ public class LoginOverlay extends Widget {
 			efName.setEnabled(false);
 			efPassword.setEnabled(false);
 			btnLogin.setEnabled(false);
-			
+
 			String username = efName.getText();
 			try {
 				MessageDigest sha1 = MessageDigest.getInstance("SHA1");
@@ -109,7 +137,7 @@ public class LoginOverlay extends Widget {
 						sha1.digest(efPassword.getText().getBytes()))
 						.toLowerCase();
 				Main.is_logged_in = Main.server.attemptLogin(username, hashed);
-				if (!Main.is_logged_in){
+				if (!Main.is_logged_in) {
 					errorLabel.setText("wrong username/password");
 				}
 				efName.setEnabled(true);

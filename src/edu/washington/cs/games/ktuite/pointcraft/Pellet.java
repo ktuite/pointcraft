@@ -102,7 +102,9 @@ public class Pellet implements org.json.JSONString {
 		if (!Main.draw_pellets)
 			return null;
 
-		for (Pellet pellet : main_pellets) {
+		//for (Pellet pellet : main_pellets) {
+		for (int i = main_pellets.size()-1; i >= 0; i--){
+			Pellet pellet = main_pellets.get(i);
 			if (pellet != this) {
 				Vector3f dist = new Vector3f();
 				Vector3f.sub(pos, pellet.pos, dist);

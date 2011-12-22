@@ -36,8 +36,9 @@ import de.matthiasmann.twl.renderer.lwjgl.LWJGLRenderer;
 import de.matthiasmann.twl.theme.ThemeManager;
 
 public class Main {
-	private static boolean IS_RELEASE = false;
-	
+	private static boolean IS_RELEASE = true;
+	public static float VERSION_NUMBER = 0.3f;
+
 	// stuff about the atmosphere
 	private float FOG_COLOR[] = new float[] { .89f, .89f, .89f, 1.0f };
 	public static Audio launch_effect;
@@ -115,6 +116,9 @@ public class Main {
 	public static void main(String[] args) {
 		Main main = new Main();
 
+		server = new ServerCommunicator(
+				"http://www.photocitygame.com/pointcraft/");
+
 		main.InitDisplay();
 		main.InitGUI();
 		main.InitGraphics();
@@ -185,7 +189,7 @@ public class Main {
 		glMatrixMode(GL_PROJECTION);
 
 		glLoadIdentity();
-		glOrtho(-1 * width / height, width / height, -1f, 1f, 0.001f, 1000.0f);
+		glOrtho(-1 * width / height, width / height, -1f, 1f, 0.001f, 5000.0f);
 		// glScalef(40, 40, 40);
 
 		proj_ortho = BufferUtils.createDoubleBuffer(16);
@@ -194,7 +198,7 @@ public class Main {
 		proj_ortho.put(5, proj_ortho.get(5) * 40f);
 
 		glLoadIdentity();
-		gluPerspective(60, width / height, .001f, 1000.0f);
+		gluPerspective(60, width / height, .01f, 100000.0f);
 		proj_persp = BufferUtils.createDoubleBuffer(16);
 		glGetDouble(GL_PROJECTION_MATRIX, proj_persp);
 		proj_intermediate = BufferUtils.createDoubleBuffer(16);
@@ -275,9 +279,6 @@ public class Main {
 			System.exit(1);
 		}
 
-		server = new ServerCommunicator(
-				"http://phci03.cs.washington.edu/pointcraft/");
-
 	}
 
 	public void loadNewPointCloud(File file) {
@@ -288,9 +289,9 @@ public class Main {
 	}
 
 	private void LoadData() {
-		KdTreeOfPoints//.loadCube();
-		 //.loadRandom();
-				.load("assets/models/lewis-hall-binary.ply");
+		KdTreeOfPoints.loadCube();
+		// .loadRandom();
+		// .load("assets/models/lewis-hall-binary.ply");
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 	}
 
@@ -346,7 +347,8 @@ public class Main {
 			Timer.tick();
 
 			if (!is_logged_in) {
-				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT
+						| GL11.GL_DEPTH_BUFFER_BIT);
 				glClearColor(1, 1, 1, 1);
 				login_gui.update();
 				Display.update();
@@ -488,10 +490,10 @@ public class Main {
 				 * Save.saveHeckaData(); } if (Keyboard.getEventKey() ==
 				 * Keyboard.KEY_L) { Save.loadHeckaData(); }
 				 */
-				
+
 				// PRINT KEY SO I CAN SEE THE KEY CODE
-				//System.out.println("Key: " + Keyboard.getEventKey());
-				
+				// System.out.println("Key: " + Keyboard.getEventKey());
+
 				if (Keyboard.getEventKey() == Keyboard.KEY_Z
 						&& (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29))) {
 					ActionTracker.undo();
@@ -545,7 +547,8 @@ public class Main {
 					System.out
 							.println("orb gun (where you can just place pellets in space without them sticking to things) selected");
 				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_DELETE || Keyboard.getEventKey() == Keyboard.KEY_BACK) {
+				if (Keyboard.getEventKey() == Keyboard.KEY_DELETE
+						|| Keyboard.getEventKey() == Keyboard.KEY_BACK) {
 					which_gun = GunMode.DESTRUCTOR;
 					System.out.println("the gun that deletes things");
 				}
@@ -751,7 +754,7 @@ public class Main {
 		glLoadMatrix(proj_intermediate);
 		glMatrixMode(GL_MODELVIEW);
 	}
-	
+
 	public void renderForCamera() {
 		glClearColor(FOG_COLOR[0], FOG_COLOR[1], FOG_COLOR[2], 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1265,12 +1268,12 @@ public class Main {
 			glVertex2f(-f, -f);
 			glVertex2f(f, -f);
 			glEnd();
-			
+
 			glBegin(GL_LINE_LOOP);
-			glVertex2f(f*.90f, -f);
-			glVertex2f(f*.35f, -f);
-			glVertex2f(f*.35f, f*-1.30f);
-			glVertex2f(f*.90f, f*-1.30f);
+			glVertex2f(f * .90f, -f);
+			glVertex2f(f * .35f, -f);
+			glVertex2f(f * .35f, f * -1.30f);
+			glVertex2f(f * .90f, f * -1.30f);
 			glEnd();
 
 			glBegin(GL_LINE_LOOP);
@@ -1330,7 +1333,7 @@ public class Main {
 			new_pellet.constructing = true;
 			all_pellets_in_world.add(new_pellet);
 			System.out.println(all_pellets_in_world);
-		} else if (which_gun == GunMode.CAMERA){
+		} else if (which_gun == GunMode.CAMERA) {
 			System.out.println("catpure and send a screenshot");
 			CameraGun.takeSnapshot(this);
 		} else if (which_gun != GunMode.ORB) {

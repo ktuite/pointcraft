@@ -242,8 +242,8 @@ public class KdTreeOfPoints {
 			}
 			chars_read += 4;
 
-			//System.out.println(x_idx + "," + y_idx + "," + z_idx + "    "
-			//		+ r_idx + "," + g_idx + "," + b_idx);
+			System.out.println(x_idx + "," + y_idx + "," + z_idx + "    "
+					+ r_idx + "," + g_idx + "," + b_idx);
 
 			point_colors = BufferUtils.createDoubleBuffer(num_points * 3);
 			point_positions = BufferUtils.createDoubleBuffer(num_points * 3);
@@ -255,7 +255,7 @@ public class KdTreeOfPoints {
 			if (!binary) {
 				int i = 0;
 				line = buf.readLine();
-				while (line != null) {
+				for (int j = 0; j < num_points; j++) {
 					String[] split_line = line.split("\\s+");
 					point_colors
 							.put(Integer.parseInt(split_line[r_idx]) / 255.0);

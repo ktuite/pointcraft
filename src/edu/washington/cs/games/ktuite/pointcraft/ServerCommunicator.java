@@ -13,9 +13,23 @@ public class ServerCommunicator {
 	private String server_url;
 	public int cloud_id = 0;
 	public String texture_server = null;
+	public boolean is_up_to_date = false;
 
 	public ServerCommunicator(String _server_url) {
 		server_url = _server_url;
+		
+		try {
+			URL url = new URL(server_url + "getLatestVersionNumber.php");
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					url.openStream()));
+
+			float latest_version = Float.parseFloat(in.readLine());
+			if (latest_version <= Main.VERSION_NUMBER){
+				is_up_to_date = true;
+			}
+		} catch (Exception e) {
+			System.out.println("no server available");
+		}
 
 		/*
 		 * URL url; try { url = new URL(server_url + "signin.php");

@@ -47,6 +47,12 @@
         <fontParam if="hover" color="#2233bb"/>
     </fontDef>
     
+    <fontDef name="attention" filename="codeBold.fnt" color="#5CFFFC">
+        <fontParam if="error" color="red"/>
+        <fontParam if="disabled" color="gray"/>
+        <fontParam if="hover" color="#2233bb"/>
+    </fontDef>
+    
     <inputMapDef name="-defaultInputMap">
         <action name="selectAll">ctrl A</action>
         <action name="cut">ctrl X</action>
@@ -76,6 +82,10 @@
 	
     <theme name="boldLabel" ref="-defaults" allowWildcard="true">
     	<param name="font"><font>bold</font></param>
+    </theme>
+    
+    <theme name="attention" ref="-defaults" allowWildcard="true">
+    	<param name="font"><font>attention</font></param>
     </theme>
     
     <theme name="errorLabel" ref="-defaults" allowWildcard="true">
