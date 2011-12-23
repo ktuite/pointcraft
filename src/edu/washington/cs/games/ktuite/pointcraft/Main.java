@@ -36,8 +36,8 @@ import de.matthiasmann.twl.renderer.lwjgl.LWJGLRenderer;
 import de.matthiasmann.twl.theme.ThemeManager;
 
 public class Main {
-	private static boolean IS_RELEASE = false;
-	public static float VERSION_NUMBER = 0.3f;
+	private static boolean IS_RELEASE = true;
+	public static float VERSION_NUMBER = 0.4f;
 
 	// stuff about the atmosphere
 	private float FOG_COLOR[] = new float[] { .89f, .89f, .89f, 1.0f };
