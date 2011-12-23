@@ -29,7 +29,8 @@ public class PolygonPellet extends Pellet {
 		radius = lp.radius;
 		max_radius = lp.max_radius;
 		constructing = lp.constructing;
-		pellet_type = lp.pellet_type;
+		//pellet_type = lp.pellet_type;
+		pellet_type = Main.GunMode.POLYGON;
 	}
 
 	@Override
@@ -64,20 +65,13 @@ public class PolygonPellet extends Pellet {
 					}
 					
 					if (!(neighbor_pellet instanceof PolygonPellet)) {
-						Main.all_dead_pellets_in_world.add(neighbor_pellet);
+						neighbor_pellet.visible = false;
+						ActionTracker.hiddenPellet(neighbor_pellet);
+						
 						neighbor_pellet = new PolygonPellet(neighbor_pellet);
 						Main.new_pellets_to_add_to_world.add(neighbor_pellet);
+						//ActionTracker.newPolygonPellet(neighbor_pellet);
 					}
-
-					// if neighbor pellet's class is not PolygonPellet...
-					// neighbor_pellet = new PolygonPellet(neighbor_pellet)
-					// copy the position and stuff from the line/plane
-					// pellet into the new polygon pellet
-					// then go and add it to this cycle
-					// hopefully it changes in the actual array of world
-					// pellets
-					// if not, remove that pellet from all world pelelts and
-					// then add the new one to the end
 
 					current_cycle.add((PolygonPellet) neighbor_pellet);
 					if (current_cycle.size() > 1) {
@@ -89,7 +83,7 @@ public class PolygonPellet extends Pellet {
 									.get(current_cycle.size() - 1)) {
 						makePolygon();
 					} else {
-						ActionTracker.newPolygonPellet(this);
+						ActionTracker.newPolygonPellet(neighbor_pellet);
 					}
 
 				} else if (closest_point != null) {
@@ -131,7 +125,7 @@ public class PolygonPellet extends Pellet {
 					}
 				}
 
-				if (current_cycle.size() > 0)
+				if (current_cycle != null && current_cycle.size() > 0)
 					current_cycle.get(0).setAsFirstInCycle();
 
 				if (constructing == true) {

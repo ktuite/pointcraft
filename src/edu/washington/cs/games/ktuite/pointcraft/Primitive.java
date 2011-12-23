@@ -194,7 +194,7 @@ public class Primitive implements org.json.JSONString{
 		if (texture_url == null) {
 			texture_url = new String[num_triangles];
 			for (int i = 0; i < num_triangles; i++) {
-				texture_url[i] = Main.server.texture_server + "texture.png?&v=";
+				texture_url[i] = "texture.png?&v=";
 
 				// triangle fan going on here
 				Pellet p = vertices.get(0);
@@ -221,7 +221,7 @@ public class Primitive implements org.json.JSONString{
 		for (int i = 0; i < num_triangles; i++) {
 			final int f_i = i;
 			System.out.println(texture_url[f_i]);
-			final String final_url_string = texture_url[f_i];
+			final String final_url_string =  Main.server.texture_server + texture_url[f_i];
 			new Thread() {
 				public void run() {
 
@@ -301,14 +301,12 @@ public class Primitive implements org.json.JSONString{
 			s.object();
 			s.key("type");
 			s.value("primitive");
-			s.key("gl_type");
-			s.value(gl_type);
 			s.key("is_polygon");
 			s.value(isPolygon());
 			s.key("vertices");
 			s.array();
 			for (Pellet p : vertices){
-				s.value(p);
+				s.value(Main.all_pellets_in_world.indexOf(p));
 			}
 			s.endArray();
 			s.key("texture_url");
@@ -324,10 +322,9 @@ public class Primitive implements org.json.JSONString{
 		JSONArray json_verts = obj.getJSONArray("vertices");
 		List<Pellet> vertices = new LinkedList<Pellet>();
 		for (int i = 0; i < json_verts.length(); i++){
-			vertices.add(Pellet.loadFromJSON(json_verts.getJSONObject(i)));
+			vertices.add(Main.all_pellets_in_world.get(json_verts.getInt(i)));
 		}
-		int gl_type = obj.getInt("gl_type");
-		Primitive p = new Primitive(gl_type, vertices);
+		Primitive p = new Primitive(GL_POLYGON, vertices);
 		p.startDownloadingTexture();
 		
 		Main.geometry.add(p);

@@ -10,7 +10,7 @@ public class ActionTracker {
 
 	// The different types of actions
 	public enum ActionType {
-		NEW_PELLET, PARTIAL_POLYGON, POLYGON_LINE, COMPLETED_POLYGON, PARTIAL_LINE, COMPLETED_LINE, PARTIAL_PLANE, COMPLETED_PLANE, VERTICAL_HEIGHT_SET, NEW_VERTICAL_LINE_PELLET, NEW_VERTICAL_WALL, PELLET_DELETED, SCAFFOLDING_DELETED, POLYGON_DELETED, EXTENDED_LINE, EXTENDED_PLANE, LINE_PLANE_INTERSECTION, COMBINED_PELLETS, MOVED_PELLET;
+		NEW_PELLET, PARTIAL_POLYGON, POLYGON_LINE, COMPLETED_POLYGON, PARTIAL_LINE, COMPLETED_LINE, PARTIAL_PLANE, COMPLETED_PLANE, VERTICAL_HEIGHT_SET, NEW_VERTICAL_LINE_PELLET, NEW_VERTICAL_WALL, PELLET_DELETED, SCAFFOLDING_DELETED, POLYGON_DELETED, EXTENDED_LINE, EXTENDED_PLANE, LINE_PLANE_INTERSECTION, COMBINED_PELLETS, MOVED_PELLET, PELLET_HIDDEN;
 	}
 
 	// A little holder-class for the actions
@@ -60,8 +60,8 @@ public class ActionTracker {
 			}
 			return s.toString();
 		}
-		
-		private void notifyServer(){
+
+		private void notifyServer() {
 			Main.server.actionUpdate(this);
 		}
 
@@ -134,7 +134,7 @@ public class ActionTracker {
 		}
 
 		Main.server.undoUpdate();
-		
+
 		System.out.println("Undoing last action: " + showLatestAction());
 
 		Action last_action = undo_stack.pop();
@@ -182,11 +182,7 @@ public class ActionTracker {
 		} else if (last_action.action_type == ActionType.EXTENDED_LINE) {
 			if (last_action.scaffold != null) {
 				((LineScaffold) last_action.scaffold).removeLastPointAndRefit();
-			}
-			if (undo_stack.size() > 0
-					&& undo_stack.peek().action_type == ActionType.PARTIAL_LINE) {
-				undo();
-			}
+			}			
 		} else if (last_action.action_type == ActionType.PARTIAL_PLANE) {
 			Main.all_dead_pellets_in_world.add(last_action.pellet);
 			if (PlanePellet.current_plane.pellets.size() > 0)
@@ -211,10 +207,6 @@ public class ActionTracker {
 			if (last_action.scaffold != null) {
 				((PlaneScaffold) last_action.scaffold)
 						.removeLastPointAndRefit();
-			}
-			if (undo_stack.size() > 0
-					&& undo_stack.peek().action_type == ActionType.PARTIAL_PLANE) {
-				undo();
 			}
 		} else if (last_action.action_type == ActionType.LINE_PLANE_INTERSECTION) {
 			Main.all_dead_pellets_in_world.add(last_action.pellet);
@@ -262,6 +254,15 @@ public class ActionTracker {
 				last_action.pellet.pos.set(last_action.old_pos);
 				HoverPellet.fixPolygonOfPellet(last_action.pellet);
 			}
+		} else if (last_action.action_type == ActionType.PELLET_HIDDEN) {
+			if (last_action.pellet != null)
+				last_action.pellet.visible = true;
+		}
+		
+		// always unhide pellets
+		if (undo_stack.size() > 0
+				&& undo_stack.peek().action_type == ActionType.PELLET_HIDDEN) {
+			undo();
 		}
 	}
 
@@ -342,5 +343,9 @@ public class ActionTracker {
 
 	public static void movedPellet(Pellet p, Vector3f old_pos) {
 		undo_stack.add(new Action(ActionType.MOVED_PELLET, p, old_pos));
+	}
+
+	public static void hiddenPellet(Pellet p) {
+		undo_stack.add(new Action(ActionType.PELLET_HIDDEN, p));
 	}
 }

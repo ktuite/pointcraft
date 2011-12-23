@@ -312,7 +312,7 @@ public class PlaneScaffold extends Scaffold {
 	}
 	
 	public void removeLastPointAndRefit(){
-		pellets.pop();
+		Main.all_dead_pellets_in_world.add(pellets.pop());
 		fitPlane();
 	}
 	
@@ -336,7 +336,7 @@ public class PlaneScaffold extends Scaffold {
 			s.key("pellets");
 			s.array();
 			for (Pellet p : pellets){
-				s.value(p);
+				s.value(Main.all_pellets_in_world.indexOf(p));
 			}
 			s.endArray();
 			s.endObject();
@@ -351,7 +351,7 @@ public class PlaneScaffold extends Scaffold {
 		
 		JSONArray json_verts = obj.getJSONArray("pellets");
 		for (int i = 0; i < json_verts.length(); i++){
-			plane.pellets.add(Pellet.loadFromJSON(json_verts.getJSONObject(i)));
+			plane.pellets.add(Main.all_pellets_in_world.get(json_verts.getInt(i)));
 		}
 		plane.fitPlane();
 		Main.geometry_v.add(plane);

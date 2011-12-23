@@ -11,7 +11,8 @@ public class LinePellet extends Pellet {
 	public static LineScaffold current_line = new LineScaffold();
 
 	// temporary holder of intersection pellets
-	//public static List<LinePellet> intersection_points = new LinkedList<LinePellet>();
+	// public static List<LinePellet> intersection_points = new
+	// LinkedList<LinePellet>();
 
 	public boolean is_intersection = false;
 
@@ -26,10 +27,10 @@ public class LinePellet extends Pellet {
 		pellet_type = Main.GunMode.LINE;
 	}
 
-	public void setIsIntersection(){
+	public void setIsIntersection() {
 		is_intersection = true;
 	}
-	
+
 	@Override
 	public void update() {
 		// constructing means the pellet has triggered something to be built at
@@ -37,9 +38,6 @@ public class LinePellet extends Pellet {
 		if (!constructing) {
 			// not constructing means the pellet is still traveling through
 			// space
-			
-			if (current_line.pellets.size() >= 2)
-				startNewLine();
 
 			// move the pellet
 			Vector3f.add(pos, vel, pos);
@@ -58,28 +56,43 @@ public class LinePellet extends Pellet {
 
 				if (neighbor_pellet != null) {
 					System.out.println("pellet stuck to another pellet");
+
+					if (current_line.pellets.size() >= 2)
+						startNewLine();
+
 					pos.set(neighbor_pellet.pos);
 					alive = false;
 					ActionTracker.newLinePellet(this);
 					current_line.add(this);
-					
+
 					current_line.fitLine();
 					if (current_line.pellets.size() >= 2)
 						ActionTracker.newLine(current_line);
 					current_line.checkForIntersections();
 				} else if (closest_point != null) {
 					System.out.println("pellet stuck to some geometry");
+
+					Scaffold intersected_scaffold = getIntersectedScaffoldGeometry();
+					if (intersected_scaffold != current_line
+							&& current_line.pellets.size() >= 2)
+						startNewLine();
+
 					constructing = true;
 					pos.set(closest_point);
-					ActionTracker.newLinePellet(this);
+					if (current_line.pellets.size() < 2)
+						ActionTracker.newLinePellet(this);
 					current_line.add(this);
-					
+
 					current_line.fitLine();
-					if (current_line.pellets.size() >= 2)
+					if (current_line.pellets.size() == 2)
 						ActionTracker.newLine(current_line);
+
 					current_line.checkForIntersections();
-					stickPelletToScaffolding();
-					
+
+					if (intersected_scaffold == current_line) {
+						ActionTracker.extendedLine(current_line);
+					}
+
 				} else if (Main.draw_points) {
 					// it didn't hit some existing geometry or pellet
 					// so check the point cloud
@@ -87,20 +100,21 @@ public class LinePellet extends Pellet {
 
 					// is it near some points?!
 					if (neighbors > 0) {
+						if (current_line.pellets.size() >= 2)
+							startNewLine();
+
 						snapToCenterOfPoints();
 						constructing = true;
 						setInPlace();
 						ActionTracker.newLinePellet(this);
 						current_line.add(this);
-						
+
 						current_line.fitLine();
 						if (current_line.pellets.size() >= 2)
 							ActionTracker.newLine(current_line);
 						current_line.checkForIntersections();
 					}
 				}
-			
-					
 
 			}
 		} else {
@@ -111,7 +125,7 @@ public class LinePellet extends Pellet {
 			}
 		}
 	}
-	
+
 	public void delete() {
 		super.delete();
 	}

@@ -105,7 +105,7 @@ public class Pellet implements org.json.JSONString {
 		//for (Pellet pellet : main_pellets) {
 		for (int i = main_pellets.size()-1; i >= 0; i--){
 			Pellet pellet = main_pellets.get(i);
-			if (pellet != this) {
+			if (pellet != this && pellet.visible) {
 				Vector3f dist = new Vector3f();
 				Vector3f.sub(pos, pellet.pos, dist);
 				if (dist.length() < radius * 2.5) {
@@ -201,8 +201,8 @@ public class Pellet implements org.json.JSONString {
 					+ JSONObject.quote("pellet_type") + ":"
 					+ JSONObject.quote(pellet_type.toString()) + ","
 					+ JSONObject.quote("pos") + ":" + JSONVector3f(pos) + ","
-					+ JSONObject.quote("id") + ":"
-					+ JSONObject.numberToString(ID) + ","
+					+ JSONObject.quote("world_index") + ":"
+					+ JSONObject.numberToString(Main.all_pellets_in_world.indexOf(this)) + ","
 					+ JSONObject.quote("radius") + ":"
 					+ JSONObject.doubleToString(radius) + ", " + "}";
 		} catch (JSONException e) {
@@ -230,6 +230,7 @@ public class Pellet implements org.json.JSONString {
 
 	public static Pellet loadFromJSON(JSONObject obj) throws JSONException {
 		String pellet_type = obj.getString("pellet_type");
+		int world_idx = obj.getInt("world_index");
 		Pellet p = null;
 		if (pellet_type.contains("POLYGON"))
 			p = new PolygonPellet(Main.all_pellets_in_world);
@@ -250,7 +251,7 @@ public class Pellet implements org.json.JSONString {
 		p.pos.x = (float) obj.getJSONArray("pos").getDouble(0);
 		p.pos.y = (float) obj.getJSONArray("pos").getDouble(1);
 		p.pos.z = (float) obj.getJSONArray("pos").getDouble(2);
-		Main.new_pellets_to_add_to_world.add(p);
+		Main.all_pellets_in_world.add(world_idx, p);
 		return p;
 	}
 }

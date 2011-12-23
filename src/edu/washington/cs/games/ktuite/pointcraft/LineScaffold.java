@@ -200,7 +200,7 @@ public class LineScaffold extends Scaffold {
 	}
 	
 	public void removeLastPointAndRefit(){
-		pellets.pop();
+		Main.all_dead_pellets_in_world.add(pellets.pop());
 		fitLine();
 	}
 	
@@ -220,7 +220,7 @@ public class LineScaffold extends Scaffold {
 			s.key("pellets");
 			s.array();
 			for (Pellet p : pellets){
-				s.value(p);
+				s.value(Main.all_pellets_in_world.indexOf(p));
 			}
 			s.endArray();
 			s.endObject();
@@ -235,7 +235,7 @@ public class LineScaffold extends Scaffold {
 		
 		JSONArray json_verts = obj.getJSONArray("pellets");
 		for (int i = 0; i < json_verts.length(); i++){
-			line.pellets.add(Pellet.loadFromJSON(json_verts.getJSONObject(i)));
+			line.pellets.add(Main.all_pellets_in_world.get(json_verts.getInt(i)));
 		}
 		line.fitLine();
 		Main.geometry_v.add(line);

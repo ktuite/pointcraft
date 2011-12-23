@@ -36,7 +36,7 @@ import de.matthiasmann.twl.renderer.lwjgl.LWJGLRenderer;
 import de.matthiasmann.twl.theme.ThemeManager;
 
 public class Main {
-	private static boolean IS_RELEASE = true;
+	private static boolean IS_RELEASE = false;
 	public static float VERSION_NUMBER = 0.3f;
 
 	// stuff about the atmosphere
@@ -198,7 +198,7 @@ public class Main {
 		proj_ortho.put(5, proj_ortho.get(5) * 40f);
 
 		glLoadIdentity();
-		gluPerspective(60, width / height, .01f, 100000.0f);
+		gluPerspective(60, width / height, .0001f, 100000.0f);
 		proj_persp = BufferUtils.createDoubleBuffer(16);
 		glGetDouble(GL_PROJECTION_MATRIX, proj_persp);
 		proj_intermediate = BufferUtils.createDoubleBuffer(16);
@@ -225,6 +225,7 @@ public class Main {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		glEnable(GL_LINE_SMOOTH);
+		//glEnable(GL_POINT_SMOOTH);
 
 		// skybox texture loaded
 		try {
@@ -289,9 +290,9 @@ public class Main {
 	}
 
 	private void LoadData() {
-		KdTreeOfPoints.loadCube();
+		KdTreeOfPoints//.loadCube();
 		// .loadRandom();
-		// .load("assets/models/lewis-hall-binary.ply");
+		.load("assets/models/lewis-hall-binary.ply");
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 	}
 
@@ -608,6 +609,9 @@ public class Main {
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_X) {
 					ActionTracker.printStack();
+					for (Pellet p : all_pellets_in_world){
+						System.out.println("\t\tPellet type: " + p.getType());
+					}
 				}
 
 				/*

@@ -33,9 +33,6 @@ public class PlanePellet extends Pellet {
 		if (!constructing) {
 			// not constructing means the pellet is still traveling through
 			// space
-
-			if (current_plane.pellets.size() >= 3)
-				startNewPlane();
 			
 			// move the pellet
 			Vector3f.add(pos, vel, pos);
@@ -54,6 +51,10 @@ public class PlanePellet extends Pellet {
 				
 				if (neighbor_pellet != null) {
 					System.out.println("pellet stuck to another pellet");
+					
+					if (current_plane.pellets.size() >= 3)
+						startNewPlane();
+					
 					pos.set(neighbor_pellet.pos);
 					alive = false;
 					ActionTracker.newPlanePellet(this);
@@ -66,21 +67,28 @@ public class PlanePellet extends Pellet {
 
 				} else if (closest_point != null) {
 					System.out.println("pellet stuck to some geometry");
+					
+					Scaffold intersected_scaffold = getIntersectedScaffoldGeometry();
+					if (intersected_scaffold != current_plane
+							&& current_plane.pellets.size() >= 3)
+						startNewPlane();
+					
 					constructing = true;
 					pos.set(closest_point);
-					ActionTracker.newPlanePellet(this);
 					
-					if (!isAnotherPlane()){
-						current_plane.add(this);
-						
-						current_plane.fitPlane();
-						if (current_plane.pellets.size() >= 3)
-							ActionTracker.newPlane(current_plane);
-						current_plane.checkForIntersections();
-					}
+					if (current_plane.pellets.size() < 3)
+						ActionTracker.newPlanePellet(this);
+					current_plane.add(this);
+					current_plane.fitPlane();
 					
-					
-					stickPelletToScaffolding();
+					if (current_plane.pellets.size() == 3)
+						ActionTracker.newPlane(current_plane);
+
+					current_plane.checkForIntersections();
+
+					if (intersected_scaffold == current_plane) {
+						ActionTracker.extendedPlane(current_plane);
+					}	
 				} else if (Main.draw_points) {
 					// it didn't hit some existing geometry or pellet
 					// so check the point cloud
@@ -88,6 +96,9 @@ public class PlanePellet extends Pellet {
 
 					// is it near some points?!
 					if (neighbors > 0) {
+						if (current_plane.pellets.size() >= 3)
+							startNewPlane();
+						
 						snapToCenterOfPoints();
 						constructing = true;
 						setInPlace();
@@ -112,6 +123,7 @@ public class PlanePellet extends Pellet {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private boolean isAnotherPlane() {
 		for (Scaffold geom : Main.geometry_v) {
 			if (radius > geom.distanceToPoint(pos)) {

@@ -65,11 +65,10 @@ public class Save {
 	}
 
 	public static void writeModel(OutputStream out) throws IOException {
+		out.write("{\"version\":2}\n".getBytes());
 		for (Pellet p : Main.all_pellets_in_world) {
-			if (p.pellet_type == Main.GunMode.PELLET) {
-				out.write(p.toJSONString().getBytes());
-				out.write("\n".getBytes());
-			}
+			out.write(p.toJSONString().getBytes());
+			out.write("\n".getBytes());
 		}
 		for (Primitive p : Main.geometry) {
 			if (p.isPolygon()) {
@@ -96,6 +95,18 @@ public class Save {
 			File file = fc.getSelectedFile();
 			try {
 				BufferedReader in = new BufferedReader(new FileReader(file));
+				String first_line = in.readLine();
+				JSONObject version_obj;
+				@SuppressWarnings("unused")
+				float file_version = 0;
+				try {
+					version_obj = new JSONObject(first_line);
+					file_version = (float) version_obj.getDouble("version");
+				} catch (JSONException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
 				while (in.ready()) {
 					String line = in.readLine();
 					try {
