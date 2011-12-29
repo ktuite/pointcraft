@@ -260,7 +260,7 @@ public class Pellet implements org.json.JSONString {
 		p.pos.x = (float) obj.getJSONArray("pos").getDouble(0);
 		p.pos.y = (float) obj.getJSONArray("pos").getDouble(1);
 		p.pos.z = (float) obj.getJSONArray("pos").getDouble(2);
-		Main.all_pellets_in_world.add(world_idx, p);
+		Main.all_pellets_in_world.add(p);
 		return p;
 	}
 }
