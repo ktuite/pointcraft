@@ -339,6 +339,12 @@ public class PlaneScaffold extends Scaffold {
 				s.value(Main.all_pellets_in_world.indexOf(p));
 			}
 			s.endArray();
+			s.key("pellet_objs");
+			s.array();
+			for (Pellet p : pellets){
+				s.value(p);
+			}
+			s.endArray();
 			s.endObject();
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -346,12 +352,23 @@ public class PlaneScaffold extends Scaffold {
         return s.toString();
 	}
 	
-	public static void loadFromJSON(JSONObject obj) throws JSONException {
+	public static void loadFromJSONv2(JSONObject obj) throws JSONException {
 		PlaneScaffold plane = new PlaneScaffold();
 		
 		JSONArray json_verts = obj.getJSONArray("pellets");
 		for (int i = 0; i < json_verts.length(); i++){
 			plane.pellets.add(Main.all_pellets_in_world.get(json_verts.getInt(i)));
+		}
+		plane.fitPlane();
+		Main.geometry_v.add(plane);
+	}
+	
+	public static void loadFromJSONv3(JSONObject obj) throws JSONException {
+		PlaneScaffold plane = new PlaneScaffold();
+		
+		JSONArray json_verts = obj.getJSONArray("pellet_objs");
+		for (int i = 0; i < json_verts.length(); i++){
+			plane.pellets.add(Pellet.loadFromJSON(json_verts.getJSONObject(i)));
 		}
 		plane.fitPlane();
 		Main.geometry_v.add(plane);

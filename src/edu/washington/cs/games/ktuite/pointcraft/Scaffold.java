@@ -48,13 +48,23 @@ public class Scaffold implements org.json.JSONString{
 		return null;
 	}
 
-	public static void loadFromJSON(JSONObject obj) throws JSONException {
+	public static void loadFromJSONv2(JSONObject obj) throws JSONException {
 		String scaffold_type = obj.getString("scaffold_type");
 		if (scaffold_type.contains("line")){
-			LineScaffold.loadFromJSON(obj);
+			LineScaffold.loadFromJSONv2(obj);
 		}
 		else if (scaffold_type.contains("plane")){
-			PlaneScaffold.loadFromJSON(obj);
+			PlaneScaffold.loadFromJSONv2(obj);
+		}
+	}
+	
+	public static void loadFromJSONv3(JSONObject obj) throws JSONException {
+		String scaffold_type = obj.getString("scaffold_type");
+		if (scaffold_type.contains("line")){
+			LineScaffold.loadFromJSONv3(obj);
+		}
+		else if (scaffold_type.contains("plane")){
+			PlaneScaffold.loadFromJSONv3(obj);
 		}
 	}
 }

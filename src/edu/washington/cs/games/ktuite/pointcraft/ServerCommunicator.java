@@ -14,19 +14,22 @@ public class ServerCommunicator {
 	public int cloud_id = 0;
 	public String texture_server = null;
 	public boolean is_up_to_date = false;
+	public boolean is_connected = false;
 
 	public ServerCommunicator(String _server_url) {
 		server_url = _server_url;
-		
+
 		try {
 			URL url = new URL(server_url + "getLatestVersionNumber.php");
 			BufferedReader in = new BufferedReader(new InputStreamReader(
 					url.openStream()));
 
 			float latest_version = Float.parseFloat(in.readLine());
-			if (latest_version <= Main.VERSION_NUMBER){
+			if (latest_version <= Main.VERSION_NUMBER) {
 				is_up_to_date = true;
 			}
+			
+			is_connected = true;
 		} catch (Exception e) {
 			System.out.println("no server available");
 		}
@@ -42,13 +45,14 @@ public class ServerCommunicator {
 		 * System.out.println("no server available"); }
 		 */
 	}
-	
-	public void setTextureServer(int c_id){
+
+	public void setTextureServer(int c_id) {
 		cloud_id = c_id;
 		try {
-			URL url = new URL(server_url + "getTextureServer.php?cloud_id=" + cloud_id);
-			//System.out.println("getting texture server: " + url);
-			
+			URL url = new URL(server_url + "getTextureServer.php?cloud_id="
+					+ cloud_id);
+			// System.out.println("getting texture server: " + url);
+
 			BufferedReader in = new BufferedReader(new InputStreamReader(
 					url.openStream()));
 
@@ -58,17 +62,16 @@ public class ServerCommunicator {
 			if (page_contents.length() > 0) {
 				texture_server = page_contents;
 				System.out.println("texture server set");
-			}
-			else{
+			} else {
 				texture_server = null;
 			}
-		
+
 		} catch (Exception e) {
 			System.out.println("no texture server available");
 		}
 	}
 
-	public boolean attemptLogin(String username, String password) {
+	public String attemptLogin(String username, String password) {
 		URL url;
 		try {
 			url = new URL(server_url + "signin.php?username=" + username
@@ -82,14 +85,13 @@ public class ServerCommunicator {
 			if (split.length == 2) {
 				player_id = Integer.decode(split[0]);
 				session_id = Integer.decode(split[1]);
-				return true;
+				return null;
 			} else {
-				System.out.println(split[0]);
+				return split[0];
 			}
 		} catch (Exception e) {
-			System.out.println("no server available");
+			return "no server available";
 		}
-		return false;
 	}
 
 	@SuppressWarnings("unused")
@@ -156,7 +158,7 @@ public class ServerCommunicator {
 		}.start();
 
 	}
-	
+
 	public void undoUpdate() {
 		new Thread() {
 			public void run() {
@@ -171,11 +173,8 @@ public class ServerCommunicator {
 							+ "="
 							+ URLEncoder.encode(Integer.toString(session_id),
 									"UTF-8");
-					data += "&"
-							+ URLEncoder.encode("action_type", "UTF-8")
-							+ "="
-							+ URLEncoder.encode("UNDO",
-									"UTF-8");
+					data += "&" + URLEncoder.encode("action_type", "UTF-8")
+							+ "=" + URLEncoder.encode("UNDO", "UTF-8");
 
 					URL url = new URL(server_url + "actionupdate.php");
 					URLConnection conn = url.openConnection();
@@ -201,6 +200,12 @@ public class ServerCommunicator {
 			}
 		}.start();
 
+	}
+
+	public void startOfflineMode() {
+		Main.is_logged_in = true;
+		player_id = -1;
+		session_id = -1;
 	}
 
 }

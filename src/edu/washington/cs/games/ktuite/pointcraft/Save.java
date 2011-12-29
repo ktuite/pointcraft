@@ -23,6 +23,8 @@ import org.lwjgl.input.Mouse;
 
 public class Save {
 
+	public static int VERSION = 3;
+
 	private static JFileChooser fc;
 
 	// Actually used
@@ -65,7 +67,7 @@ public class Save {
 	}
 
 	public static void writeModel(OutputStream out) throws IOException {
-		out.write("{\"version\":2}\n".getBytes());
+		out.write(("{\"version\":" + VERSION + "}\n").getBytes());
 		for (Pellet p : Main.all_pellets_in_world) {
 			out.write(p.toJSONString().getBytes());
 			out.write("\n".getBytes());
@@ -97,7 +99,6 @@ public class Save {
 				BufferedReader in = new BufferedReader(new FileReader(file));
 				String first_line = in.readLine();
 				JSONObject version_obj;
-				@SuppressWarnings("unused")
 				float file_version = 0;
 				try {
 					version_obj = new JSONObject(first_line);
@@ -106,22 +107,15 @@ public class Save {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				
+
 				while (in.ready()) {
 					String line = in.readLine();
-					try {
-						JSONObject obj = new JSONObject(line);
-						String type = obj.getString("type");
-						System.out.println(type);
-						if (type.contains("pellet")) {
-							Pellet.loadFromJSON(obj);
-						} else if (type.contains("primitive")) {
-							Primitive.loadFromJSON(obj);
-						} else if (type.contains("scaffold")) {
-							Scaffold.loadFromJSON(obj);
-						}
-					} catch (JSONException e) {
-						e.printStackTrace();
+
+					if (file_version == 2) {
+						loadV2(line);
+					}
+					else if (file_version == 3){
+						loadV3(line);
 					}
 
 				}
@@ -133,6 +127,44 @@ public class Save {
 			}
 		}
 		Mouse.setGrabbed(mouseGrabbed);
+	}
+
+	private static void loadV2(String line) {
+		// version 2 just has pellet indices in things like planes and primitives
+		JSONObject obj;
+		try {
+			obj = new JSONObject(line);
+			String type = obj.getString("type");
+			System.out.println(type);
+			if (type.contains("pellet")) {
+				Pellet.loadFromJSON(obj);
+			} else if (type.contains("primitive")) {
+				Primitive.loadFromJSONv2(obj);
+			} else if (type.contains("scaffold")) {
+				Scaffold.loadFromJSONv2(obj);
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static void loadV3(String line) {
+		// version has pellet indices as well as pellet positions
+		JSONObject obj;
+		try {
+			obj = new JSONObject(line);
+			String type = obj.getString("type");
+			System.out.println(type);
+			if (type.contains("pellet")) {
+				Pellet.loadFromJSON(obj);
+			} else if (type.contains("primitive")) {
+				Primitive.loadFromJSONv3(obj);
+			} else if (type.contains("scaffold")) {
+				Scaffold.loadFromJSONv3(obj);
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static void saveHeckaData() {

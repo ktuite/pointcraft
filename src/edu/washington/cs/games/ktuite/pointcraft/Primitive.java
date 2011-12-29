@@ -24,7 +24,7 @@ import org.newdawn.slick.opengl.TextureLoader;
 /* these primitives built out of pellets...
  * keep a list of pellets and then draw lines or polygons between them.
  */
-public class Primitive implements org.json.JSONString{
+public class Primitive implements org.json.JSONString {
 
 	private int gl_type;
 	private List<Pellet> vertices;
@@ -34,9 +34,10 @@ public class Primitive implements org.json.JSONString{
 	private Vector3f player_position;
 	private Vector3f player_viewing_direction;
 	private String[] texture_url = null;
-	private int num_triangles = 0;
+	private int num_textures = 0;
 	private boolean textures_loaded;
 	private int texture_count;
+	private boolean is_quad = false;
 
 	private void readObject(ObjectInputStream ois)
 			throws ClassNotFoundException, IOException {
@@ -52,11 +53,20 @@ public class Primitive implements org.json.JSONString{
 		vertices = _vertices;
 		textures_loaded = false;
 		if (gl_type == GL_POLYGON) {
-			num_triangles = vertices.size() - 3;
-			texture_data = new Vector<byte[]>();
-			texture_data.setSize(num_triangles);
-			textures = new Vector<Texture>();
-			textures.setSize(num_triangles);
+			if (vertices.size() == 5) {
+				is_quad = true;
+				num_textures = 1;
+				texture_data = new Vector<byte[]>();
+				texture_data.setSize(num_textures);
+				textures = new Vector<Texture>();
+				textures.setSize(num_textures);
+			} else {
+				num_textures = vertices.size() - 3;
+				texture_data = new Vector<byte[]>();
+				texture_data.setSize(num_textures);
+				textures = new Vector<Texture>();
+				textures.setSize(num_textures);
+			}
 			System.out.println("making new polygon Primitive");
 			System.out.println("number of vertices: " + vertices.size());
 		}
@@ -67,7 +77,7 @@ public class Primitive implements org.json.JSONString{
 		gl_type = _gl_type;
 		vertices = _vertices;
 		line_width = _line_width;
-		num_triangles = vertices.size() - 3;
+		num_textures = vertices.size() - 3;
 	}
 
 	public void setPlayerPositionAndViewingDirection(Vector3f pos, Vector3f view) {
@@ -111,9 +121,9 @@ public class Primitive implements org.json.JSONString{
 				glEnable(GL_TEXTURE_2D);
 			} else {
 				glDisable(GL_TEXTURE_2D);
-				if (texture_count == num_triangles) {
+				if (texture_count == num_textures) {
 					try {
-						for (int i = 0; i < num_triangles; i++) {
+						for (int i = 0; i < num_textures; i++) {
 							System.out.println(" texture set!!");
 							textures.set(i, TextureLoader.getTexture(
 									"PNG",
@@ -131,11 +141,16 @@ public class Primitive implements org.json.JSONString{
 
 		}
 
-		Vector2f[] tex_coords = new Vector2f[] { new Vector2f(0, 0),
-				new Vector2f(1, 0), new Vector2f(1, 1)};
-															// };
+		Vector2f[] tex_coords = null;
+		if (is_quad) {
+			tex_coords = new Vector2f[] { new Vector2f(0, 0),
+					new Vector2f(1, 0), new Vector2f(1, 1), new Vector2f(0, 1) };
+		} else {
+			tex_coords = new Vector2f[] { new Vector2f(0, 0),
+					new Vector2f(1, 0), new Vector2f(1, 1) };
+		}
 
-		for (int h = 0; h < num_triangles; h++) {
+		for (int h = 0; h < num_textures; h++) {
 			if (textures_loaded) {
 				textures.get(h).bind();
 			}
@@ -156,9 +171,9 @@ public class Primitive implements org.json.JSONString{
 			glEnd();
 
 		}
-		
+
 		// draw a border around the polygons
-		for (int h = 0; h < num_triangles; h++) {
+		for (int h = 0; h < num_textures; h++) {
 			glDisable(GL_TEXTURE_2D);
 			glColor3f(0, 0, 0);
 			glLineWidth(3);
@@ -176,12 +191,12 @@ public class Primitive implements org.json.JSONString{
 			glEnd();
 		}
 	}
-	
-	public void refreshTexture(){
+
+	public void refreshTexture() {
 		texture_data = new Vector<byte[]>();
-		texture_data.setSize(num_triangles);
+		texture_data.setSize(num_textures);
 		textures = new Vector<Texture>();
-		textures.setSize(num_triangles);
+		textures.setSize(num_textures);
 		texture_url = null;
 		textures_loaded = false;
 		startDownloadingTexture();
@@ -190,18 +205,21 @@ public class Primitive implements org.json.JSONString{
 	public void startDownloadingTexture() {
 		if (Main.server.texture_server == null)
 			return;
-		
+
 		if (texture_url == null) {
-			texture_url = new String[num_triangles];
-			for (int i = 0; i < num_triangles; i++) {
-				texture_url[i] = "texture.png?&v=";
+			texture_url = new String[num_textures];
+			for (int i = 0; i < num_textures; i++) {
+				if (is_quad)
+					texture_url[i] = "quad.png?&v=";
+				else
+					texture_url[i] = "texture.png?&v=";
 
 				// triangle fan going on here
 				Pellet p = vertices.get(0);
 				Vector3f v = p.pos;
 				texture_url[i] += v.x + "," + v.y + "," + v.z + ",";
 
-				for (int j = i + 1; j < i + 3; j++) {
+				for (int j = i + 1; j < i + (is_quad ? 4 : 3); j++) {
 					p = vertices.get(j);
 					v = p.pos;
 					texture_url[i] += v.x + "," + v.y + "," + v.z + ",";
@@ -218,10 +236,11 @@ public class Primitive implements org.json.JSONString{
 		}
 
 		texture_count = 0;
-		for (int i = 0; i < num_triangles; i++) {
+		for (int i = 0; i < num_textures; i++) {
 			final int f_i = i;
 			System.out.println(texture_url[f_i]);
-			final String final_url_string =  Main.server.texture_server + texture_url[f_i];
+			final String final_url_string = Main.server.texture_server
+					+ texture_url[f_i];
 			new Thread() {
 				public void run() {
 
@@ -305,8 +324,14 @@ public class Primitive implements org.json.JSONString{
 			s.value(isPolygon());
 			s.key("vertices");
 			s.array();
-			for (Pellet p : vertices){
+			for (Pellet p : vertices) {
 				s.value(Main.all_pellets_in_world.indexOf(p));
+			}
+			s.endArray();
+			s.key("vertex_objs");
+			s.array();
+			for (Pellet p : vertices) {
+				s.value(p);
 			}
 			s.endArray();
 			s.key("texture_url");
@@ -315,19 +340,30 @@ public class Primitive implements org.json.JSONString{
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-        return s.toString();
+		return s.toString();
 	}
 
-	public static void loadFromJSON(JSONObject obj) throws JSONException {
+	public static void loadFromJSONv2(JSONObject obj) throws JSONException {
 		JSONArray json_verts = obj.getJSONArray("vertices");
 		List<Pellet> vertices = new LinkedList<Pellet>();
-		for (int i = 0; i < json_verts.length(); i++){
+		for (int i = 0; i < json_verts.length(); i++) {
 			vertices.add(Main.all_pellets_in_world.get(json_verts.getInt(i)));
 		}
 		Primitive p = new Primitive(GL_POLYGON, vertices);
 		p.startDownloadingTexture();
-		
+
 		Main.geometry.add(p);
-		
+	}
+	
+	public static void loadFromJSONv3(JSONObject obj) throws JSONException {
+		JSONArray json_verts = obj.getJSONArray("vertex_objs");
+		List<Pellet> vertices = new LinkedList<Pellet>();
+		for (int i = 0; i < json_verts.length(); i++) {
+			vertices.add(Pellet.loadFromJSON(json_verts.getJSONObject(i)));
+		}
+		Primitive p = new Primitive(GL_POLYGON, vertices);
+		p.startDownloadingTexture();
+
+		Main.geometry.add(p);
 	}
 }

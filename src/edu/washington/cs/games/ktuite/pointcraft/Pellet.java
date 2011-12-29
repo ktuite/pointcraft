@@ -231,15 +231,23 @@ public class Pellet implements org.json.JSONString {
 	public static Pellet loadFromJSON(JSONObject obj) throws JSONException {
 		String pellet_type = obj.getString("pellet_type");
 		int world_idx = obj.getInt("world_index");
+		for (Pellet p : Main.all_pellets_in_world){
+			if (p.id == world_idx){
+				System.out.println("found existing pellet");
+				return p;
+			}
+		}
+		
 		Pellet p = null;
 		if (pellet_type.contains("POLYGON"))
 			p = new PolygonPellet(Main.all_pellets_in_world);
+		else if (pellet_type.contains("VERTICAL_LINE"))
+			p = new VerticalLinePellet(Main.all_pellets_in_world);
 		else if (pellet_type.contains("LINE"))
 			p = new LinePellet(Main.all_pellets_in_world);
 		else if (pellet_type.contains("PLANE"))
 			p = new PlanePellet(Main.all_pellets_in_world);
-		else if (pellet_type.contains("VERTICAL_LINE"))
-			p = new VerticalLinePellet(Main.all_pellets_in_world);
+		
 		else 
 			p = new ScaffoldPellet(Main.all_pellets_in_world);
 		
@@ -248,6 +256,7 @@ public class Pellet implements org.json.JSONString {
 		p.constructing = true;
 		p.visible = true;
 		p.pos = new Vector3f();
+		p.id = world_idx;
 		p.pos.x = (float) obj.getJSONArray("pos").getDouble(0);
 		p.pos.y = (float) obj.getJSONArray("pos").getDouble(1);
 		p.pos.z = (float) obj.getJSONArray("pos").getDouble(2);

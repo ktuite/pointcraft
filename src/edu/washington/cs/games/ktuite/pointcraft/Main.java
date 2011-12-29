@@ -36,7 +36,7 @@ import de.matthiasmann.twl.renderer.lwjgl.LWJGLRenderer;
 import de.matthiasmann.twl.theme.ThemeManager;
 
 public class Main {
-	private static boolean IS_RELEASE = true;
+	private static boolean IS_RELEASE = false;
 	public static float VERSION_NUMBER = 0.4f;
 
 	// stuff about the atmosphere
@@ -225,7 +225,7 @@ public class Main {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		glEnable(GL_LINE_SMOOTH);
-		//glEnable(GL_POINT_SMOOTH);
+		// glEnable(GL_POINT_SMOOTH);
 
 		// skybox texture loaded
 		try {
@@ -290,10 +290,12 @@ public class Main {
 	}
 
 	private void LoadData() {
-		KdTreeOfPoints//.loadCube();
-		// .loadRandom();
-		.load("assets/models/lewis-hall-binary.ply");
+		if (IS_RELEASE)
+			KdTreeOfPoints.loadCube();
+		else
+			KdTreeOfPoints.load("assets/models/lewis-hall-binary.ply");
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
+
 	}
 
 	private void InitData() {
@@ -609,7 +611,7 @@ public class Main {
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_X) {
 					ActionTracker.printStack();
-					for (Pellet p : all_pellets_in_world){
+					for (Pellet p : all_pellets_in_world) {
 						System.out.println("\t\tPellet type: " + p.getType());
 					}
 				}

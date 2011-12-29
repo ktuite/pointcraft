@@ -37,14 +37,17 @@ public class LoginOverlay extends Widget {
 		Button signUp = new Button("Get an account online");
 		signUp.setTheme("boldLabel");
 
-		Button newerVersion = new Button("");
-		if (!Main.server.is_up_to_date){
-			newerVersion.setText("A newer version of PointCraft is available online!! Go get it!!");
-		}
-		newerVersion.setTheme("attention");
-
 		errorLabel = new Label("");
 		errorLabel.setTheme("errorLabel");
+		
+		Button newerVersion = new Button("");
+		if (!Main.server.is_connected) {
+			errorLabel.setText("no server available");
+		} else if (!Main.server.is_up_to_date) {
+			newerVersion
+					.setText("A newer version of PointCraft is available online!! Go get it!!");
+		}
+		newerVersion.setTheme("attention");
 
 		signUp.addCallback(new Runnable() {
 			public void run() {
@@ -125,6 +128,10 @@ public class LoginOverlay extends Widget {
 	private void login() {
 		GUI gui = getGUI();
 		if (gui != null) {
+			if (btnLogin.getText() == "USE OFFLINE MODE") {
+				Main.server.startOfflineMode();
+				return;
+			}
 			// step 1: disable all controls
 			efName.setEnabled(false);
 			efPassword.setEnabled(false);
@@ -136,16 +143,18 @@ public class LoginOverlay extends Widget {
 				String hashed = toHex(
 						sha1.digest(efPassword.getText().getBytes()))
 						.toLowerCase();
-				Main.is_logged_in = Main.server.attemptLogin(username, hashed);
-				if (!Main.is_logged_in) {
-					errorLabel.setText("wrong username/password");
+				String error_text = Main.server.attemptLogin(username, hashed);
+				if (error_text == null) {
+					Main.is_logged_in = true;
+				} else {
+					errorLabel.setText(error_text);
+					//btnLogin.setText("USE OFFLINE MODE");
 				}
 				efName.setEnabled(true);
 				efPassword.setEnabled(true);
 				efPassword.setText("");
 				btnLogin.setEnabled(true);
 			} catch (NoSuchAlgorithmException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
