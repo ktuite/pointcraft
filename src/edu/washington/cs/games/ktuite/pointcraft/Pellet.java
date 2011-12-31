@@ -14,7 +14,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class Pellet implements org.json.JSONString {
 
-	static private int ID = 0;
+	static public int ID = 0;
 	public Vector3f pos;
 	public Vector3f vel;
 	public transient Sphere sphere;
@@ -202,7 +202,7 @@ public class Pellet implements org.json.JSONString {
 					+ JSONObject.quote(pellet_type.toString()) + ","
 					+ JSONObject.quote("pos") + ":" + JSONVector3f(pos) + ","
 					+ JSONObject.quote("world_index") + ":"
-					+ JSONObject.numberToString(Main.all_pellets_in_world.indexOf(this)) + ","
+					+ JSONObject.numberToString(id) + ","
 					+ JSONObject.quote("radius") + ":"
 					+ JSONObject.doubleToString(radius) + ", " + "}";
 		} catch (JSONException e) {
@@ -231,8 +231,12 @@ public class Pellet implements org.json.JSONString {
 	public static Pellet loadFromJSON(JSONObject obj) throws JSONException {
 		String pellet_type = obj.getString("pellet_type");
 		int world_idx = obj.getInt("world_index");
+		Vector3f temp_pos = new Vector3f();
+		temp_pos.x = (float) obj.getJSONArray("pos").getDouble(0);
+		temp_pos.y = (float) obj.getJSONArray("pos").getDouble(1);
+		temp_pos.z = (float) obj.getJSONArray("pos").getDouble(2);
 		for (Pellet p : Main.all_pellets_in_world){
-			if (p.id == world_idx){
+			if (p.id == world_idx && p.pos == temp_pos){
 				System.out.println("found existing pellet");
 				return p;
 			}

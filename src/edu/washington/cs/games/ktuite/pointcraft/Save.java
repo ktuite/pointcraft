@@ -113,8 +113,7 @@ public class Save {
 
 					if (file_version == 2) {
 						loadV2(line);
-					}
-					else if (file_version == 3){
+					} else if (file_version == 3) {
 						loadV3(line);
 					}
 
@@ -130,7 +129,8 @@ public class Save {
 	}
 
 	private static void loadV2(String line) {
-		// version 2 just has pellet indices in things like planes and primitives
+		// version 2 just has pellet indices in things like planes and
+		// primitives
 		JSONObject obj;
 		try {
 			obj = new JSONObject(line);
@@ -147,7 +147,7 @@ public class Save {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private static void loadV3(String line) {
 		// version has pellet indices as well as pellet positions
 		JSONObject obj;
@@ -162,6 +162,11 @@ public class Save {
 			} else if (type.contains("scaffold")) {
 				Scaffold.loadFromJSONv3(obj);
 			}
+			// don't know how much pellet ids are really used but lets keep them
+			// big so we can keep track of them
+			for (Pellet p : Main.all_pellets_in_world)
+				if (p.id > Pellet.ID)
+					Pellet.ID = p.id + 1;
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

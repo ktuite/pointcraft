@@ -33,6 +33,10 @@ public class ServerCommunicator {
 		} catch (Exception e) {
 			System.out.println("no server available");
 		}
+		
+		if (is_connected && Main.is_logged_in){
+			getKathleenSession();
+		}
 
 		/*
 		 * URL url; try { url = new URL(server_url + "signin.php");
@@ -71,6 +75,26 @@ public class ServerCommunicator {
 		}
 	}
 
+	private void getKathleenSession(){
+		URL url;
+		try {
+			url = new URL(server_url + "newsession.php");
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					url.openStream()));
+
+			String page_contents = in.readLine();
+			String[] split = page_contents.split(",");
+
+			if (split.length == 2) {
+				player_id = Integer.decode(split[0]);
+				session_id = Integer.decode(split[1]);
+				return;
+			} 
+		} catch (Exception e) {
+			System.out.println("no server available");
+		}
+	}
+	
 	public String attemptLogin(String username, String password) {
 		URL url;
 		try {

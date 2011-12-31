@@ -158,7 +158,8 @@ public class ActionTracker {
 			if (last_action.primitive != null) {
 				Main.geometry.remove(last_action.primitive);
 			}
-			PolygonPellet.current_cycle = last_action.current_poly;
+			if (last_action.current_poly != null)
+				PolygonPellet.current_cycle = last_action.current_poly;
 			if (undo_stack.size() > 0
 					&& undo_stack.peek().action_type == ActionType.POLYGON_LINE) {
 				undo();
