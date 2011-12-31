@@ -85,6 +85,7 @@ public class Main {
 	public static boolean draw_points = true;
 	public static boolean draw_scaffolding = true;
 	public static boolean draw_pellets = true;
+	public static boolean rotate_world = false;
 
 	public static int picked_polygon = -1;
 
@@ -561,13 +562,12 @@ public class Main {
 				}
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_T) {
-					tilt_locked = !tilt_locked;
-					if (tilt_locked) {
-						last_tilt = tilt_angle;
-						tilt_animation = 30;
-					} else {
-						tilt_animation = -30;
-					}
+					rotate_world = !rotate_world;
+					/*
+					 * tilt_locked = !tilt_locked; if (tilt_locked) { last_tilt
+					 * = tilt_angle; tilt_animation = 30; } else {
+					 * tilt_animation = -30; }
+					 */
 				}
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_N) {
@@ -823,7 +823,9 @@ public class Main {
 		// this goes here to make the points appear as they should
 		// with new up vector
 		// but gun direction and gun origin is wrong
-		gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
+
+		if (rotate_world)
+			gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
 
 		glEnable(GL_FOG);
 		if (draw_points)
@@ -912,7 +914,8 @@ public class Main {
 		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
 
-		gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
+		if (rotate_world)
+			gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
 
 		// draw polygons for picking
 		for (int i = 0; i < all_pellets_in_world.size(); i++) {
@@ -974,7 +977,8 @@ public class Main {
 		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
 
-		gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
+		if (rotate_world)
+			gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
 
 		// draw polygons for picking
 		for (int i = 0; i < geometry.size(); i++) {
@@ -1237,6 +1241,13 @@ public class Main {
 			glEnd();
 			break;
 		case VERTICAL_LINE:
+			if (rotate_world) {
+				float wall_angle = Vector3f.angle(new Vector3f(up_vec.x,
+						up_vec.y, 0), new Vector3f(0, 1, 0));
+				glPushMatrix();
+				glRotated(wall_angle * 180 / Math.PI, 0, 0, 1);
+				glScalef(1, 600f / 800, 1);
+			}
 			glBegin(GL_LINES);
 			glVertex2f(0, f);
 			glVertex2f(0, -f);
@@ -1244,11 +1255,14 @@ public class Main {
 			glBegin(GL_LINE_LOOP);
 			for (int i = 0; i < n; i++) {
 				float angle = (float) (Math.PI * 2 * i / n);
-				float x = (float) (Math.cos(angle) * f * 0.25 * 600 / 800);
+				float x = (float) (Math.cos(angle) * f * 0.25);
 				float y = (float) (Math.sin(angle) * f * 0.25);
 				glVertex2f(x, y);
 			}
 			glEnd();
+			if (rotate_world) {
+				glPopMatrix();
+			}
 			break;
 		case DESTRUCTOR:
 			glBegin(GL_LINES);
@@ -1309,29 +1323,6 @@ public class Main {
 		glEnable(GL_DEPTH_TEST);
 	}
 
-	@SuppressWarnings("unused")
-	private void ShootPelletGun() {
-		System.out.println("shooting gun");
-
-		// do all this extra stuff with horizontal angle so that shooting up in
-		// the air makes the pellet go up in the air
-		Vector2f horiz = new Vector2f();
-		horiz.x = (float) Math.sin(pan_angle * 3.14159 / 180f);
-		horiz.y = -1 * (float) Math.cos(pan_angle * 3.14159 / 180f);
-		horiz.normalise();
-		horiz.scale((float) Math.cos(tilt_angle * 3.14159 / 180f));
-		gun_direction.x = horiz.x;
-		gun_direction.z = horiz.y;
-		gun_direction.y = -1 * (float) Math.sin(tilt_angle * 3.14159 / 180f);
-		gun_direction.normalise();
-
-		Pellet pellet = new Pellet(all_pellets_in_world);
-		pellet.vel.set(gun_direction);
-		pellet.vel.scale(gun_speed);
-		pellet.pos.set(pos);
-		all_pellets_in_world.add(pellet);
-	}
-
 	private void ShootGun() {
 		if (which_gun == GunMode.ORB) {
 			OrbPellet new_pellet = new OrbPellet(all_pellets_in_world);
@@ -1361,25 +1352,25 @@ public class Main {
 			} else {
 				pellet = new PolygonPellet(all_pellets_in_world);
 			}
+			pellet.pos.set(pos);
 			pellet.vel.set(gun_direction);
 			pellet.vel.scale(gun_speed);
 			pellet.vel.scale(pellet_scale);
 
-			float angle = Vector3f.angle(new Vector3f(up_vec.x, up_vec.y, 0),
-					new Vector3f(0, 1, 0));
+			if (rotate_world) {
+				float angle = Vector3f.angle(
+						new Vector3f(up_vec.x, up_vec.y, 0), new Vector3f(0, 1,
+								0));
 
-			Matrix4f mat = new Matrix4f();
-			mat.setIdentity();
-			mat.rotate(angle, new Vector3f(0, 0, -1));
+				Matrix4f mat = new Matrix4f();
+				mat.setIdentity();
+				mat.rotate(angle, new Vector3f(0, 0, -1));
 
-			Vector4f new_pos = new Vector4f();
-			new_pos.set(pos.x, pos.y, pos.z, 1);
-			Matrix4f.transform(mat, new_pos, new_pos);
-
-			// System.out.println("old position: " + pos);
-			// System.out.println("new position: " + new_pos);
-
-			pellet.pos.set(new_pos.x, new_pos.y, new_pos.z);
+				Vector4f new_pos = new Vector4f();
+				new_pos.set(pos.x, pos.y, pos.z, 1);
+				Matrix4f.transform(mat, new_pos, new_pos);
+				pellet.pos.set(new_pos.x, new_pos.y, new_pos.z);
+			}
 
 			all_pellets_in_world.add(pellet);
 		}
@@ -1392,22 +1383,22 @@ public class Main {
 		pellet.vel.set(gun_direction);
 		pellet.vel.scale(gun_speed);
 		pellet.vel.scale(pellet_scale);
+		pellet.pos.set(pos);
 
-		float angle = Vector3f.angle(new Vector3f(up_vec.x, up_vec.y, 0),
-				new Vector3f(0, 1, 0));
+		if (rotate_world) {
+			float angle = Vector3f.angle(new Vector3f(up_vec.x, up_vec.y, 0),
+					new Vector3f(0, 1, 0));
 
-		Matrix4f mat = new Matrix4f();
-		mat.setIdentity();
-		mat.rotate(angle, new Vector3f(0, 0, -1));
+			Matrix4f mat = new Matrix4f();
+			mat.setIdentity();
+			mat.rotate(angle, new Vector3f(0, 0, -1));
 
-		Vector4f new_pos = new Vector4f();
-		new_pos.set(pos.x, pos.y, pos.z, 1);
-		Matrix4f.transform(mat, new_pos, new_pos);
+			Vector4f new_pos = new Vector4f();
+			new_pos.set(pos.x, pos.y, pos.z, 1);
+			Matrix4f.transform(mat, new_pos, new_pos);
 
-		// System.out.println("old position: " + pos);
-		// System.out.println("new position: " + new_pos);
-
-		pellet.pos.set(new_pos.x, new_pos.y, new_pos.z);
+			pellet.pos.set(new_pos.x, new_pos.y, new_pos.z);
+		}
 		all_pellets_in_world.add(pellet);
 
 	}
@@ -1425,6 +1416,42 @@ public class Main {
 		gun_direction.y = -1 * (float) Math.sin(tilt_angle * 3.14159 / 180f);
 		gun_direction.normalise();
 
+		if (rotate_world) {
+			float angle = Vector3f.angle(new Vector3f(up_vec.x, up_vec.y, 0),
+					new Vector3f(0, 1, 0));
+
+			Matrix4f mat = new Matrix4f();
+			mat.setIdentity();
+			mat.rotate(angle, new Vector3f(0, 0, -1));
+
+			Vector4f new_direction = new Vector4f();
+			new_direction.set(gun_direction.x, gun_direction.y,
+					gun_direction.z, 1);
+			Matrix4f.transform(mat, new_direction, new_direction);
+			gun_direction.set(new_direction);
+		}
+	}
+
+	public static void rotateVector(Vector3f v) {
+		float angle = -1 * Vector3f.angle(up_vec, new Vector3f(0, 1, 0));
+
+		Vector3f cross = new Vector3f();
+		Vector3f.cross(up_vec, new Vector3f(0, 1, 0), cross);
+
+		Matrix4f mat = new Matrix4f();
+		mat.setIdentity();
+		mat.rotate(angle, cross);
+
+		Vector4f new_direction = new Vector4f();
+		new_direction.set(v.x, v.y, v.z, 1);
+		Matrix4f.transform(mat, new_direction, new_direction);
+		v.set(new_direction);
+	}
+
+	public static Vector3f getTransformedPos() {
+		if (!rotate_world)
+			return pos;
+
 		float angle = Vector3f.angle(new Vector3f(up_vec.x, up_vec.y, 0),
 				new Vector3f(0, 1, 0));
 
@@ -1432,13 +1459,10 @@ public class Main {
 		mat.setIdentity();
 		mat.rotate(angle, new Vector3f(0, 0, -1));
 
-		Vector4f new_direction = new Vector4f();
-		new_direction.set(gun_direction.x, gun_direction.y, gun_direction.z, 1);
-		Matrix4f.transform(mat, new_direction, new_direction);
-		gun_direction.set(new_direction);
-
-		// System.out.println("gun direction:" + gun_direction);
-		// calculateUpVectorAdjustment(new Vector3f(gun_direction));
+		Vector4f new_pos = new Vector4f();
+		new_pos.set(pos.x, pos.y, pos.z, 1);
+		Matrix4f.transform(mat, new_pos, new_pos);
+		return new Vector3f(new_pos);
 	}
 
 	@SuppressWarnings("unused")

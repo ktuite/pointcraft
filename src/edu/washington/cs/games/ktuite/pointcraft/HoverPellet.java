@@ -105,7 +105,7 @@ public class HoverPellet extends Pellet {
 	public static void computeDistToPellet() {
 		dist_to_pellet = 1;
 		Vector3f dist = new Vector3f();
-		Vector3f.sub(target_pellet.pos, Main.pos, dist);
+		Vector3f.sub(target_pellet.pos, Main.getTransformedPos(), dist);
 		dist_to_pellet = dist.length();
 	}
 
@@ -128,11 +128,11 @@ public class HoverPellet extends Pellet {
 		Vector3f direction = new Vector3f(Main.gun_direction);
 		direction.normalise();
 		direction.scale(dist_to_pellet);
-		Vector3f.add(Main.pos, direction, target_pellet.pos);
+		Vector3f.add(Main.getTransformedPos(), direction, target_pellet.pos);
 	}
 
 	public static void updatePelletInPlane() {
-		Vector3f p1 = Main.pos;
+		Vector3f p1 = Main.getTransformedPos();
 		Vector3f p2 = Main.gun_direction;
 		Vector3f.add(p1, p2, p2);
 		Vector3f new_pos = target_pellet_primitive.getPlane()
