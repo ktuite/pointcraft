@@ -33,8 +33,8 @@ public class PlaneScaffold extends Scaffold {
 		c = 0;
 		d = 0;
 	}
-	
-	public boolean isReady(){
+
+	public boolean isReady() {
 		if ((a == 0 && b == 0 && c == 0 && d == 0))
 			return false;
 		else
@@ -66,7 +66,18 @@ public class PlaneScaffold extends Scaffold {
 						.sqrt(a * a + b * b + c * c));
 			}
 		}
-		
+
+		return Math.abs(dist);
+	}
+
+	public float distanceToPointNoBounds(Vector3f pos) {
+		float dist = Float.MAX_VALUE;
+
+		if (isReady()) {
+			dist = (float) ((a * pos.x + b * pos.y + c * pos.z + d) / Math
+					.sqrt(a * a + b * b + c * c));
+		}
+
 		return Math.abs(dist);
 	}
 
@@ -112,6 +123,9 @@ public class PlaneScaffold extends Scaffold {
 		d = -1
 				* (a * pellets.get(0).pos.x + b * pellets.get(0).pos.y + c
 						* pellets.get(0).pos.z);
+
+		// System.out.println("plane parameters: " + a + "," + b + "," + c + ","
+		// + d);
 
 		float pts[] = new float[12];
 		plane_extent = findPlaneExtent();
@@ -217,17 +231,17 @@ public class PlaneScaffold extends Scaffold {
 			grid_vertices.add(end);
 		}
 
-		//checkForIntersections();
+		// checkForIntersections();
 	}
 
 	public void checkForIntersections() {
 		if (pellets.size() < 3)
 			return;
-		
+
 		for (Scaffold geom : Main.geometry_v) {
 			if (geom instanceof LineScaffold) {
 				Vector3f intersect = ((LineScaffold) geom)
-						.checkForIntersectionPlaneWithLine(a,b,c,d);
+						.checkForIntersectionPlaneWithLine(a, b, c, d);
 				if (intersect != null) {
 					LinePellet i = new LinePellet(Main.all_pellets_in_world);
 					i.alive = true;
@@ -243,7 +257,7 @@ public class PlaneScaffold extends Scaffold {
 			}
 		}
 	}
-	
+
 	private float findPlaneExtent() {
 		float max_distance = 0;
 		Vector3f dist = new Vector3f();
@@ -279,7 +293,7 @@ public class PlaneScaffold extends Scaffold {
 				i.x = p1.x + u * (p2.x - p1.x);
 				i.y = p1.y + u * (p2.y - p1.y);
 				i.z = p1.z + u * (p2.z - p1.z);
-				
+
 				Vector3f dist = new Vector3f();
 				Vector3f.sub(i, center, dist);
 				if (dist.length() > plane_extent)
@@ -288,6 +302,30 @@ public class PlaneScaffold extends Scaffold {
 		}
 
 		return i;
+	}
+	
+	public Vector3f checkForIntersectionLineWithPlaneNoBounds(Vector3f p1, Vector3f p2) {
+		Vector3f i = null;
+		float u_denom = a * (p1.x - p2.x) + b * (p1.y - p2.y) + c
+				* (p1.z - p2.z);
+		if (u_denom != 0) {
+			float u_num = a * p1.x + b * p1.y + c * p1.z + d;
+			float u = u_num / u_denom;
+			if (u > 0 && u < 1) {
+				i = new Vector3f();
+				i.x = p1.x + u * (p2.x - p1.x);
+				i.y = p1.y + u * (p2.y - p1.y);
+				i.z = p1.z + u * (p2.z - p1.z);
+			}
+		}
+
+		return i;
+	}
+	
+	public float planeNormalDotVector(Vector3f v){
+		Vector3f norm = new Vector3f(a,b,c);
+		norm.normalise();
+		return Vector3f.dot(v, norm);
 	}
 
 	public void draw() {
@@ -310,12 +348,11 @@ public class PlaneScaffold extends Scaffold {
 		d = 0;
 		grid_vertices = null;
 	}
-	
-	public void removeLastPointAndRefit(){
+
+	public void removeLastPointAndRefit() {
 		Main.all_dead_pellets_in_world.add(pellets.pop());
 		fitPlane();
 	}
-	
 
 	@Override
 	public String toJSONString() {
@@ -335,13 +372,13 @@ public class PlaneScaffold extends Scaffold {
 			s.endArray();
 			s.key("pellets");
 			s.array();
-			for (Pellet p : pellets){
+			for (Pellet p : pellets) {
 				s.value(Main.all_pellets_in_world.indexOf(p));
 			}
 			s.endArray();
 			s.key("pellet_objs");
 			s.array();
-			for (Pellet p : pellets){
+			for (Pellet p : pellets) {
 				s.value(p);
 			}
 			s.endArray();
@@ -349,25 +386,26 @@ public class PlaneScaffold extends Scaffold {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-        return s.toString();
+		return s.toString();
 	}
-	
+
 	public static void loadFromJSONv2(JSONObject obj) throws JSONException {
 		PlaneScaffold plane = new PlaneScaffold();
-		
+
 		JSONArray json_verts = obj.getJSONArray("pellets");
-		for (int i = 0; i < json_verts.length(); i++){
-			plane.pellets.add(Main.all_pellets_in_world.get(json_verts.getInt(i)));
+		for (int i = 0; i < json_verts.length(); i++) {
+			plane.pellets.add(Main.all_pellets_in_world.get(json_verts
+					.getInt(i)));
 		}
 		plane.fitPlane();
 		Main.geometry_v.add(plane);
 	}
-	
+
 	public static void loadFromJSONv3(JSONObject obj) throws JSONException {
 		PlaneScaffold plane = new PlaneScaffold();
-		
+
 		JSONArray json_verts = obj.getJSONArray("pellet_objs");
-		for (int i = 0; i < json_verts.length(); i++){
+		for (int i = 0; i < json_verts.length(); i++) {
 			plane.pellets.add(Pellet.loadFromJSON(json_verts.getJSONObject(i)));
 		}
 		plane.fitPlane();

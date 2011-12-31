@@ -11,6 +11,7 @@ public class PolygonPellet extends Pellet {
 
 	public static Stack<PolygonPellet> current_cycle = new Stack<PolygonPellet>();
 	private boolean first_in_cycle = false;
+	private static PlaneScaffold plane = new PlaneScaffold();
 
 	/*
 	 * A Pellet is a magical thing that you can shoot out of a gun that will
@@ -29,7 +30,7 @@ public class PolygonPellet extends Pellet {
 		radius = lp.radius;
 		max_radius = lp.max_radius;
 		constructing = lp.constructing;
-		//pellet_type = lp.pellet_type;
+		// pellet_type = lp.pellet_type;
 		pellet_type = Main.GunMode.POLYGON;
 	}
 
@@ -59,18 +60,19 @@ public class PolygonPellet extends Pellet {
 				if (neighbor_pellet != null) {
 					alive = false;
 
-					if (current_cycle.size() > 0 && neighbor_pellet == current_cycle.lastElement()){
+					if (current_cycle.size() > 0
+							&& neighbor_pellet == current_cycle.lastElement()) {
 						System.out.println("shot at same pellet");
 						return;
 					}
-					
+
 					if (!(neighbor_pellet instanceof PolygonPellet)) {
 						neighbor_pellet.visible = false;
 						ActionTracker.hiddenPellet(neighbor_pellet);
-						
+
 						neighbor_pellet = new PolygonPellet(neighbor_pellet);
 						Main.new_pellets_to_add_to_world.add(neighbor_pellet);
-						//ActionTracker.newPolygonPellet(neighbor_pellet);
+						// ActionTracker.newPolygonPellet(neighbor_pellet);
 					}
 
 					current_cycle.add((PolygonPellet) neighbor_pellet);
@@ -86,6 +88,20 @@ public class PolygonPellet extends Pellet {
 						ActionTracker.newPolygonPellet(neighbor_pellet);
 					}
 
+				} else if (current_cycle.size() >= 3 && plane.distanceToPointNoBounds(pos) < radius) {
+					pos.set(plane.closestPoint(pos));
+					constructing = true;
+					if (CONNECT_TO_PREVIOUS)
+						current_cycle.add(this);
+
+					if (CONNECT_TO_PREVIOUS && current_cycle.size() > 1) {
+						makeLine();
+					}
+
+					if (current_cycle.size() > 2
+							&& current_cycle.get(0) == current_cycle
+									.get(current_cycle.size() - 1))
+						makePolygon();
 				} else if (closest_point != null) {
 					System.out.println("pellet stuck to some geometry");
 					constructing = true;
@@ -131,6 +147,12 @@ public class PolygonPellet extends Pellet {
 				if (constructing == true) {
 					ActionTracker.newPolygonPellet(this);
 				}
+
+				// if this polygon has 3 vertices in it, fit a plane and use
+				// that to find the position of the 4th pellet
+				if (!plane.isReady() && current_cycle.size() == 3) {
+					makePlane();
+				}
 			}
 		} else {
 			// the pellet has stuck... here we just give it a nice growing
@@ -139,6 +161,15 @@ public class PolygonPellet extends Pellet {
 				radius *= 1.1;
 			}
 		}
+	}
+
+	private void makePlane() {
+		System.out.println("polygon has 3 vertices... fit a plane");
+		plane.pellets.clear();
+		for (Pellet p : current_cycle) {
+			plane.pellets.add(p);
+		}
+		plane.fitPlane();
 	}
 
 	public void makeLine() {
@@ -161,6 +192,7 @@ public class PolygonPellet extends Pellet {
 			cycle.add(p);
 		}
 		Primitive polygon = new Primitive(GL_POLYGON, cycle);
+		polygon.setPlane(plane);
 		polygon.setPlayerPositionAndViewingDirection(pos, vel);
 		Main.geometry.add(polygon);
 
@@ -168,6 +200,8 @@ public class PolygonPellet extends Pellet {
 				(Stack<PolygonPellet>) current_cycle.clone());
 
 		current_cycle.clear();
+		plane.pellets.clear();
+		plane.nullifyPlane();
 	}
 
 	public void setAsFirstInCycle() {
@@ -189,6 +223,8 @@ public class PolygonPellet extends Pellet {
 
 	public static void startNewPolygon() {
 		current_cycle.clear();
+		plane.pellets.clear();
+		plane.nullifyPlane();
 		System.out.println("making new polygon");
 	}
 

@@ -38,6 +38,7 @@ public class Primitive implements org.json.JSONString {
 	private boolean textures_loaded;
 	private int texture_count;
 	private boolean is_quad = false;
+	private PlaneScaffold plane = null;
 
 	private void readObject(ObjectInputStream ois)
 			throws ClassNotFoundException, IOException {
@@ -53,6 +54,7 @@ public class Primitive implements org.json.JSONString {
 		vertices = _vertices;
 		textures_loaded = false;
 		if (gl_type == GL_POLYGON) {
+			plane = new PlaneScaffold();
 			if (vertices.size() == 5) {
 				is_quad = true;
 				num_textures = 1;
@@ -101,6 +103,10 @@ public class Primitive implements org.json.JSONString {
 
 	public List<Pellet> getVertices() {
 		return vertices;
+	}
+	
+	public PlaneScaffold getPlane(){
+		return plane;
 	}
 
 	public void draw() {
@@ -308,6 +314,13 @@ public class Primitive implements org.json.JSONString {
 		return Math.abs(distance);
 	}
 
+	public void setPlane(PlaneScaffold pl){
+		plane.a = pl.a;
+		plane.b = pl.b;
+		plane.c = pl.c;
+		plane.d = pl.d;
+	}
+	
 	public static void addBackDeletedPrimitive(Primitive primitive) {
 
 		Main.geometry.add(primitive);

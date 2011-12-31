@@ -145,14 +145,14 @@ public class VerticalLinePellet extends Pellet {
 
 			top_pellet = new VerticalLinePellet(main_pellets);
 			top_pellet.pos.set(pos);
-			top_pellet.pos.y += radius * 2;
+			top_pellet.pos.y += radius * 1.5;
 			top_pellet.vel.set(0, speed, 0);
 			top_pellet.is_upward_pellet = true;
 			Main.new_pellets_to_add_to_world.add(top_pellet);
 
 			bottom_pellet = new VerticalLinePellet(main_pellets);
 			bottom_pellet.pos.set(pos);
-			bottom_pellet.pos.y -= radius * 2;
+			bottom_pellet.pos.y -= radius * 1.5;
 			bottom_pellet.vel.set(0, -1 * speed, 0);
 			bottom_pellet.is_downward_pellet = true;
 			Main.new_pellets_to_add_to_world.add(bottom_pellet);
