@@ -174,6 +174,8 @@ public class KdTreeOfPoints {
 		}
 		System.out.println("done adding " + tree.getPoints().size()
 				+ " points to lookup tree");
+		
+		//tree.intersectsRay(arg0, arg1, arg2)
 	}
 
 	private static void parsePlyFile(BufferedReader buf, String filename) {
@@ -295,9 +297,9 @@ public class KdTreeOfPoints {
 				ByteBuffer bb = BufferUtils.createByteBuffer(len);
 				bb.order(ByteOrder.LITTLE_ENDIAN);
 
-				//System.out.println("reading " + count + " values with " + len
-				//		+ " bytes");
-				
+				// System.out.println("reading " + count + " values with " + len
+				// + " bytes");
+
 				for (int h = 0; h < num_points; h++) {
 					stream.read(pt, 0, len);
 					bb.rewind();
@@ -367,5 +369,11 @@ public class KdTreeOfPoints {
 			e.printStackTrace();
 		}
 
+	}
+
+	public static Vector3f getIthPoint(int i) {
+		return new Vector3f((float) point_positions.get(i * 3 + 0),
+				(float) point_positions.get(i * 3 + 1),
+				(float) point_positions.get(i * 3 + 2));
 	}
 }
