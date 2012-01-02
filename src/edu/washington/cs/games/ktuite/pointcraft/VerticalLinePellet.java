@@ -56,15 +56,12 @@ public class VerticalLinePellet extends Pellet {
 						alive = false;
 						attachVerticalLine();
 					} else if (closest_point != null) {
-						boolean new_up_set = trySettingNewUp();
-						if (new_up_set) {
-							alive = false;
-						} else {
-							System.out.println("pellet stuck to some geometry");
-							constructing = true;
-							pos.set(closest_point);
-							attachVerticalLine();
-						}
+
+						System.out.println("pellet stuck to some geometry");
+						constructing = true;
+						pos.set(closest_point);
+						attachVerticalLine();
+
 					} else {
 						// it didn't hit some existing geometry or pellet
 						// so check the point cloud
@@ -149,39 +146,30 @@ public class VerticalLinePellet extends Pellet {
 		}
 	}
 
-	private boolean trySettingNewUp() {
-		Scaffold geom = getIntersectedScaffoldGeometry();
-		if (geom instanceof LineScaffold){
-			LineScaffold line = (LineScaffold)geom;
-			Vector3f.sub(line.pellets.get(0).pos, line.pellets.get(1).pos, Main.up_vec);
-			Main.up_vec.normalise();
-			System.out.println("new up vector: " + Main.up_vec);
-			return true;
-		}
-		return false;
-	}
-
 	private void attachVerticalLine() {
 		if (bottom_pellet == null || top_pellet == null) {
 			float speed = vel.length() / 2;
 
-			Vector3f new_up = new Vector3f(0, 1, 0);
-			Main.rotateVector(new_up);
+			Vector3f new_up = new Vector3f();
+			new_up.set(Main.up_vec);
+			new_up.normalise();
 			new_up.scale(radius * 1.5f);
 
 			top_pellet = new VerticalLinePellet(main_pellets);
 			top_pellet.pos.set(pos);
 			Vector3f.add(top_pellet.pos, new_up, top_pellet.pos);
-			top_pellet.vel.set(0, speed, 0);
-			Main.rotateVector(top_pellet.vel);
+			top_pellet.vel.set(new_up);
+			top_pellet.vel.normalise();
+			top_pellet.vel.scale(speed);
 			top_pellet.is_upward_pellet = true;
 			Main.new_pellets_to_add_to_world.add(top_pellet);
 
 			bottom_pellet = new VerticalLinePellet(main_pellets);
 			bottom_pellet.pos.set(pos);
 			Vector3f.sub(bottom_pellet.pos, new_up, bottom_pellet.pos);
-			bottom_pellet.vel.set(0, -1 * speed, 0);
-			Main.rotateVector(bottom_pellet.vel);
+			bottom_pellet.vel.set(new_up);
+			bottom_pellet.vel.normalise();
+			bottom_pellet.vel.scale(speed * -1);
 			bottom_pellet.is_downward_pellet = true;
 			Main.new_pellets_to_add_to_world.add(bottom_pellet);
 

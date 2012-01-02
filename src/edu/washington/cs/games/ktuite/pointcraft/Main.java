@@ -101,7 +101,7 @@ public class Main {
 	public float overhead_scale = 1;
 
 	public enum GunMode {
-		PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA
+		PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER
 	}
 
 	public GunMode which_gun;
@@ -293,8 +293,10 @@ public class Main {
 	private void LoadData() {
 		if (IS_RELEASE)
 			KdTreeOfPoints.loadCube();
-		else
-			KdTreeOfPoints.load("assets/models/lewis-hall-binary.ply");
+		else{
+			KdTreeOfPoints.loadCube();
+			//KdTreeOfPoints.load("assets/models/lewis-hall-binary.ply");
+		}
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 
 	}
@@ -547,9 +549,9 @@ public class Main {
 					System.out.println("drag edit gun");
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_9) {
-					which_gun = GunMode.ORB;
+					which_gun = GunMode.DIRECTION_PICKER;
 					System.out
-							.println("orb gun (where you can just place pellets in space without them sticking to things) selected");
+							.println("shoot at a line to use that line's orientation");
 				}
 				if (Keyboard.getEventKey() == Keyboard.KEY_DELETE
 						|| Keyboard.getEventKey() == Keyboard.KEY_BACK) {
@@ -1306,12 +1308,29 @@ public class Main {
 			glEnd();
 			break;
 		case COMBINE:
+			glBegin(GL_LINES);
+			glVertex2f(0, 0);
+			glVertex2f(f * 600 / 800 * .6f, f * .6f);
+			glVertex2f(0, 0);
+			glVertex2f(-f * 600 / 800 * .6f, f * .6f);
+			glEnd();
+			break;
 		case DRAG_TO_EDIT:
 			glBegin(GL_LINES);
 			glVertex2f(0, f * .6f);
 			glVertex2f(0, -f * .6f);
 			glVertex2f(f * 600 / 800 * .6f, 0);
 			glVertex2f(-f * 600 / 800 * .6f, 0);
+			glEnd();
+			break;
+		case DIRECTION_PICKER:
+			glBegin(GL_LINES);
+			glVertex2f(0, 0);
+			glVertex2f(f * 600 / 800 * .6f, f * .6f);
+			glVertex2f(0, 0);
+			glVertex2f(-f * 600 / 800 * .6f, f * .6f);
+			glVertex2f(0, 0);
+			glVertex2f(0, f * 2 * .6f);
 			glEnd();
 			break;
 		default:
@@ -1349,6 +1368,8 @@ public class Main {
 				pellet = new VerticalLinePellet(all_pellets_in_world);
 			} else if (which_gun == GunMode.DESTRUCTOR) {
 				pellet = new DestructorPellet(all_pellets_in_world);
+			} else if (which_gun == GunMode.DIRECTION_PICKER) {
+				pellet = new UpPellet(all_pellets_in_world);
 			} else {
 				pellet = new PolygonPellet(all_pellets_in_world);
 			}
