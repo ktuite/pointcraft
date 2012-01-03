@@ -101,7 +101,7 @@ public class WiggleTool {
 		int min_neighbors = Integer.MAX_VALUE;
 
 		for (Pellet p : g.getVertices()) {
-			int neighbors = KdTreeOfPoints.queryKdTree(p.pos.x, p.pos.y,
+			int neighbors = PointStore.queryKdTree(p.pos.x, p.pos.y,
 					p.pos.z, p.radius);
 			if (neighbors < min_neighbors) {
 				min_neighbors = neighbors;

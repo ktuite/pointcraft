@@ -37,7 +37,7 @@ import de.matthiasmann.twl.theme.ThemeManager;
 
 public class Main {
 	private static boolean IS_RELEASE = true;
-	public static float VERSION_NUMBER = 0.5f;
+	public static float VERSION_NUMBER = 0.6f;
 
 	// stuff about the atmosphere
 	private float FOG_COLOR[] = new float[] { .89f, .89f, .89f, 1.0f };
@@ -65,8 +65,8 @@ public class Main {
 
 	// stuff about the point cloud
 	private int num_points;
-	private DoubleBuffer point_positions;
-	private DoubleBuffer point_colors;
+	private FloatBuffer point_positions;
+	private ByteBuffer point_colors;
 
 	// stuff about general guns and general list of pellets/things shot
 	public static Vector3f gun_direction;
@@ -154,7 +154,8 @@ public class Main {
 			renderer = new LWJGLRenderer();
 			onscreen_overlay = new OnscreenOverlay();
 			onscreen_gui = new GUI(onscreen_overlay, renderer);
-			URL url = new File("assets/theme/onscreen.xml").toURL();
+			//URL url = new File("assets/theme/onscreen.xml").toURL();
+			URL url = getClass().getResource("assets/theme/onscreen.xml");
 			ThemeManager themeManager = ThemeManager.createThemeManager(url,
 					renderer);
 			onscreen_gui.applyTheme(themeManager);
@@ -287,23 +288,23 @@ public class Main {
 	public void loadNewPointCloud(File file) {
 		System.out.println("attempting to load new point cloud : "
 				+ file.getAbsolutePath());
-		KdTreeOfPoints.load(file.getAbsolutePath());
+		PointStore.load(file.getAbsolutePath());
 		InitData();
 	}
 
 	private void LoadData() {
 		if (IS_RELEASE)
-			KdTreeOfPoints.loadCube();
+			PointStore.loadCube();
 		else{
 			//KdTreeOfPoints.loadCube();
-			KdTreeOfPoints.load("assets/models/lewis-hall-binary.ply");
+			PointStore.load("assets/models/lewis-hall-binary.ply");
 		}
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 
 	}
 
 	private void InitData() {
-		world_scale = (float) ((float) ((KdTreeOfPoints.max_corner[1] - KdTreeOfPoints.min_corner[1])) / 0.071716);
+		world_scale = (float) ((float) ((PointStore.max_corner[1] - PointStore.min_corner[1])) / 0.071716);
 		// lewis hall height for scale ref...
 
 		System.out.println("world scale: " + world_scale);
@@ -316,9 +317,9 @@ public class Main {
 		fog_density /= world_scale;
 		glFogf(GL_FOG_DENSITY, fog_density);
 
-		num_points = KdTreeOfPoints.num_points;
-		point_positions = KdTreeOfPoints.point_positions;
-		point_colors = KdTreeOfPoints.point_colors;
+		num_points = PointStore.num_points;
+		point_positions = PointStore.point_positions;
+		point_colors = PointStore.point_colors;
 	}
 
 	@SuppressWarnings("unused")
@@ -1064,7 +1065,7 @@ public class Main {
 		glEnableClientState(GL_COLOR_ARRAY);
 
 		GL11.glVertexPointer(3, 0, point_positions);
-		GL11.glColorPointer(3, 0, point_colors);
+		GL11.glColorPointer(3, true, 0, point_colors);
 
 		glPointSize(point_size);
 		glDrawArrays(GL_POINTS, 0, num_points);

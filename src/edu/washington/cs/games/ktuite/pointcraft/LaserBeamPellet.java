@@ -85,8 +85,8 @@ public class LaserBeamPellet extends PolygonPellet {
 
 		Vector3f closest_point = null;
 		float min_dist_to_player = Float.MAX_VALUE;
-		for (int i = 0; i < KdTreeOfPoints.num_points; i++) {
-			Vector3f pt = KdTreeOfPoints.getIthPoint(i);
+		for (int i = 0; i < PointStore.num_points; i++) {
+			Vector3f pt = PointStore.getIthPoint(i);
 			float dist_to_line = distanceToPoint(pt);
 			if (dist_to_line < laser_beam_pellet.radius) {
 				float dist_to_player = distanceToPlayer(pt);

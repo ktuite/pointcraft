@@ -91,11 +91,11 @@ public class Pellet implements org.json.JSONString {
 	}
 
 	protected void snapToCenterOfPoints() {
-		pos.set(KdTreeOfPoints.getCenter(pos.x, pos.y, pos.z, radius));
+		pos.set(PointStore.getCenter(pos.x, pos.y, pos.z, radius));
 	}
 
 	protected int queryKdTree(float x, float y, float z, float radius) {
-		return KdTreeOfPoints.queryKdTree(x, y, z, radius);
+		return PointStore.queryKdTree(x, y, z, radius);
 	}
 
 	public Pellet queryOtherPellets() {
