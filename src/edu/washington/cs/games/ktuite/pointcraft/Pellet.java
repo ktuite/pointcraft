@@ -29,6 +29,7 @@ public class Pellet implements org.json.JSONString {
 	protected List<Pellet> main_pellets;
 	public int id;
 	public Main.GunMode pellet_type;
+	public int ref_count = 0;
 
 	public static boolean CONNECT_TO_PREVIOUS = true;
 
@@ -266,5 +267,9 @@ public class Pellet implements org.json.JSONString {
 		p.pos.z = (float) obj.getJSONArray("pos").getDouble(2);
 		Main.all_pellets_in_world.add(p);
 		return p;
+	}
+
+	public boolean refCountZero() {
+		return (ref_count == 0);
 	}
 }

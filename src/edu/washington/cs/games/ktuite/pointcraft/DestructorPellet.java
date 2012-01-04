@@ -42,7 +42,10 @@ public class DestructorPellet extends Pellet {
 					if (poly != null) {
 						ActionTracker.deletedPrimitive(poly);
 						int idx = Main.geometry.indexOf(poly);
+						System.out.println("geometry idx: " + idx);
 						int lines_to_remove = poly.numVertices() - 1;
+						if (idx <= 0 || !Main.geometry.get(idx-1).isPolygon())
+							lines_to_remove = 0;
 						int start_deleting = idx - lines_to_remove;
 						for (int i = 0; i <= lines_to_remove; i++) {
 							Main.geometry.remove(start_deleting);

@@ -36,7 +36,7 @@ import de.matthiasmann.twl.renderer.lwjgl.LWJGLRenderer;
 import de.matthiasmann.twl.theme.ThemeManager;
 
 public class Main {
-	private static boolean IS_RELEASE = true;
+	private static boolean IS_RELEASE = false;
 	public static float VERSION_NUMBER = 0.6f;
 
 	// stuff about the atmosphere
@@ -146,7 +146,6 @@ public class Main {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	private void InitGUI() {
 
 		LWJGLRenderer renderer;
@@ -154,8 +153,7 @@ public class Main {
 			renderer = new LWJGLRenderer();
 			onscreen_overlay = new OnscreenOverlay();
 			onscreen_gui = new GUI(onscreen_overlay, renderer);
-			//URL url = new File("assets/theme/onscreen.xml").toURL();
-			URL url = getClass().getResource("assets/theme/onscreen.xml");
+			URL url = ResourceLoader.getResource("theme/onscreen.xml");
 			ThemeManager themeManager = ThemeManager.createThemeManager(url,
 					renderer);
 			onscreen_gui.applyTheme(themeManager);
@@ -163,13 +161,13 @@ public class Main {
 			instruction_overlay = new InstructionalOverlay();
 			instruction_overlay.setPointerToMainProgram(this);
 			instructional_gui = new GUI(instruction_overlay, renderer);
-			URL url2 = new File("assets/theme/guiTheme.xml").toURL();
+			URL url2 = ResourceLoader.getResource("theme/guiTheme.xml");
 			ThemeManager themeManager2 = ThemeManager.createThemeManager(url2,
 					renderer);
 			instructional_gui.applyTheme(themeManager2);
 
 			login_gui = new GUI(new LoginOverlay(), renderer);
-			URL url3 = new File("assets/theme/login.xml").toURL();
+			URL url3 = ResourceLoader.getResource("theme/login.xml");
 			ThemeManager themeManager3 = ThemeManager.createThemeManager(url3,
 					renderer);
 			login_gui.applyTheme(themeManager3);
@@ -232,7 +230,7 @@ public class Main {
 		// skybox texture loaded
 		try {
 			skybox = TextureLoader.getTexture("JPG",
-					ResourceLoader.getResourceAsStream("assets/gray_sky.jpg"));
+					ResourceLoader.getResourceAsStream("gray_sky.jpg"));
 			System.out.println("Texture loaded: " + skybox);
 			System.out.println(">> Image width: " + skybox.getImageWidth());
 			System.out.println(">> Image height: " + skybox.getImageHeight());
@@ -274,9 +272,9 @@ public class Main {
 
 		try {
 			launch_effect = AudioLoader.getAudio("WAV",
-					ResourceLoader.getResourceAsStream("assets/launch.wav"));
+					ResourceLoader.getResourceAsStream("launch.wav"));
 			attach_effect = AudioLoader.getAudio("WAV",
-					ResourceLoader.getResourceAsStream("assets/attach.wav"));
+					ResourceLoader.getResourceAsStream("attach.wav"));
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("couldn't load sounds");
@@ -554,12 +552,12 @@ public class Main {
 					which_gun = GunMode.DRAG_TO_EDIT;
 					System.out.println("drag edit gun");
 				}
-				/*
+				
 				if (Keyboard.getEventKey() == Keyboard.KEY_8) {
 					which_gun = GunMode.LASER_BEAM;
 					System.out.println("laser beam gun");
 				}
-				*/
+				
 				if (Keyboard.getEventKey() == Keyboard.KEY_9) {
 					which_gun = GunMode.DIRECTION_PICKER;
 					System.out

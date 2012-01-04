@@ -144,7 +144,10 @@ public class ActionTracker {
 		if (last_action.action_type == ActionType.NEW_PELLET) {
 			Main.all_dead_pellets_in_world.add(last_action.pellet);
 		} else if (last_action.action_type == ActionType.PARTIAL_POLYGON) {
-			Main.all_dead_pellets_in_world.add(last_action.pellet);
+			if (last_action.pellet.refCountZero())
+				Main.all_dead_pellets_in_world.add(last_action.pellet);
+			else 
+				last_action.pellet.ref_count--;
 			PolygonPellet.current_cycle.pop();
 			if (undo_stack.size() > 0
 					&& undo_stack.peek().action_type == ActionType.POLYGON_LINE) {

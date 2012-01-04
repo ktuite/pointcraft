@@ -72,23 +72,36 @@ public class PolygonPellet extends Pellet {
 
 						neighbor_pellet = new PolygonPellet(neighbor_pellet);
 						Main.new_pellets_to_add_to_world.add(neighbor_pellet);
-						// ActionTracker.newPolygonPellet(neighbor_pellet);
-					}
+						current_cycle.add((PolygonPellet) neighbor_pellet);
+						if (current_cycle.size() > 1) {
+							makeLine();
+						}
 
-					current_cycle.add((PolygonPellet) neighbor_pellet);
-					if (current_cycle.size() > 1) {
-						makeLine();
-					}
-
-					if (current_cycle.size() > 2
-							&& current_cycle.get(0) == current_cycle
-									.get(current_cycle.size() - 1)) {
-						makePolygon();
+						if (current_cycle.size() > 2
+								&& current_cycle.get(0) == current_cycle
+										.get(current_cycle.size() - 1)) {
+							makePolygon();
+						} else {
+							ActionTracker.newPolygonPellet(neighbor_pellet);
+						}
 					} else {
-						ActionTracker.newPolygonPellet(neighbor_pellet);
+						current_cycle.add((PolygonPellet) neighbor_pellet);
+						neighbor_pellet.ref_count++;
+						if (current_cycle.size() > 1) {
+							makeLine();
+						}
+
+						if (current_cycle.size() > 2
+								&& current_cycle.get(0) == current_cycle
+										.get(current_cycle.size() - 1)) {
+							makePolygon();
+						} else {
+							ActionTracker.newPolygonPellet(neighbor_pellet);
+						}
 					}
 
-				} else if (current_cycle.size() >= 3 && plane.distanceToPointNoBounds(pos) < radius) {
+				} else if (current_cycle.size() >= 3
+						&& plane.distanceToPointNoBounds(pos) < radius) {
 					pos.set(plane.closestPoint(pos));
 					constructing = true;
 					if (CONNECT_TO_PREVIOUS)
@@ -102,6 +115,8 @@ public class PolygonPellet extends Pellet {
 							&& current_cycle.get(0) == current_cycle
 									.get(current_cycle.size() - 1))
 						makePolygon();
+
+					ActionTracker.newPolygonPellet(this);
 				} else if (closest_point != null) {
 					System.out.println("pellet stuck to some geometry");
 					constructing = true;
@@ -119,6 +134,9 @@ public class PolygonPellet extends Pellet {
 							&& current_cycle.get(0) == current_cycle
 									.get(current_cycle.size() - 1))
 						makePolygon();
+
+					ActionTracker.newPolygonPellet(this);
+
 				} else if (Main.draw_points) {
 					// if it's not dead yet and also didn't hit a
 					// neighboring
@@ -138,15 +156,13 @@ public class PolygonPellet extends Pellet {
 						if (CONNECT_TO_PREVIOUS && current_cycle.size() > 1) {
 							makeLine();
 						}
+
+						ActionTracker.newPolygonPellet(this);
 					}
 				}
 
 				if (current_cycle != null && current_cycle.size() > 0)
 					current_cycle.get(0).setAsFirstInCycle();
-
-				if (constructing == true) {
-					ActionTracker.newPolygonPellet(this);
-				}
 
 				// if this polygon has 3 vertices in it, fit a plane and use
 				// that to find the position of the 4th pellet
