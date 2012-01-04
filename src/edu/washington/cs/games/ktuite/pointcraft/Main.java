@@ -295,7 +295,7 @@ public class Main {
 			PointStore.loadCube();
 		else{
 			//KdTreeOfPoints.loadCube();
-			PointStore.load("assets/models/lewis-hall-binary.ply");
+			PointStore.load("data/lewis_hall.ply");
 		}
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 

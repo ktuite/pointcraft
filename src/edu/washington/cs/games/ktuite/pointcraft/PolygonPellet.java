@@ -86,7 +86,7 @@ public class PolygonPellet extends Pellet {
 						}
 					} else {
 						current_cycle.add((PolygonPellet) neighbor_pellet);
-						neighbor_pellet.ref_count++;
+						
 						if (current_cycle.size() > 1) {
 							makeLine();
 						}
@@ -96,6 +96,7 @@ public class PolygonPellet extends Pellet {
 										.get(current_cycle.size() - 1)) {
 							makePolygon();
 						} else {
+							neighbor_pellet.ref_count++;
 							ActionTracker.newPolygonPellet(neighbor_pellet);
 						}
 					}
