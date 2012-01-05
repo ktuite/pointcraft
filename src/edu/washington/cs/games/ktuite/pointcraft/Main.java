@@ -187,7 +187,7 @@ public class Main {
 		glMatrixMode(GL_PROJECTION);
 
 		glLoadIdentity();
-		glOrtho(-1 * width / height, width / height, -1f, 1f, 0.001f, 5000.0f);
+		glOrtho(-1 * width / height, width / height, -1f, 1f, 0.001f, 50000.0f);
 		// glScalef(40, 40, 40);
 
 		proj_ortho = BufferUtils.createDoubleBuffer(16);
@@ -293,7 +293,8 @@ public class Main {
 		if (IS_RELEASE)
 			PointStore.loadCube();
 		else {
-			PointStore.loadCube();
+			PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
+			//PointStore.loadCube();
 			// PointStore.load("data/uris.ply");
 		}
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
@@ -826,6 +827,7 @@ public class Main {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glPushMatrix();
 
+		glScalef(1/world_scale, 1/world_scale, 1/world_scale);
 		glRotatef(tilt_angle, 1.0f, 0.0f, 0.0f); // rotate our camera up/down
 		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
 
