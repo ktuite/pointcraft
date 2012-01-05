@@ -77,8 +77,6 @@ public class Main {
 	public static Stack<Pellet> all_dead_pellets_in_world;
 	public static Stack<Pellet> new_pellets_to_add_to_world;
 
-	// TODO: move out of here and put somewhere else since this is a certain
-	// kind of geometry
 	public static Stack<Primitive> geometry;
 	public static Stack<Scaffold> geometry_v;
 
@@ -101,7 +99,7 @@ public class Main {
 	public float overhead_scale = 1;
 
 	public enum GunMode {
-		PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM
+		PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM, TRIANGULATION
 	}
 
 	public GunMode which_gun;
@@ -261,7 +259,8 @@ public class Main {
 
 		which_gun = GunMode.POLYGON;
 		OrbPellet.orb_pellet = new OrbPellet(all_pellets_in_world);
-		LaserBeamPellet.laser_beam_pellet = new LaserBeamPellet(all_pellets_in_world);
+		LaserBeamPellet.laser_beam_pellet = new LaserBeamPellet(
+				all_pellets_in_world);
 
 		// TODO: Move this crap elsewhere... init the different geometry
 		// containers individually
@@ -293,9 +292,9 @@ public class Main {
 	private void LoadData() {
 		if (IS_RELEASE)
 			PointStore.loadCube();
-		else{
-			//KdTreeOfPoints.loadCube();
-			PointStore.load("data/lewis_hall.ply");
+		else {
+			PointStore.loadCube();
+			// PointStore.load("data/uris.ply");
 		}
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 
@@ -426,8 +425,7 @@ public class Main {
 		if (which_gun == GunMode.ORB) {
 			OrbPellet
 					.updateOrbPellet(pos, gun_direction, pan_angle, tilt_angle);
-		}
-		else if (which_gun == GunMode.LASER_BEAM){
+		} else if (which_gun == GunMode.LASER_BEAM) {
 			computeGunDirection();
 			LaserBeamPellet.updateLaserBeamPellet(pos, gun_direction);
 		}
@@ -552,12 +550,13 @@ public class Main {
 					which_gun = GunMode.DRAG_TO_EDIT;
 					System.out.println("drag edit gun");
 				}
-				
+
 				if (Keyboard.getEventKey() == Keyboard.KEY_8) {
-					which_gun = GunMode.LASER_BEAM;
-					System.out.println("laser beam gun");
+					which_gun = GunMode.TRIANGULATION;
+					// which_gun = GunMode.LASER_BEAM;
+					// System.out.println("laser beam gun");
 				}
-				
+
 				if (Keyboard.getEventKey() == Keyboard.KEY_9) {
 					which_gun = GunMode.DIRECTION_PICKER;
 					System.out
@@ -591,6 +590,8 @@ public class Main {
 						PolygonPellet.startNewPolygon();
 					else if (which_gun == GunMode.VERTICAL_LINE)
 						VerticalLinePellet.clearAllVerticalLines();
+					else if (which_gun == GunMode.TRIANGULATION)
+						TriangulationPellet.startNewTriMesh();
 				}
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_EQUALS) {
@@ -854,6 +855,10 @@ public class Main {
 		}
 
 		for (Primitive geom : geometry) {
+			geom.draw();
+		}
+		
+		for (Primitive geom : TriangulationPellet.edges_to_display) {
 			geom.draw();
 		}
 
@@ -1348,6 +1353,16 @@ public class Main {
 			glVertex2f(0, f * 2 * .6f);
 			glEnd();
 			break;
+		case TRIANGULATION:
+			glBegin(GL_LINES);
+			glVertex2f(0, 0);
+			glVertex2f(f * 600 / 800 * .6f, f * 1.1f);
+			glVertex2f(0, 0);
+			glVertex2f(-f * 600 / 800 * .6f, f * 1.1f);
+			glVertex2f(f * 600 / 800 * .6f, f * 1.1f);
+			glVertex2f(-f * 600 / 800 * .6f, f * 1.1f);
+			glEnd();
+			break;
 		default:
 			break;
 		}
@@ -1391,6 +1406,8 @@ public class Main {
 				pellet = new DestructorPellet(all_pellets_in_world);
 			} else if (which_gun == GunMode.DIRECTION_PICKER) {
 				pellet = new UpPellet(all_pellets_in_world);
+			} else if (which_gun == GunMode.TRIANGULATION){
+				pellet = new TriangulationPellet(all_pellets_in_world);
 			} else {
 				pellet = new PolygonPellet(all_pellets_in_world);
 			}

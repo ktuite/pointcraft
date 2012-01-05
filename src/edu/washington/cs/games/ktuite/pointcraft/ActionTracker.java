@@ -352,4 +352,10 @@ public class ActionTracker {
 	public static void hiddenPellet(Pellet p) {
 		undo_stack.add(new Action(ActionType.PELLET_HIDDEN, p));
 	}
+
+	public static void newTriangulation(Primitive polygon,
+			Stack<TriangulationPellet> clone) {
+		// TODO Auto-generated method stub
+		
+	}
 }
