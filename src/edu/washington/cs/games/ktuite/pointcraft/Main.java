@@ -118,18 +118,18 @@ public class Main {
 		server = new ServerCommunicator(
 				"http://www.photocitygame.com/pointcraft/");
 
-		main.InitDisplay();
-		main.InitGUI();
-		main.InitGraphics();
+		main.initDisplay();
+		main.initGUI();
+		main.initGraphics();
 
-		main.LoadData();
-		main.InitData();
-		main.InitGameVariables();
+		main.loadData();
+		main.initData();
+		main.initGameVariables();
 
-		main.Start();
+		main.run();
 	}
 
-	private void InitDisplay() {
+	private void initDisplay() {
 		try {
 			Display.setDisplayMode(new DisplayMode(800, 600));
 			Display.setResizable(true);
@@ -144,7 +144,7 @@ public class Main {
 		}
 	}
 
-	private void InitGUI() {
+	private void initGUI() {
 
 		LWJGLRenderer renderer;
 		try {
@@ -179,7 +179,7 @@ public class Main {
 		}
 	}
 
-	private void InitGraphics() {
+	private void initGraphics() {
 		float width = Display.getDisplayMode().getWidth();
 		float height = Display.getDisplayMode().getHeight();
 		System.out.println("init graphics: " + width + "," + height);
@@ -244,7 +244,7 @@ public class Main {
 
 	}
 
-	private void InitGameVariables() {
+	private void initGameVariables() {
 		pos = new Vector3f();
 		vel = new Vector3f();
 		tilt_angle = 0;
@@ -286,10 +286,10 @@ public class Main {
 		System.out.println("attempting to load new point cloud : "
 				+ file.getAbsolutePath());
 		PointStore.load(file.getAbsolutePath());
-		InitData();
+		initData();
 	}
 
-	private void LoadData() {
+	private void loadData() {
 		if (IS_RELEASE)
 			PointStore.loadCube();
 		else {
@@ -301,7 +301,7 @@ public class Main {
 
 	}
 
-	private void InitData() {
+	private void initData() {
 		world_scale = (float) ((float) ((PointStore.max_corner[1] - PointStore.min_corner[1])) / 0.071716);
 		// lewis hall height for scale ref...
 
@@ -320,35 +320,7 @@ public class Main {
 		point_colors = PointStore.point_colors;
 	}
 
-	@SuppressWarnings("unused")
-	private void FindMinMaxOfWorld() {
-		float[] min_point = new float[3];
-		float[] max_point = new float[3];
-		for (int k = 0; k < 3; k++) {
-			min_point[k] = Float.MAX_VALUE;
-			max_point[k] = Float.MIN_VALUE;
-		}
-
-		for (int i = 0; i < num_points; i++) {
-			for (int k = 0; k < 3; k++) {
-				float p = (float) point_positions.get(k * num_points + i);
-				if (p < min_point[k])
-					min_point[k] = p;
-				if (p > max_point[k])
-					max_point[k] = p;
-			}
-		}
-
-		world_scale = (float) (((max_point[1] - min_point[1])) / 0.071716);
-		// lewis hall height for scale ref...
-
-		System.out.println("world scale: " + world_scale);
-		walkforce = 1 / 4000f * world_scale;
-		max_speed = 1 * world_scale;
-
-	}
-
-	private void Start() {
+	private void run() {
 		while (!Display.isCloseRequested()) {
 			Timer.tick();
 
@@ -360,13 +332,13 @@ public class Main {
 				Display.update();
 			} else {
 				if (Mouse.isGrabbed()) {
-					EventLoop(); // input like mouse and keyboard
-					UpdateGameObjects();
-					DisplayLoop(); // draw things on the screen
+					eventLoop(); // input like mouse and keyboard
+					updateGameObjects();
+					displayLoop(); // draw things on the screen
 
 				} else {
-					UpdateInstructionalGui();
-					InstructionalEventLoop();
+					updateInstructionalGui();
+					instructionalEventLoop();
 				}
 
 				if ((Display.getWidth() != Display.getDisplayMode().getWidth() || Display
@@ -379,6 +351,7 @@ public class Main {
 		}
 
 		Display.destroy();
+		System.out.println("PointCraft is closing");
 	}
 
 	private void dealWithDisplayResize() {
@@ -391,8 +364,8 @@ public class Main {
 			System.out.println(e);
 		}
 
-		InitGUI();
-		InitGraphics();
+		initGUI();
+		initGraphics();
 
 	}
 
@@ -409,7 +382,7 @@ public class Main {
 	 * 
 	 * }
 	 */
-	private void UpdateGameObjects() {
+	private void updateGameObjects() {
 		if (which_gun == GunMode.DRAG_TO_EDIT)
 			computeGunDirection();
 		HoverPellet.handleDrag();
@@ -432,7 +405,7 @@ public class Main {
 		}
 	}
 
-	private void InstructionalEventLoop() {
+	private void instructionalEventLoop() {
 		while (Keyboard.next()) {
 			if (Keyboard.getEventKeyState()) {
 				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
@@ -442,7 +415,7 @@ public class Main {
 		}
 	}
 
-	private void EventLoop() {
+	private void eventLoop() {
 		// WASD key motion, with a little bit of gliding
 		if (Keyboard.isKeyDown(Keyboard.KEY_W)
 				|| Keyboard.isKeyDown(Keyboard.KEY_UP)) {
@@ -723,10 +696,10 @@ public class Main {
 			} else if (which_gun == GunMode.DRAG_TO_EDIT) {
 				HoverPellet.startDrag();
 			} else {
-				ShootGun();
+				shootGun();
 			}
 		} else if (Mouse.getEventButton() == 1) {
-			ShootDeleteGun();
+			shootDeleteGun();
 		}
 	}
 
@@ -783,7 +756,7 @@ public class Main {
 		glRotatef(tilt_angle, 1.0f, 0.0f, 0.0f); // rotate our camera up/down
 		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
 
-		DrawSkybox(); // draw skybox before translate
+		drawSkybox(); // draw skybox before translate
 
 		glScalef(overhead_scale, overhead_scale, overhead_scale);
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
@@ -796,10 +769,10 @@ public class Main {
 
 		glEnable(GL_FOG);
 		if (draw_points)
-			DrawPoints(); // draw the actual 3d things
+			drawPoints(); // draw the actual 3d things
 
 		if (draw_pellets) {
-			DrawPellets();
+			drawPellets();
 			if (which_gun == GunMode.ORB)
 				OrbPellet.drawOrbPellet();
 			else if (which_gun == GunMode.LASER_BEAM)
@@ -822,7 +795,7 @@ public class Main {
 		Display.update();
 	}
 
-	private void DisplayLoop() {
+	private void displayLoop() {
 		glClearColor(FOG_COLOR[0], FOG_COLOR[1], FOG_COLOR[2], 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glPushMatrix();
@@ -831,7 +804,7 @@ public class Main {
 		glRotatef(tilt_angle, 1.0f, 0.0f, 0.0f); // rotate our camera up/down
 		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
 
-		DrawSkybox(); // draw skybox before translate
+		drawSkybox(); // draw skybox before translate
 
 		glScalef(overhead_scale, overhead_scale, overhead_scale);
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
@@ -846,10 +819,10 @@ public class Main {
 
 		glEnable(GL_FOG);
 		if (draw_points)
-			DrawPoints(); // draw the actual 3d things
+			drawPoints(); // draw the actual 3d things
 
 		if (draw_pellets) {
-			DrawPellets();
+			drawPellets();
 			if (which_gun == GunMode.ORB)
 				OrbPellet.drawOrbPellet();
 			else if (which_gun == GunMode.LASER_BEAM)
@@ -885,14 +858,14 @@ public class Main {
 			HoverPellet.illuminatePellet();
 		}
 
-		DrawHud();
+		drawHud();
 
-		UpdateOnscreenGui();
+		updateOnscreenGui();
 
 		Display.update();
 	}
 
-	private void UpdateOnscreenGui() {
+	private void updateOnscreenGui() {
 		if (onscreen_gui != null) {
 			onscreen_overlay.label_current_mode.setText("Current Gun: "
 					+ which_gun);
@@ -902,7 +875,7 @@ public class Main {
 		}
 	}
 
-	private void UpdateInstructionalGui() {
+	private void updateInstructionalGui() {
 		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		if (instructional_gui != null) {
 			instructional_gui.update();
@@ -1061,7 +1034,7 @@ public class Main {
 		return selected_geometry;
 	}
 
-	private void DrawPoints() {
+	private void drawPoints() {
 		/*
 		 * glPointSize(point_size); glBegin(GL_POINTS); for (int i = 0; i <
 		 * num_points; i += 1) { float r = (float) (point_colors.get(0 + 3 *
@@ -1083,7 +1056,7 @@ public class Main {
 		glDisableClientState(GL_COLOR_ARRAY);
 	}
 
-	private void DrawPellets() {
+	private void drawPellets() {
 		// temp
 		/*
 		 * for (LinePellet pellet : LinePellet.intersection_points) { if
@@ -1115,7 +1088,7 @@ public class Main {
 		all_dead_pellets_in_world.clear();
 	}
 
-	private void DrawSkybox() {
+	private void drawSkybox() {
 		glEnable(GL_TEXTURE_2D);
 		glDisable(GL_FOG);
 		glDisable(GL_DEPTH_TEST);
@@ -1193,7 +1166,7 @@ public class Main {
 		glEnable(GL_DEPTH_TEST);
 	}
 
-	private void DrawHud() {
+	private void drawHud() {
 		glDisable(GL_DEPTH_TEST);
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
@@ -1378,7 +1351,7 @@ public class Main {
 		glEnable(GL_DEPTH_TEST);
 	}
 
-	private void ShootGun() {
+	private void shootGun() {
 		if (which_gun == GunMode.ORB) {
 			OrbPellet new_pellet = new OrbPellet(all_pellets_in_world);
 			new_pellet.pos.set(OrbPellet.orb_pellet.pos);
@@ -1441,7 +1414,7 @@ public class Main {
 		}
 	}
 
-	private void ShootDeleteGun() {
+	private void shootDeleteGun() {
 		System.out.println("shooting DESTRUCTOR gun");
 		computeGunDirection();
 		Pellet pellet = new DestructorPellet(all_pellets_in_world);
