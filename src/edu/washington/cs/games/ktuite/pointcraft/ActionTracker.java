@@ -1,5 +1,6 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
+import java.util.List;
 import java.util.Stack;
 
 import org.json.JSONException;
@@ -10,7 +11,10 @@ public class ActionTracker {
 
 	// The different types of actions
 	public enum ActionType {
-		NEW_PELLET, PARTIAL_POLYGON, POLYGON_LINE, COMPLETED_POLYGON, PARTIAL_LINE, COMPLETED_LINE, PARTIAL_PLANE, COMPLETED_PLANE, VERTICAL_HEIGHT_SET, NEW_VERTICAL_LINE_PELLET, NEW_VERTICAL_WALL, PELLET_DELETED, SCAFFOLDING_DELETED, POLYGON_DELETED, EXTENDED_LINE, EXTENDED_PLANE, LINE_PLANE_INTERSECTION, COMBINED_PELLETS, MOVED_PELLET, PELLET_HIDDEN;
+		NEW_PELLET, PARTIAL_POLYGON, POLYGON_LINE, COMPLETED_POLYGON, PARTIAL_LINE, COMPLETED_LINE, PARTIAL_PLANE, COMPLETED_PLANE, 
+		VERTICAL_HEIGHT_SET, NEW_VERTICAL_LINE_PELLET, NEW_VERTICAL_WALL, PELLET_DELETED, SCAFFOLDING_DELETED, POLYGON_DELETED, 
+		EXTENDED_LINE, EXTENDED_PLANE, LINE_PLANE_INTERSECTION, COMBINED_PELLETS, MOVED_PELLET, PELLET_HIDDEN, 
+		PARTIAL_TRIANGLE_MESH, COMPLETED_TRIANGLE_MESH;
 	}
 
 	// A little holder-class for the actions
@@ -20,9 +24,10 @@ public class ActionTracker {
 		public Pellet pellet;
 		public Pellet pellet2;
 		public Primitive primitive;
-		public Stack<PolygonPellet> current_poly;
+		public Stack<Pellet> current_poly;
 		public Scaffold scaffold;
 		public Vector3f old_pos;
+		public List<Primitive> current_edges;
 
 		public String toString() {
 			JSONStringer s = new JSONStringer();
@@ -89,7 +94,7 @@ public class ActionTracker {
 			notifyServer();
 		}
 
-		public Action(ActionType at, Primitive p, Stack<PolygonPellet> curr) {
+		public Action(ActionType at, Primitive p, Stack<Pellet> curr) {
 			primitive = p;
 			action_type = at;
 			current_poly = curr;
@@ -106,6 +111,23 @@ public class ActionTracker {
 			pellet = p;
 			old_pos = pos;
 			action_type = at;
+			notifyServer();
+		}
+
+		public Action(ActionType at, Primitive p, Stack<Pellet> curr,
+				List<Primitive> list) {
+			primitive = p;
+			action_type = at;
+			current_poly = curr;
+			current_edges = list;
+			notifyServer();
+		}
+		
+		public Action(ActionType at, Stack<Pellet> curr,
+				List<Primitive> list) {
+			action_type = at;
+			current_poly = curr;
+			current_edges = list;
 			notifyServer();
 		}
 	}
@@ -146,7 +168,7 @@ public class ActionTracker {
 		} else if (last_action.action_type == ActionType.PARTIAL_POLYGON) {
 			if (last_action.pellet.refCountZero())
 				Main.all_dead_pellets_in_world.add(last_action.pellet);
-			else 
+			else
 				last_action.pellet.ref_count--;
 			PolygonPellet.current_cycle.pop();
 			if (undo_stack.size() > 0
@@ -155,16 +177,24 @@ public class ActionTracker {
 			}
 		} else if (last_action.action_type == ActionType.POLYGON_LINE) {
 			if (last_action.primitive != null) {
-				Main.geometry.remove(last_action.primitive);
+				PolygonPellet.edges_to_display.remove(last_action.primitive);
 			}
 		} else if (last_action.action_type == ActionType.COMPLETED_POLYGON) {
 			if (last_action.primitive != null) {
 				Main.geometry.remove(last_action.primitive);
 			}
-			if (last_action.current_poly != null)
+			if (last_action.current_poly != null) {
 				PolygonPellet.current_cycle = last_action.current_poly;
+			}
+			if (last_action.current_edges != null) {
+				PolygonPellet.edges_to_display = (Stack<Primitive>) last_action.current_edges;
+			}
 			if (undo_stack.size() > 0
 					&& undo_stack.peek().action_type == ActionType.POLYGON_LINE) {
+				undo();
+			}
+			else if (undo_stack.size() > 0
+					&& undo_stack.peek().action_type == ActionType.COMPLETED_TRIANGLE_MESH) {
 				undo();
 			}
 		} else if (last_action.action_type == ActionType.PARTIAL_LINE) {
@@ -186,7 +216,7 @@ public class ActionTracker {
 		} else if (last_action.action_type == ActionType.EXTENDED_LINE) {
 			if (last_action.scaffold != null) {
 				((LineScaffold) last_action.scaffold).removeLastPointAndRefit();
-			}			
+			}
 		} else if (last_action.action_type == ActionType.PARTIAL_PLANE) {
 			Main.all_dead_pellets_in_world.add(last_action.pellet);
 			if (PlanePellet.current_plane.pellets.size() > 0)
@@ -261,8 +291,26 @@ public class ActionTracker {
 		} else if (last_action.action_type == ActionType.PELLET_HIDDEN) {
 			if (last_action.pellet != null)
 				last_action.pellet.visible = true;
+
+		} else if (last_action.action_type == ActionType.PARTIAL_TRIANGLE_MESH) {
+			if (last_action.pellet.refCountZero())
+				Main.all_dead_pellets_in_world.add(last_action.pellet);
+			else
+				last_action.pellet.ref_count--;
+			if (TriangulationPellet.current_vertices.size() > 0){
+				TriangulationPellet.current_vertices.pop();
+				TriangulationPellet.computeTriangulation();
+			}
 		}
-		
+		else if (last_action.action_type == ActionType.COMPLETED_TRIANGLE_MESH) {
+			if (last_action.current_poly != null) {
+				TriangulationPellet.current_vertices = last_action.current_poly;
+			}
+			if (last_action.current_edges != null) {
+				TriangulationPellet.edges_to_display = (Stack<Primitive>) last_action.current_edges;
+			}
+		}
+
 		// always unhide pellets
 		if (undo_stack.size() > 0
 				&& undo_stack.peek().action_type == ActionType.PELLET_HIDDEN) {
@@ -283,10 +331,11 @@ public class ActionTracker {
 		undo_stack.add(new Action(ActionType.POLYGON_LINE, p));
 	}
 
-	public static void newPolygon(Primitive p, Stack<PolygonPellet> curr) {
+	public static void newPolygon(Primitive p, Stack<Pellet> curr,
+			List<Primitive> list) {
 		if (curr != null && curr.size() > 0)
 			curr.pop();
-		undo_stack.add(new Action(ActionType.COMPLETED_POLYGON, p, curr));
+		undo_stack.add(new Action(ActionType.COMPLETED_POLYGON, p, curr, list));
 	}
 
 	public static void newLinePellet(Pellet p) {
@@ -353,9 +402,12 @@ public class ActionTracker {
 		undo_stack.add(new Action(ActionType.PELLET_HIDDEN, p));
 	}
 
-	public static void newTriangulation(Primitive polygon,
-			Stack<TriangulationPellet> clone) {
-		// TODO Auto-generated method stub
-		
+	public static void newTriangleMeshPellet(Pellet p) {
+		undo_stack.add(new Action(ActionType.PARTIAL_TRIANGLE_MESH, p));
+	}
+	
+	public static void newTriangulation(Stack<Pellet> pellets, Stack<Primitive> edges) {
+		undo_stack.add(new Action(ActionType.COMPLETED_TRIANGLE_MESH, pellets, edges));
+
 	}
 }

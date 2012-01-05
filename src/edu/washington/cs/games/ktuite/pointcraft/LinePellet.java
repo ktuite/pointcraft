@@ -62,6 +62,7 @@ public class LinePellet extends Pellet {
 
 					pos.set(neighbor_pellet.pos);
 					alive = false;
+					neighbor_pellet.ref_count++;
 					ActionTracker.newLinePellet(this);
 					current_line.add(this);
 

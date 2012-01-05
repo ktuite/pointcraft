@@ -1,7 +1,5 @@
 package megamu.mesh;
 
-import java.lang.reflect.Array;
-
 public class LinkedIndex {
 
 	LinkedArray array;

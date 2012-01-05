@@ -9,9 +9,9 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class PolygonPellet extends Pellet {
 
-	public static Stack<PolygonPellet> current_cycle = new Stack<PolygonPellet>();
-	private boolean first_in_cycle = false;
+	public static Stack<Pellet> current_cycle = new Stack<Pellet>();
 	private static PlaneScaffold plane = new PlaneScaffold();
+	public static Stack<Primitive> edges_to_display = new Stack<Primitive>();
 
 	/*
 	 * A Pellet is a magical thing that you can shoot out of a gun that will
@@ -66,39 +66,19 @@ public class PolygonPellet extends Pellet {
 						return;
 					}
 
-					if (!(neighbor_pellet instanceof PolygonPellet)) {
-						neighbor_pellet.visible = false;
-						ActionTracker.hiddenPellet(neighbor_pellet);
+					current_cycle.add(neighbor_pellet);
 
-						neighbor_pellet = new PolygonPellet(neighbor_pellet);
-						Main.new_pellets_to_add_to_world.add(neighbor_pellet);
-						current_cycle.add((PolygonPellet) neighbor_pellet);
-						if (current_cycle.size() > 1) {
-							makeLine();
-						}
+					if (current_cycle.size() > 1) {
+						makeLine();
+					}
 
-						if (current_cycle.size() > 2
-								&& current_cycle.get(0) == current_cycle
-										.get(current_cycle.size() - 1)) {
-							makePolygon();
-						} else {
-							ActionTracker.newPolygonPellet(neighbor_pellet);
-						}
+					if (current_cycle.size() > 2
+							&& current_cycle.get(0) == current_cycle
+									.get(current_cycle.size() - 1)) {
+						makePolygon();
 					} else {
-						current_cycle.add((PolygonPellet) neighbor_pellet);
-						
-						if (current_cycle.size() > 1) {
-							makeLine();
-						}
-
-						if (current_cycle.size() > 2
-								&& current_cycle.get(0) == current_cycle
-										.get(current_cycle.size() - 1)) {
-							makePolygon();
-						} else {
-							neighbor_pellet.ref_count++;
-							ActionTracker.newPolygonPellet(neighbor_pellet);
-						}
+						neighbor_pellet.ref_count++;
+						ActionTracker.newPolygonPellet(neighbor_pellet);
 					}
 
 				} else if (current_cycle.size() >= 3
@@ -162,9 +142,6 @@ public class PolygonPellet extends Pellet {
 					}
 				}
 
-				if (current_cycle != null && current_cycle.size() > 0)
-					current_cycle.get(0).setAsFirstInCycle();
-
 				// if this polygon has 3 vertices in it, fit a plane and use
 				// that to find the position of the 4th pellet
 				if (!plane.isReady() && current_cycle.size() == 3) {
@@ -196,7 +173,7 @@ public class PolygonPellet extends Pellet {
 		last_two.add(current_cycle.get(current_cycle.size() - 1));
 
 		Primitive line = new Primitive(GL_LINES, last_two);
-		Main.geometry.add(line);
+		edges_to_display.add(line);
 
 		ActionTracker.newPolygonLine(line);
 	}
@@ -205,7 +182,7 @@ public class PolygonPellet extends Pellet {
 	public void makePolygon() {
 		// make the polygon
 		List<Pellet> cycle = new LinkedList<Pellet>();
-		for (PolygonPellet p : current_cycle) {
+		for (Pellet p : current_cycle) {
 			cycle.add(p);
 		}
 		Primitive polygon = new Primitive(GL_POLYGON, cycle);
@@ -213,24 +190,19 @@ public class PolygonPellet extends Pellet {
 		polygon.setPlayerPositionAndViewingDirection(pos, vel);
 		Main.geometry.add(polygon);
 
-		ActionTracker.newPolygon(polygon,
-				(Stack<PolygonPellet>) current_cycle.clone());
-
+		ActionTracker
+				.newPolygon(polygon, (Stack<Pellet>) current_cycle.clone(), (Stack<Primitive>) edges_to_display.clone());
+		
+		edges_to_display.clear();
 		current_cycle.clear();
 		plane.pellets.clear();
 		plane.nullifyPlane();
-	}
-
-	public void setAsFirstInCycle() {
-		first_in_cycle = true;
 	}
 
 	public void coloredDraw() {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
 			glColor4f(.9f, .1f, .4f, alpha);
-			if (first_in_cycle)
-				glColor4f(.8f, 0f, .3f, alpha);
 			sphere.draw(radius, 32, 32);
 		} else {
 			glColor4f(1f, .1f, .4f, 1f);

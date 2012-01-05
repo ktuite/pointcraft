@@ -1,7 +1,5 @@
 package megamu.mesh;
 
-import java.lang.reflect.Array;
-
 public class IntArray {
 
 	int[] data;

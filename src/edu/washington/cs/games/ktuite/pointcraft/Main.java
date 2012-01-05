@@ -861,6 +861,10 @@ public class Main {
 		for (Primitive geom : TriangulationPellet.edges_to_display) {
 			geom.draw();
 		}
+		
+		for (Primitive geom : PolygonPellet.edges_to_display) {
+			geom.draw();
+		}
 
 		if (draw_scaffolding) {
 			for (Scaffold geom : geometry_v) {

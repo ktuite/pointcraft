@@ -229,7 +229,7 @@ public class VerticalLinePellet extends Pellet {
 			polygon.getPlane().pellets.add(bottom_pellet);
 			polygon.getPlane().fitPlane();
 
-			ActionTracker.newPolygon(polygon, null);
+			ActionTracker.newPolygon(polygon, null, null);
 
 			ActionTracker.newVerticalWall(top_pellet, bottom_pellet);
 
