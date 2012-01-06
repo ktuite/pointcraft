@@ -83,11 +83,11 @@ public class Primitive implements org.json.JSONString {
 		num_textures = vertices.size() - 3;
 	}
 
-	public void initTextureArrays(){
+	public void initTextureArrays() {
 		texture_url = new String[num_textures];
 		local_textures = new String[num_textures];
 	}
-	
+
 	public void setPlayerPositionAndViewingDirection(Vector3f pos, Vector3f view) {
 		player_position = new Vector3f(pos);
 		player_viewing_direction = new Vector3f(view);
@@ -215,69 +215,78 @@ public class Primitive implements org.json.JSONString {
 	}
 
 	public void startDownloadingTexture() {
-		if (Main.server.texture_server == null)
-			return;
-
-		if (texture_url == null) {
+		if (texture_url == null)
 			texture_url = new String[num_textures];
-			local_textures = new String[num_textures];
 
-			for (int i = 0; i < num_textures; i++) {
-				local_textures[i] = "tex_" + Main.server.session_id + "_"
-						+ Main.geometry.size() + "_" + i + ".png";
+		local_textures = new String[num_textures];
 
-				if (is_quad)
-					texture_url[i] = "quad.png?&v=";
-				else
-					texture_url[i] = "texture.png?&v=";
-
-				// triangle fan going on here
-				Pellet p = vertices.get(0);
-				Vector3f v = p.pos;
-				texture_url[i] += v.x + "," + v.y + "," + v.z + ",";
-
-				for (int j = i + 1; j < i + (is_quad ? 4 : 3); j++) {
-					p = vertices.get(j);
-					v = p.pos;
-					texture_url[i] += v.x + "," + v.y + "," + v.z + ",";
-				}
-				texture_url[i] += "garbage,&w=128,&h=128,";
-				if (player_position != null && player_viewing_direction != null) {
-					texture_url[i] += "&p=" + player_position.x + ","
-							+ player_position.y + "," + player_position.z + ",";
-					texture_url[i] += "&e=" + player_viewing_direction.x + ","
-							+ player_viewing_direction.y + ","
-							+ player_viewing_direction.z + ",";
-				}
-			}
+		for (int i = 0; i < num_textures; i++) {
+			local_textures[i] = "tex_" + Main.server.session_id + "_"
+					+ Main.geometry.size() + "_" + i + ".png";
 		}
 
-		texture_count = 0;
-		for (int i = 0; i < num_textures; i++) {
-			final int f_i = i;
-			System.out.println(texture_url[f_i]);
-			final String final_url_string = Main.server.texture_server
-					+ texture_url[f_i];
-			new Thread() {
-				public void run() {
+		if (Main.server.texture_server == null) {
+			// TODO shit this only works for the first quad in a thing right now
+			TextureMaker.makeTexture(this);
+		} else {
+			if (texture_url == null) {
+				for (int i = 0; i < num_textures; i++) {
 
-					try {
-						URL url = new URL(final_url_string);
-						InputStream is = url.openStream();
-						ByteArrayOutputStream baos = new ByteArrayOutputStream();
-						byte[] bytes = new byte[4096];
-						int n;
-						while ((n = is.read(bytes)) != -1) {
-							baos.write(bytes, 0, n);
-						}
-						byte[] tex_byte_data = baos.toByteArray();
-						texture_data.set(f_i, tex_byte_data);
-						texture_count++;
-					} catch (Exception e) {
-						e.printStackTrace();
+					if (is_quad)
+						texture_url[i] = "quad.png?&v=";
+					else
+						texture_url[i] = "texture.png?&v=";
+
+					// triangle fan going on here
+					Pellet p = vertices.get(0);
+					Vector3f v = p.pos;
+					texture_url[i] += v.x + "," + v.y + "," + v.z + ",";
+
+					for (int j = i + 1; j < i + (is_quad ? 4 : 3); j++) {
+						p = vertices.get(j);
+						v = p.pos;
+						texture_url[i] += v.x + "," + v.y + "," + v.z + ",";
+					}
+					texture_url[i] += "garbage,&w=128,&h=128,";
+					if (player_position != null
+							&& player_viewing_direction != null) {
+						texture_url[i] += "&p=" + player_position.x + ","
+								+ player_position.y + "," + player_position.z
+								+ ",";
+						texture_url[i] += "&e=" + player_viewing_direction.x
+								+ "," + player_viewing_direction.y + ","
+								+ player_viewing_direction.z + ",";
 					}
 				}
-			}.start();
+			}
+
+			texture_count = 0;
+			for (int i = 0; i < num_textures; i++) {
+				final int f_i = i;
+				System.out.println(texture_url[f_i]);
+				final String final_url_string = Main.server.texture_server
+						+ texture_url[f_i];
+				new Thread() {
+					public void run() {
+
+						try {
+							URL url = new URL(final_url_string);
+							InputStream is = url.openStream();
+							ByteArrayOutputStream baos = new ByteArrayOutputStream();
+							byte[] bytes = new byte[4096];
+							int n;
+							while ((n = is.read(bytes)) != -1) {
+								baos.write(bytes, 0, n);
+							}
+							byte[] tex_byte_data = baos.toByteArray();
+							texture_data.set(f_i, tex_byte_data);
+							texture_count++;
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}.start();
+			}
 		}
 	}
 
@@ -392,7 +401,7 @@ public class Primitive implements org.json.JSONString {
 
 		Main.geometry.add(p);
 	}
-	
+
 	public static void loadFromJSONv4(JSONObject obj) throws JSONException {
 		JSONArray json_verts = obj.getJSONArray("vertex_objs");
 		List<Pellet> vertices = new LinkedList<Pellet>();
@@ -402,7 +411,8 @@ public class Primitive implements org.json.JSONString {
 		Primitive p = new Primitive(GL_POLYGON, vertices);
 		p.initTextureArrays();
 		for (int i = 0; i < p.num_textures; i++)
-			p.local_textures[i] = obj.getJSONArray("local_textures").getString(i);
+			p.local_textures[i] = obj.getJSONArray("local_textures").getString(
+					i);
 
 		Main.geometry.add(p);
 	}

@@ -9,6 +9,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Vector3f;
@@ -27,6 +29,7 @@ public class PointStore {
 			Float.MAX_VALUE };
 	public static float max_corner[] = { -1 * Float.MAX_VALUE,
 			-1 * Float.MAX_VALUE, -1 * Float.MAX_VALUE };
+	private static Map<Vec3D,Integer> index_map;
 
 	public static void loadRandom() {
 		num_points = 2000;
@@ -36,7 +39,8 @@ public class PointStore {
 		for (int i = 0; i < num_points; i++) {
 			for (int k = 0; k < 3; k++) {
 				point_colors.put(i * 3 + k, (byte) (Math.random() * 255));
-				point_positions.put(i * 3 + k, (float) (Math.random() * 0.01 - 0.005));
+				point_positions.put(i * 3 + k,
+						(float) (Math.random() * 0.01 - 0.005));
 			}
 		}
 		point_colors.rewind();
@@ -98,7 +102,7 @@ public class PointStore {
 		}
 		for (int i = n * 4; i < n * 5; i++) {
 			point_positions.put(i * 3 + 2, -s);
-			byte[] color = { 120, 100, (byte)153 };
+			byte[] color = { 120, 100, (byte) 153 };
 			for (int k = 0; k < 3; k++) {
 				point_colors.put(i * 3 + k, color[k]);
 			}
@@ -129,7 +133,17 @@ public class PointStore {
 		}
 	}
 
-	public static int queryKdTree(float x, float y, float z, float radius) {
+	public static int getNearestPoint(float x, float y, float z, float radius) {
+		ArrayList<Vec3D> results = tree.getPointsWithinSphere(
+				new Vec3D(x, y, z), radius);
+		if (results != null)
+			return index_map.get(results.get(0));
+		else
+			return 0;
+	}
+
+	public static int getNumPointsInSphere(float x, float y, float z,
+			float radius) {
 		ArrayList<Vec3D> results = tree.getPointsWithinSphere(
 				new Vec3D(x, y, z), radius);
 		if (results != null)
@@ -167,10 +181,14 @@ public class PointStore {
 		tree = new PointOctree(center, max_span);
 		tree.setMinNodeSize(max_span / 2);
 
+		index_map = new HashMap<Vec3D,Integer>();
+		
 		for (int i = 0; i < num_points; i++) {
-			tree.addPoint(new Vec3D((float) point_positions.get(i * 3 + 0),
-					(float) point_positions.get(i * 3 + 1),
-					(float) point_positions.get(i * 3 + 2)));
+			final Vec3D vec = new Vec3D((float) point_positions.get(i * 3 + 0),
+										(float) point_positions.get(i * 3 + 1),
+										(float) point_positions.get(i * 3 + 2));
+			index_map.put(vec, i);
+			tree.addPoint(vec);
 		}
 		System.out.println("done adding " + tree.getPoints().size()
 				+ " points to lookup tree");

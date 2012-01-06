@@ -30,7 +30,7 @@ public class CameraGun {
 
 		String base_filename = "pointcraft_" + Main.server.player_id + "_" + Main.server.session_id + "_" + count;
 		
-		BufferedImage bi = transformPixelsRGBBuffer2ARGB_ByHand(pixels);
+		BufferedImage bi = transformPixelsRGBBuffer2ARGB_ByHand(pixels, Display.getDisplayMode().getWidth(),  Display.getDisplayMode().getHeight());
 		
 		try {
 			//File file = new File(filename);
@@ -116,12 +116,9 @@ public class CameraGun {
 	}
 	
 	// taken from: http://www.felixgers.de/teaching/jogl/imagingProg.html
-	private static BufferedImage transformPixelsRGBBuffer2ARGB_ByHand(
-			ByteBuffer pixelsRGB) {
+	public static BufferedImage transformPixelsRGBBuffer2ARGB_ByHand(
+			ByteBuffer pixelsRGB, int frameWidth, int frameHeight) {
 		// Transform the ByteBuffer and get it as pixeldata.
-
-		int frameWidth = Display.getDisplayMode().getWidth();
-		int frameHeight = Display.getDisplayMode().getHeight();
 
 		int[] pixelInts = new int[frameWidth * frameHeight];
 

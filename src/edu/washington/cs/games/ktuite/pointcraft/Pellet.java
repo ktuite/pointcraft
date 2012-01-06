@@ -91,7 +91,7 @@ public class Pellet implements org.json.JSONString {
 	}
 
 	protected int queryKdTree(float x, float y, float z, float radius) {
-		return PointStore.queryKdTree(x, y, z, radius);
+		return PointStore.getNumPointsInSphere(x, y, z, radius);
 	}
 
 	public Pellet queryOtherPellets() {

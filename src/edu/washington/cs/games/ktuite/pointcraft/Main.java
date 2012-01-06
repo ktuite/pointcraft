@@ -1,7 +1,77 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.util.glu.GLU.*;
+import static org.lwjgl.opengl.GL11.GL_BLEND;
+import static org.lwjgl.opengl.GL11.GL_CLAMP;
+import static org.lwjgl.opengl.GL11.GL_COLOR_ARRAY;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
+import static org.lwjgl.opengl.GL11.GL_EXP2;
+import static org.lwjgl.opengl.GL11.GL_FOG;
+import static org.lwjgl.opengl.GL11.GL_FOG_COLOR;
+import static org.lwjgl.opengl.GL11.GL_FOG_DENSITY;
+import static org.lwjgl.opengl.GL11.GL_FOG_END;
+import static org.lwjgl.opengl.GL11.GL_FOG_MODE;
+import static org.lwjgl.opengl.GL11.GL_FOG_START;
+import static org.lwjgl.opengl.GL11.GL_LINES;
+import static org.lwjgl.opengl.GL11.GL_LINE_LOOP;
+import static org.lwjgl.opengl.GL11.GL_LINE_SMOOTH;
+import static org.lwjgl.opengl.GL11.GL_MODELVIEW;
+import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_POINTS;
+import static org.lwjgl.opengl.GL11.GL_PROJECTION;
+import static org.lwjgl.opengl.GL11.GL_PROJECTION_MATRIX;
+import static org.lwjgl.opengl.GL11.GL_QUADS;
+import static org.lwjgl.opengl.GL11.GL_RENDER;
+import static org.lwjgl.opengl.GL11.GL_SELECT;
+import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_S;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_T;
+import static org.lwjgl.opengl.GL11.GL_VERTEX_ARRAY;
+import static org.lwjgl.opengl.GL11.GL_VIEWPORT;
+import static org.lwjgl.opengl.GL11.glBegin;
+import static org.lwjgl.opengl.GL11.glBlendFunc;
+import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glColor3f;
+import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL11.glDisableClientState;
+import static org.lwjgl.opengl.GL11.glDrawArrays;
+import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glEnableClientState;
+import static org.lwjgl.opengl.GL11.glEnd;
+import static org.lwjgl.opengl.GL11.glFlush;
+import static org.lwjgl.opengl.GL11.glFog;
+import static org.lwjgl.opengl.GL11.glFogf;
+import static org.lwjgl.opengl.GL11.glFogi;
+import static org.lwjgl.opengl.GL11.glGetDouble;
+import static org.lwjgl.opengl.GL11.glGetInteger;
+import static org.lwjgl.opengl.GL11.glInitNames;
+import static org.lwjgl.opengl.GL11.glLineWidth;
+import static org.lwjgl.opengl.GL11.glLoadIdentity;
+import static org.lwjgl.opengl.GL11.glLoadMatrix;
+import static org.lwjgl.opengl.GL11.glLoadName;
+import static org.lwjgl.opengl.GL11.glMatrixMode;
+import static org.lwjgl.opengl.GL11.glOrtho;
+import static org.lwjgl.opengl.GL11.glPointSize;
+import static org.lwjgl.opengl.GL11.glPopMatrix;
+import static org.lwjgl.opengl.GL11.glPushMatrix;
+import static org.lwjgl.opengl.GL11.glPushName;
+import static org.lwjgl.opengl.GL11.glRenderMode;
+import static org.lwjgl.opengl.GL11.glRotated;
+import static org.lwjgl.opengl.GL11.glRotatef;
+import static org.lwjgl.opengl.GL11.glScalef;
+import static org.lwjgl.opengl.GL11.glSelectBuffer;
+import static org.lwjgl.opengl.GL11.glTexCoord2f;
+import static org.lwjgl.opengl.GL11.glTexParameteri;
+import static org.lwjgl.opengl.GL11.glTranslated;
+import static org.lwjgl.opengl.GL11.glTranslatef;
+import static org.lwjgl.opengl.GL11.glVertex2f;
+import static org.lwjgl.opengl.GL11.glVertex3f;
+import static org.lwjgl.util.glu.GLU.gluLookAt;
+import static org.lwjgl.util.glu.GLU.gluPerspective;
+import static org.lwjgl.util.glu.GLU.gluPickMatrix;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +89,9 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.openal.AL;
-import org.lwjgl.opengl.*;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.DisplayMode;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.Timer;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
@@ -115,6 +187,7 @@ public class Main {
 	private GUI login_gui;
 
 	public static void main(String[] args) {
+		
 		Main main = new Main();
 
 		server = new ServerCommunicator(
@@ -244,7 +317,10 @@ public class Main {
 			System.out.println("Couldn't load skybox");
 			System.exit(1);
 		}
-		
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
 		Pellet.initSphereDisplayList();
 
 	}
@@ -298,9 +374,9 @@ public class Main {
 		if (IS_RELEASE)
 			PointStore.loadCube();
 		else {
-			//PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
-			PointStore.loadCube();
-			//PointStore.load("data/uris.ply");
+			 PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
+			//PointStore.loadCube();
+			// PointStore.load("data/uris.ply");
 		}
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 
@@ -806,7 +882,7 @@ public class Main {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glPushMatrix();
 
-		glScalef(1/world_scale, 1/world_scale, 1/world_scale);
+		glScalef(1 / world_scale, 1 / world_scale, 1 / world_scale);
 		glRotatef(tilt_angle, 1.0f, 0.0f, 0.0f); // rotate our camera up/down
 		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
 
@@ -838,11 +914,11 @@ public class Main {
 		for (Primitive geom : geometry) {
 			geom.draw();
 		}
-		
+
 		for (Primitive geom : TriangulationPellet.edges_to_display) {
 			geom.draw();
 		}
-		
+
 		for (Primitive geom : PolygonPellet.edges_to_display) {
 			geom.draw();
 		}
@@ -1361,7 +1437,7 @@ public class Main {
 		// don't shoot when no pellets are there to draw
 		if (!draw_pellets)
 			return;
-		
+
 		if (which_gun == GunMode.ORB) {
 			OrbPellet new_pellet = new OrbPellet(all_pellets_in_world);
 			new_pellet.pos.set(OrbPellet.orb_pellet.pos);
@@ -1369,7 +1445,8 @@ public class Main {
 			all_pellets_in_world.add(new_pellet);
 			System.out.println(all_pellets_in_world);
 		} else if (which_gun == GunMode.LASER_BEAM) {
-			LaserBeamPellet new_pellet = new LaserBeamPellet(all_pellets_in_world);
+			LaserBeamPellet new_pellet = new LaserBeamPellet(
+					all_pellets_in_world);
 			new_pellet.pos.set(LaserBeamPellet.laser_beam_pellet.pos);
 			new_pellet.constructing = true;
 			all_pellets_in_world.add(new_pellet);
@@ -1395,7 +1472,7 @@ public class Main {
 				pellet = new DestructorPellet();
 			} else if (which_gun == GunMode.DIRECTION_PICKER) {
 				pellet = new UpPellet();
-			} else if (which_gun == GunMode.TRIANGULATION){
+			} else if (which_gun == GunMode.TRIANGULATION) {
 				pellet = new TriangulationPellet();
 			} else {
 				pellet = new PolygonPellet();
@@ -1428,7 +1505,7 @@ public class Main {
 		// don't shoot when no pellets are there to draw
 		if (!draw_pellets)
 			return;
-		
+
 		System.out.println("shooting DESTRUCTOR gun");
 		computeGunDirection();
 		Pellet pellet = new DestructorPellet();
