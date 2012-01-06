@@ -122,18 +122,6 @@ public class PlanePellet extends Pellet {
 		}
 	}
 
-	@SuppressWarnings("unused")
-	private boolean isAnotherPlane() {
-		for (Scaffold geom : Main.geometry_v) {
-			if (radius > geom.distanceToPoint(pos)) {
-				geom.addNewPellet(this);
-				if (geom instanceof PlaneScaffold)
-					return true;
-			}
-		}
-		return false;
-	}
-
 	public void delete() {
 		super.delete();
 	}
