@@ -18,6 +18,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.*;
 import org.lwjgl.util.Timer;
 import org.lwjgl.util.vector.Matrix4f;
@@ -351,6 +352,7 @@ public class Main {
 		}
 
 		Display.destroy();
+		AL.destroy();
 		System.out.println("PointCraft is closing");
 	}
 
