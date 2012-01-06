@@ -44,13 +44,13 @@ public class TriangulationPellet extends Pellet {
 	 * 
 	 * Soon it will even stick to other pellets.
 	 */
-	public TriangulationPellet(List<Pellet> _pellets) {
-		super(_pellets);
+	public TriangulationPellet() {
+		super();
 		pellet_type = Main.GunMode.TRIANGULATION;
 	}
 
 	public TriangulationPellet(Pellet lp) {
-		super(lp.main_pellets);
+		super();
 		pos.set(lp.pos);
 		radius = lp.radius;
 		max_radius = lp.max_radius;
@@ -191,10 +191,10 @@ public class TriangulationPellet extends Pellet {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
 			glColor4f(.1f, .7f, .4f, alpha);
-			sphere.draw(radius, 32, 32);
+			drawSphere(radius);
 		} else {
 			glColor4f(.1f, .7f, .4f, 1f);
-			sphere.draw(radius, 32, 32);
+			drawSphere(radius);
 		}
 	}
 

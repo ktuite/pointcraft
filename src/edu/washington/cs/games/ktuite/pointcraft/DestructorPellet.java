@@ -1,14 +1,13 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
-import java.util.List;
 
 import org.lwjgl.util.vector.Vector3f;
 import static org.lwjgl.opengl.GL11.*;
 
 public class DestructorPellet extends Pellet {
 
-	public DestructorPellet(List<Pellet> _pellets) {
-		super(_pellets);
+	public DestructorPellet() {
+		super();
 		pellet_type = Main.GunMode.DESTRUCTOR;
 	}
 
@@ -54,6 +53,6 @@ public class DestructorPellet extends Pellet {
 
 	public void coloredDraw() {
 		glColor4f(.6f, 0f, 0f, .3f);
-		sphere.draw(radius, 32, 32);
+		drawSphere(radius);
 	}
 }

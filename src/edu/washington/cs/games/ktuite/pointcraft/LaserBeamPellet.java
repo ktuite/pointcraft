@@ -25,7 +25,7 @@ public class LaserBeamPellet extends PolygonPellet {
 	 * placed in 3d space when they choose to place it somewhere
 	 */
 	public LaserBeamPellet(List<Pellet> _pellets) {
-		super(_pellets);
+		super();
 		orb_direction = new Vector3f();
 		scaled_orb_direction = new Vector3f();
 		player_position = new Vector3f();
@@ -71,10 +71,10 @@ public class LaserBeamPellet extends PolygonPellet {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
 			glColor4f(.9f, 0f, .05f, alpha);
-			sphere.draw(radius, 32, 32);
+			drawSphere(radius);
 		} else {
 			glColor4f(1f, 0f, 0f, .6f);
-			sphere.draw(radius, 32, 32);
+			drawSphere(radius);
 		}
 	}
 

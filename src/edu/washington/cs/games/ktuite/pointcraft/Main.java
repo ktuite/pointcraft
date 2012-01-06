@@ -242,6 +242,8 @@ public class Main {
 			System.out.println("Couldn't load skybox");
 			System.exit(1);
 		}
+		
+		Pellet.initSphereDisplayList();
 
 	}
 
@@ -1376,21 +1378,21 @@ public class Main {
 
 			Pellet pellet = null;
 			if (which_gun == GunMode.PELLET) {
-				pellet = new ScaffoldPellet(all_pellets_in_world);
+				pellet = new ScaffoldPellet();
 			} else if (which_gun == GunMode.PLANE) {
-				pellet = new PlanePellet(all_pellets_in_world);
+				pellet = new PlanePellet();
 			} else if (which_gun == GunMode.LINE) {
-				pellet = new LinePellet(all_pellets_in_world);
+				pellet = new LinePellet();
 			} else if (which_gun == GunMode.VERTICAL_LINE) {
-				pellet = new VerticalLinePellet(all_pellets_in_world);
+				pellet = new VerticalLinePellet();
 			} else if (which_gun == GunMode.DESTRUCTOR) {
-				pellet = new DestructorPellet(all_pellets_in_world);
+				pellet = new DestructorPellet();
 			} else if (which_gun == GunMode.DIRECTION_PICKER) {
-				pellet = new UpPellet(all_pellets_in_world);
+				pellet = new UpPellet();
 			} else if (which_gun == GunMode.TRIANGULATION){
-				pellet = new TriangulationPellet(all_pellets_in_world);
+				pellet = new TriangulationPellet();
 			} else {
-				pellet = new PolygonPellet(all_pellets_in_world);
+				pellet = new PolygonPellet();
 			}
 			pellet.pos.set(pos);
 			pellet.vel.set(gun_direction);
@@ -1419,7 +1421,7 @@ public class Main {
 	private void shootDeleteGun() {
 		System.out.println("shooting DESTRUCTOR gun");
 		computeGunDirection();
-		Pellet pellet = new DestructorPellet(all_pellets_in_world);
+		Pellet pellet = new DestructorPellet();
 		pellet.vel.set(gun_direction);
 		pellet.vel.scale(gun_speed);
 		pellet.vel.scale(pellet_scale);

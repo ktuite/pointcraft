@@ -1,6 +1,5 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
-import java.util.List;
 
 import org.lwjgl.util.vector.Vector3f;
 
@@ -22,8 +21,8 @@ public class LinePellet extends Pellet {
 	 * 
 	 * Soon it will even stick to other pellets.
 	 */
-	public LinePellet(List<Pellet> _pellets) {
-		super(_pellets);
+	public LinePellet() {
+		super();
 		pellet_type = Main.GunMode.LINE;
 	}
 
@@ -135,14 +134,14 @@ public class LinePellet extends Pellet {
 		if (is_intersection) {
 			float alpha = 1 - radius / max_radius * .2f;
 			glColor4f(.15f, .45f, .75f, alpha);
-			sphere.draw(radius, 32, 32);
+			drawSphere(radius);
 		} else if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
 			glColor4f(.1f, .4f, .7f, alpha);
-			sphere.draw(radius, 32, 32);
+			drawSphere(radius);
 		} else {
 			glColor4f(.1f, .4f, .7f, 1f);
-			sphere.draw(radius, 32, 32);
+			drawSphere(radius);
 		}
 	}
 

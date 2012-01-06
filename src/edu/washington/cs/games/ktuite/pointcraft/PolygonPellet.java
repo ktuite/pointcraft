@@ -19,13 +19,13 @@ public class PolygonPellet extends Pellet {
 	 * 
 	 * Soon it will even stick to other pellets.
 	 */
-	public PolygonPellet(List<Pellet> _pellets) {
-		super(_pellets);
+	public PolygonPellet() {
+		super();
 		pellet_type = Main.GunMode.POLYGON;
 	}
 
 	public PolygonPellet(Pellet lp) {
-		super(lp.main_pellets);
+		super();
 		pos.set(lp.pos);
 		radius = lp.radius;
 		max_radius = lp.max_radius;
@@ -203,10 +203,10 @@ public class PolygonPellet extends Pellet {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
 			glColor4f(.9f, .1f, .4f, alpha);
-			sphere.draw(radius, 32, 32);
+			drawSphere(radius);
 		} else {
 			glColor4f(1f, .1f, .4f, 1f);
-			sphere.draw(radius, 32, 32);
+			drawSphere(radius);
 		}
 	}
 

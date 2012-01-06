@@ -1,6 +1,5 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
-import java.util.List;
 import org.lwjgl.util.vector.Vector3f;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -13,8 +12,8 @@ public class UpPellet extends Pellet {
 	 * 
 	 * Soon it will even stick to other pellets.
 	 */
-	public UpPellet(List<Pellet> _pellets) {
-		super(_pellets);
+	public UpPellet() {
+		super();
 		pellet_type = Main.GunMode.DIRECTION_PICKER;
 	}
 
@@ -74,10 +73,10 @@ public class UpPellet extends Pellet {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
 			glColor4f(.3f, .4f, .7f, alpha);
-			sphere.draw(radius, 32, 32);
+			drawSphere(radius);
 		} else {
 			glColor4f(.3f, .4f, .7f, 1f);
-			sphere.draw(radius, 32, 32);
+			drawSphere(radius);
 		}
 	}
 

@@ -1,6 +1,5 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
-import java.util.List;
 
 import org.lwjgl.util.vector.Vector3f;
 
@@ -14,14 +13,14 @@ public class ScaffoldPellet extends Pellet {
 	 * 
 	 * Soon it will even stick to other pellets.
 	 */
-	public ScaffoldPellet(List<Pellet> _pellets) {
-		super(_pellets);
+	public ScaffoldPellet() {
+		super();
 		pellet_type = Main.GunMode.PELLET;
 	}
 
 	// these constructors are for making plane/line intersection points
 	public ScaffoldPellet(LinePellet p) {
-		super(p.main_pellets);
+		super();
 		alive = true;
 		constructing = true;
 		pos.set(p.pos);
@@ -31,7 +30,7 @@ public class ScaffoldPellet extends Pellet {
 	}
 
 	public ScaffoldPellet(PlanePellet p) {
-		super(p.main_pellets);
+		super();
 		alive = true;
 		constructing = true;
 		pos.set(p.pos);
@@ -101,10 +100,10 @@ public class ScaffoldPellet extends Pellet {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
 			glColor4f(.2f, .7f, .7f, alpha);
-			sphere.draw(radius, 32, 32);
+			drawSphere(radius);
 		} else {
 			glColor4f(.2f, .7f, .7f, 1f);
-			sphere.draw(radius, 32, 32);
+			drawSphere(radius);
 		}
 	}
 }

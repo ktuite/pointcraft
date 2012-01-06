@@ -3,7 +3,6 @@ package edu.washington.cs.games.ktuite.pointcraft;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,7 +16,6 @@ public class Pellet implements org.json.JSONString {
 	static public int ID = 0;
 	public Vector3f pos;
 	public Vector3f vel;
-	public transient Sphere sphere;
 	public float radius;
 	public float max_radius;
 	public boolean alive;
@@ -26,10 +24,10 @@ public class Pellet implements org.json.JSONString {
 	public int[] color = new int[3];
 	public boolean constructing;
 	public float birthday;
-	protected List<Pellet> main_pellets;
 	public int id;
 	public Main.GunMode pellet_type;
 	public int ref_count = 0;
+	private static Integer sphere_display_list;
 
 	public static boolean CONNECT_TO_PREVIOUS = true;
 
@@ -40,7 +38,6 @@ public class Pellet implements org.json.JSONString {
 	private void readObject(ObjectInputStream ois)
 			throws ClassNotFoundException, IOException {
 		ois.defaultReadObject();
-		sphere = new Sphere();
 	}
 
 	/*
@@ -49,9 +46,8 @@ public class Pellet implements org.json.JSONString {
 	 * 
 	 * Soon it will even stick to other pellets.
 	 */
-	public Pellet(List<Pellet> _pellets) {
+	public Pellet() {
 		pos = new Vector3f();
-		sphere = new Sphere();
 		vel = new Vector3f();
 		radius = .0005f * Main.world_scale * Main.pellet_scale;
 		max_radius = radius * 1.5f;
@@ -59,7 +55,6 @@ public class Pellet implements org.json.JSONString {
 		alive = true;
 		visible = true;
 		constructing = false;
-		main_pellets = _pellets;
 		id = ID;
 		ID++;
 		pellet_type = null;
@@ -103,9 +98,8 @@ public class Pellet implements org.json.JSONString {
 		if (!Main.draw_pellets)
 			return null;
 
-		//for (Pellet pellet : main_pellets) {
-		for (int i = main_pellets.size()-1; i >= 0; i--){
-			Pellet pellet = main_pellets.get(i);
+		for (int i = Main.all_pellets_in_world.size()-1; i >= 0; i--){
+			Pellet pellet = Main.all_pellets_in_world.get(i);
 			if (pellet != this && pellet.visible) {
 				Vector3f dist = new Vector3f();
 				Vector3f.sub(pos, pellet.pos, dist);
@@ -178,20 +172,27 @@ public class Pellet implements org.json.JSONString {
 			float alpha = 1 - radius / max_radius * .2f;
 			glColor4f(.2f, .2f, .2f, alpha);
 			// glColor4f(.9f, .6f, .7f, alpha);
-			sphere.draw(radius, 32, 32);
+			drawSphere(radius);
 		} else {
 			glColor4f(.3f, .3f, .3f, 1f);
-			sphere.draw(radius, 32, 32);
+			drawSphere(radius);
 		}
 	}
 
 	public void draw() {
 		if (hover) {
 			glColor4f(1f, 1f, .3f, .5f);
-			sphere.draw(radius, 32, 32);
+			drawSphere(radius);
 		} else {
 			coloredDraw();
 		}
+	}
+	
+	public static void drawSphere(float radius){
+		glPushMatrix();
+		glScalef(radius, radius, radius);
+		glCallList(sphere_display_list);
+		glPopMatrix();
 	}
 
 	@Override
@@ -245,16 +246,16 @@ public class Pellet implements org.json.JSONString {
 		
 		Pellet p = null;
 		if (pellet_type.contains("POLYGON"))
-			p = new PolygonPellet(Main.all_pellets_in_world);
+			p = new PolygonPellet();
 		else if (pellet_type.contains("VERTICAL_LINE"))
-			p = new VerticalLinePellet(Main.all_pellets_in_world);
+			p = new VerticalLinePellet();
 		else if (pellet_type.contains("LINE"))
-			p = new LinePellet(Main.all_pellets_in_world);
+			p = new LinePellet();
 		else if (pellet_type.contains("PLANE"))
-			p = new PlanePellet(Main.all_pellets_in_world);
+			p = new PlanePellet();
 		
 		else 
-			p = new ScaffoldPellet(Main.all_pellets_in_world);
+			p = new ScaffoldPellet();
 		
 		p.radius = (float) obj.getDouble("radius");
 		p.alive = true;
@@ -271,5 +272,13 @@ public class Pellet implements org.json.JSONString {
 
 	public boolean refCountZero() {
 		return (ref_count == 0);
+	}
+	
+	public static void initSphereDisplayList(){
+		Sphere sphere = new Sphere();
+		sphere_display_list = glGenLists(1);
+		glNewList(sphere_display_list, GL_COMPILE);
+		sphere.draw(1, 32, 32);
+		glEndList();
 	}
 }

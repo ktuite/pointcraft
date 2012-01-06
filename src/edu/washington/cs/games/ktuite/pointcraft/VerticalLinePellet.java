@@ -20,8 +20,8 @@ public class VerticalLinePellet extends Pellet {
 	 * 
 	 * Soon it will even stick to other pellets.
 	 */
-	public VerticalLinePellet(List<Pellet> _pellets) {
-		super(_pellets);
+	public VerticalLinePellet() {
+		super();
 		pellet_type = Main.GunMode.VERTICAL_LINE;
 	}
 
@@ -155,7 +155,7 @@ public class VerticalLinePellet extends Pellet {
 			new_up.normalise();
 			new_up.scale(radius * 1.5f);
 
-			top_pellet = new VerticalLinePellet(main_pellets);
+			top_pellet = new VerticalLinePellet();
 			top_pellet.pos.set(pos);
 			Vector3f.add(top_pellet.pos, new_up, top_pellet.pos);
 			top_pellet.vel.set(new_up);
@@ -164,7 +164,7 @@ public class VerticalLinePellet extends Pellet {
 			top_pellet.is_upward_pellet = true;
 			Main.new_pellets_to_add_to_world.add(top_pellet);
 
-			bottom_pellet = new VerticalLinePellet(main_pellets);
+			bottom_pellet = new VerticalLinePellet();
 			bottom_pellet.pos.set(pos);
 			Vector3f.sub(bottom_pellet.pos, new_up, bottom_pellet.pos);
 			bottom_pellet.vel.set(new_up);
@@ -197,15 +197,13 @@ public class VerticalLinePellet extends Pellet {
 
 			new_up.scale(height / 2f);
 
-			VerticalLinePellet new_top_pellet = new VerticalLinePellet(
-					main_pellets);
+			VerticalLinePellet new_top_pellet = new VerticalLinePellet();
 			new_top_pellet.pos.set(new_pos);
 			Vector3f.add(new_top_pellet.pos, new_up, new_top_pellet.pos);
 			new_top_pellet.constructing = true;
 			Main.new_pellets_to_add_to_world.add(new_top_pellet);
 
-			VerticalLinePellet new_bottom_pellet = new VerticalLinePellet(
-					main_pellets);
+			VerticalLinePellet new_bottom_pellet = new VerticalLinePellet();
 			new_bottom_pellet.pos.set(new_pos);
 			Vector3f.sub(new_bottom_pellet.pos, new_up, new_bottom_pellet.pos);
 			new_bottom_pellet.constructing = true;
@@ -243,10 +241,10 @@ public class VerticalLinePellet extends Pellet {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
 			glColor4f(.3f, .4f, .7f, alpha);
-			sphere.draw(radius, 32, 32);
+			drawSphere(radius);
 		} else {
 			glColor4f(.3f, .4f, .7f, 1f);
-			sphere.draw(radius, 32, 32);
+			drawSphere(radius);
 		}
 	}
 

@@ -15,7 +15,7 @@ public class HoverPellet extends Pellet {
 	private static Primitive target_pellet_primitive = null;
 
 	public HoverPellet(List<Pellet> _pellets) {
-		super(_pellets);
+		super();
 	}
 
 	public static void click() {

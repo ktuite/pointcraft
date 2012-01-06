@@ -243,7 +243,7 @@ public class PlaneScaffold extends Scaffold {
 				Vector3f intersect = ((LineScaffold) geom)
 						.checkForIntersectionPlaneWithLine(a, b, c, d);
 				if (intersect != null) {
-					LinePellet i = new LinePellet(Main.all_pellets_in_world);
+					LinePellet i = new LinePellet();
 					i.alive = true;
 					i.constructing = true;
 					i.is_intersection = true;

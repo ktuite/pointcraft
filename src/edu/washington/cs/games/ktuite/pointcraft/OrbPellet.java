@@ -22,7 +22,7 @@ public class OrbPellet extends PolygonPellet {
 	 * placed in 3d space when they choose to place it somewhere
 	 */
 	public OrbPellet(List<Pellet> _pellets) {
-		super(_pellets);
+		super();
 		orb_direction = new Vector3f();
 		scaled_orb_direction = new Vector3f();
 		player_position = new Vector3f();
@@ -66,10 +66,10 @@ public class OrbPellet extends PolygonPellet {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
 			glColor4f(0f, .4f, .8f, alpha);
-			sphere.draw(radius, 32, 32);
+			drawSphere(radius);
 		} else {
 			glColor4f(0f, .5f, .8f, 1f);
-			sphere.draw(radius, 32, 32);
+			drawSphere(radius);
 		}
 	}
 
