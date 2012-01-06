@@ -299,8 +299,8 @@ public class Main {
 			PointStore.loadCube();
 		else {
 			//PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
-			//PointStore.loadCube();
-			PointStore.load("data/uris.ply");
+			PointStore.loadCube();
+			//PointStore.load("data/uris.ply");
 		}
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 

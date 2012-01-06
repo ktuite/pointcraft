@@ -37,7 +37,7 @@ public class Primitive implements org.json.JSONString {
 	public String[] local_textures = null;
 	private int num_textures = 0;
 	private boolean textures_loaded;
-	private int texture_count;
+	public int texture_count;
 	private boolean is_quad = false;
 	private PlaneScaffold plane = null;
 
@@ -83,6 +83,11 @@ public class Primitive implements org.json.JSONString {
 		num_textures = vertices.size() - 3;
 	}
 
+	public void initTextureArrays(){
+		texture_url = new String[num_textures];
+		local_textures = new String[num_textures];
+	}
+	
 	public void setPlayerPositionAndViewingDirection(Vector3f pos, Vector3f view) {
 		player_position = new Vector3f(pos);
 		player_viewing_direction = new Vector3f(view);
@@ -105,8 +110,8 @@ public class Primitive implements org.json.JSONString {
 	public List<Pellet> getVertices() {
 		return vertices;
 	}
-	
-	public PlaneScaffold getPlane(){
+
+	public PlaneScaffold getPlane() {
 		return plane;
 	}
 
@@ -136,10 +141,9 @@ public class Primitive implements org.json.JSONString {
 									"PNG",
 									new ByteArrayInputStream(texture_data
 											.get(i))));
-							//saveTexture(Main.geometry.indexOf(this), i, texture_data.get(i));
-
 						}
-						//texture_data.clear();
+						// texture_data.clear(); // dont clear these anymore
+						// because we want to save them at the end
 						textures_loaded = true;
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -217,10 +221,11 @@ public class Primitive implements org.json.JSONString {
 		if (texture_url == null) {
 			texture_url = new String[num_textures];
 			local_textures = new String[num_textures];
-			
+
 			for (int i = 0; i < num_textures; i++) {
-				local_textures[i] = "tex_" + Main.server.session_id + "_" + Main.geometry.size() + "_" + i + ".png";
-				
+				local_textures[i] = "tex_" + Main.server.session_id + "_"
+						+ Main.geometry.size() + "_" + i + ".png";
+
 				if (is_quad)
 					texture_url[i] = "quad.png?&v=";
 				else
@@ -320,18 +325,18 @@ public class Primitive implements org.json.JSONString {
 		return Math.abs(distance);
 	}
 
-	public void setPlane(PlaneScaffold pl){
+	public void setPlane(PlaneScaffold pl) {
 		plane.a = pl.a;
 		plane.b = pl.b;
 		plane.c = pl.c;
 		plane.d = pl.d;
 	}
-	
+
 	public static void addBackDeletedPrimitive(Primitive primitive) {
 
 		Main.geometry.add(primitive);
 	}
-	
+
 	@Override
 	public String toJSONString() {
 		JSONStringer s = new JSONStringer();
@@ -375,7 +380,7 @@ public class Primitive implements org.json.JSONString {
 
 		Main.geometry.add(p);
 	}
-	
+
 	public static void loadFromJSONv3(JSONObject obj) throws JSONException {
 		JSONArray json_verts = obj.getJSONArray("vertex_objs");
 		List<Pellet> vertices = new LinkedList<Pellet>();
@@ -384,6 +389,20 @@ public class Primitive implements org.json.JSONString {
 		}
 		Primitive p = new Primitive(GL_POLYGON, vertices);
 		p.startDownloadingTexture();
+
+		Main.geometry.add(p);
+	}
+	
+	public static void loadFromJSONv4(JSONObject obj) throws JSONException {
+		JSONArray json_verts = obj.getJSONArray("vertex_objs");
+		List<Pellet> vertices = new LinkedList<Pellet>();
+		for (int i = 0; i < json_verts.length(); i++) {
+			vertices.add(Pellet.loadFromJSON(json_verts.getJSONObject(i)));
+		}
+		Primitive p = new Primitive(GL_POLYGON, vertices);
+		p.initTextureArrays();
+		for (int i = 0; i < p.num_textures; i++)
+			p.local_textures[i] = obj.getJSONArray("local_textures").getString(i);
 
 		Main.geometry.add(p);
 	}
