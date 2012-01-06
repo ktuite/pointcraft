@@ -4,6 +4,8 @@ import static org.lwjgl.opengl.GL11.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -30,7 +32,7 @@ public class Primitive implements org.json.JSONString {
 	private List<Pellet> vertices;
 	private float line_width = 5f;
 	private Vector<byte[]> texture_data = null;
-	private transient Vector<Texture> textures = null;
+	private Vector<Texture> textures = null;
 	private Vector3f player_position;
 	private Vector3f player_viewing_direction;
 	private String[] texture_url = null;
@@ -135,9 +137,10 @@ public class Primitive implements org.json.JSONString {
 									"PNG",
 									new ByteArrayInputStream(texture_data
 											.get(i))));
+							//saveTexture(Main.geometry.indexOf(this), i, texture_data.get(i));
 
 						}
-						texture_data.clear();
+						//texture_data.clear();
 						textures_loaded = true;
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -326,6 +329,24 @@ public class Primitive implements org.json.JSONString {
 		Main.geometry.add(primitive);
 	}
 
+	public static void saveTexture(int geom_idx, int tex_idx, byte[] data){
+		if (!Main.IS_SIGGRAPH_DEMO)
+			return;
+		
+		String filename = "tex_" + Main.server.cloud_id + "_" + geom_idx + "_" + tex_idx + ".png";
+		try {
+			FileOutputStream out = new FileOutputStream(filename);
+			out.write(data);
+			out.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	@Override
 	public String toJSONString() {
 		JSONStringer s = new JSONStringer();

@@ -38,6 +38,7 @@ import de.matthiasmann.twl.theme.ThemeManager;
 
 public class Main {
 	private static boolean IS_RELEASE = false;
+	public static boolean IS_SIGGRAPH_DEMO = true;
 	public static float VERSION_NUMBER = 0.7f;
 
 	// stuff about the atmosphere
@@ -128,6 +129,7 @@ public class Main {
 		main.initGameVariables();
 
 		main.run();
+		System.exit(0);
 	}
 
 	private void initDisplay() {
@@ -296,9 +298,9 @@ public class Main {
 		if (IS_RELEASE)
 			PointStore.loadCube();
 		else {
-			PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
+			//PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
 			//PointStore.loadCube();
-			// PointStore.load("data/uris.ply");
+			PointStore.load("data/uris.ply");
 		}
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 
@@ -1356,6 +1358,10 @@ public class Main {
 	}
 
 	private void shootGun() {
+		// don't shoot when no pellets are there to draw
+		if (!draw_pellets)
+			return;
+		
 		if (which_gun == GunMode.ORB) {
 			OrbPellet new_pellet = new OrbPellet(all_pellets_in_world);
 			new_pellet.pos.set(OrbPellet.orb_pellet.pos);
@@ -1419,6 +1425,10 @@ public class Main {
 	}
 
 	private void shootDeleteGun() {
+		// don't shoot when no pellets are there to draw
+		if (!draw_pellets)
+			return;
+		
 		System.out.println("shooting DESTRUCTOR gun");
 		computeGunDirection();
 		Pellet pellet = new DestructorPellet();
