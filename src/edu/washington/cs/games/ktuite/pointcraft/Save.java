@@ -1,5 +1,6 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -14,6 +15,8 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Stack;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.swing.JFileChooser;
 
@@ -23,7 +26,7 @@ import org.lwjgl.input.Mouse;
 
 public class Save {
 
-	public static int VERSION = 3;
+	public static int VERSION = 4;
 
 	private static JFileChooser fc;
 
@@ -54,16 +57,66 @@ public class Save {
 		int returnVal = fc.showSaveDialog(fc);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
-			try {
-				OutputStream out = new FileOutputStream(file);
-				writeModel(out);
-				out.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			writeZipOfModelAndTextures(file);
+			//OutputStream out = new FileOutputStream(file);
+			//writeModel(out);
+			//out.close();
 		}
 		Mouse.setGrabbed(mouseGrabbed);
+	}
+	
+	public static void writeZipOfModelAndTextures(File file){
+		try {
+			FileOutputStream dest = new FileOutputStream(file.getAbsolutePath() + ".zip");
+			
+			ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
+			out.setLevel(5);
+			out.setMethod(ZipOutputStream.DEFLATED);
+			
+			// give it a higher level folder?
+			String dir = file.getName() + "/";
+			
+			// write json thing to zip
+			ZipEntry entry = new ZipEntry(dir + "geometry.txt");
+			out.putNextEntry(entry);
+			writeModel(out);
+			out.closeEntry();
+			
+			// write images to zip
+			for (Primitive geom : Main.geometry){
+				for (int i = 0; i < geom.local_textures.length; i++){
+					String filename =geom.local_textures[i];
+					byte[] data = geom.texture_data.get(i);
+					if (filename != null && data != null){
+						ZipEntry tex_entry = new ZipEntry(dir + filename);
+						out.putNextEntry(tex_entry);
+						saveTexture(out, filename, data);
+						out.closeEntry();
+					}
+				}
+			}
+			
+			// close zip
+			out.close();
+			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void saveTexture(OutputStream out, String filename, byte[] data){
+		if (!Main.IS_SIGGRAPH_DEMO)
+			return;
+	
+		try {
+			out.write(data);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static void writeModel(OutputStream out) throws IOException {
@@ -114,6 +167,9 @@ public class Save {
 					if (file_version == 2) {
 						loadV2(line);
 					} else if (file_version == 3) {
+						loadV3(line);
+					}
+					else if (file_version == 4) {
 						loadV3(line);
 					}
 

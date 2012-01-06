@@ -4,8 +4,6 @@ import static org.lwjgl.opengl.GL11.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -31,11 +29,12 @@ public class Primitive implements org.json.JSONString {
 	private int gl_type;
 	private List<Pellet> vertices;
 	private float line_width = 5f;
-	private Vector<byte[]> texture_data = null;
+	public Vector<byte[]> texture_data = null;
 	private Vector<Texture> textures = null;
 	private Vector3f player_position;
 	private Vector3f player_viewing_direction;
 	private String[] texture_url = null;
+	public String[] local_textures = null;
 	private int num_textures = 0;
 	private boolean textures_loaded;
 	private int texture_count;
@@ -217,7 +216,11 @@ public class Primitive implements org.json.JSONString {
 
 		if (texture_url == null) {
 			texture_url = new String[num_textures];
+			local_textures = new String[num_textures];
+			
 			for (int i = 0; i < num_textures; i++) {
+				local_textures[i] = "tex_" + Main.server.session_id + "_" + Main.geometry.size() + "_" + i + ".png";
+				
 				if (is_quad)
 					texture_url[i] = "quad.png?&v=";
 				else
@@ -328,24 +331,6 @@ public class Primitive implements org.json.JSONString {
 
 		Main.geometry.add(primitive);
 	}
-
-	public static void saveTexture(int geom_idx, int tex_idx, byte[] data){
-		if (!Main.IS_SIGGRAPH_DEMO)
-			return;
-		
-		String filename = "tex_" + Main.server.cloud_id + "_" + geom_idx + "_" + tex_idx + ".png";
-		try {
-			FileOutputStream out = new FileOutputStream(filename);
-			out.write(data);
-			out.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 	
 	@Override
 	public String toJSONString() {
@@ -370,6 +355,8 @@ public class Primitive implements org.json.JSONString {
 			s.endArray();
 			s.key("texture_url");
 			s.value(texture_url);
+			s.key("local_textures");
+			s.value(local_textures);
 			s.endObject();
 		} catch (JSONException e) {
 			e.printStackTrace();
