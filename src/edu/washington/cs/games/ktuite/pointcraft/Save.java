@@ -162,10 +162,7 @@ public class Save {
 				loadZipOfModelAndTexture(file);
 			} else {
 				try {
-					BufferedReader in = new BufferedReader(new FileReader(file));
-					readGeometryFile(in);
-					in.close();
-
+					loadModelAndFetchNewTextures(file);
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
@@ -202,6 +199,16 @@ public class Save {
 		}
 	}
 
+	private static void loadModelAndFetchNewTextures(File file) throws IOException {
+		BufferedReader in = new BufferedReader(new FileReader(file));
+		readGeometryFile(in);
+		in.close();
+		
+		for (Primitive geom : Main.geometry){
+			geom.startDownloadingTexture();
+		}
+	}
+	
 	private static void loadZipOfModelAndTexture(File file) {
 
 		ZipFile zf;

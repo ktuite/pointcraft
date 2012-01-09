@@ -81,7 +81,7 @@ public class PolygonPellet extends Pellet {
 						ActionTracker.newPolygonPellet(neighbor_pellet);
 					}
 
-				} else if (current_cycle.size() >= 3
+				} /*else if (current_cycle.size() >= 3
 						&& plane.distanceToPointNoBounds(pos) < radius) {
 					pos.set(plane.closestPoint(pos));
 					constructing = true;
@@ -98,7 +98,7 @@ public class PolygonPellet extends Pellet {
 						makePolygon();
 
 					ActionTracker.newPolygonPellet(this);
-				} else if (closest_point != null) {
+				} */ else if (closest_point != null) {
 					System.out.println("pellet stuck to some geometry");
 					constructing = true;
 

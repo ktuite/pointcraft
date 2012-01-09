@@ -21,6 +21,8 @@ public class InstructionalOverlay extends Widget {
 	private Button export_button;
 
 	private Button load_ply_button;
+	
+	private Button toggle_minecraft_controls;
 
 	public void setPointerToMainProgram(Main m) {
 		main_program = m;
@@ -43,6 +45,7 @@ public class InstructionalOverlay extends Widget {
 		load_button = new Button("Load progress");
 		export_button = new Button("Export as .ply");
 		load_ply_button = new Button("Load ply");
+		toggle_minecraft_controls = new Button("Use Minecraft controls");
 
 		start_button.addCallback(new Runnable() {
 			public void run() {
@@ -76,12 +79,19 @@ public class InstructionalOverlay extends Widget {
 				}
 			}
 		});
-
+		
+		toggle_minecraft_controls.addCallback(new Runnable() {
+			public void run() {
+				Main.IS_MINECRAFT_CONTROLS = !Main.IS_MINECRAFT_CONTROLS;
+			}
+		});
+		
 		add(start_button);
 		add(save_button);
 		add(load_button);
 		add(export_button);
 		add(load_ply_button);
+		add(toggle_minecraft_controls);
 		// add(a_label);
 	}
 
@@ -101,6 +111,10 @@ public class InstructionalOverlay extends Widget {
 		 * load_button.setPosition(save_button.getX() + 50 +
 		 * load_button.getWidth(), save_button.getY());
 		 */
+		
+		toggle_minecraft_controls.adjustSize();
+		toggle_minecraft_controls.setPosition(getInnerWidth() - save_button.getWidth() - 260,
+				getInnerY() + 100);
 
 		save_button.adjustSize();
 		save_button.setPosition(getInnerWidth() - save_button.getWidth() - 260,

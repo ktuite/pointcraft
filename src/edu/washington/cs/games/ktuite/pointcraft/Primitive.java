@@ -386,7 +386,7 @@ public class Primitive implements org.json.JSONString {
 			vertices.add(Main.all_pellets_in_world.get(json_verts.getInt(i)));
 		}
 		Primitive p = new Primitive(GL_POLYGON, vertices);
-		p.startDownloadingTexture();
+		//p.startDownloadingTexture();
 
 		Main.geometry.add(p);
 	}
@@ -398,7 +398,7 @@ public class Primitive implements org.json.JSONString {
 			vertices.add(Pellet.loadFromJSON(json_verts.getJSONObject(i)));
 		}
 		Primitive p = new Primitive(GL_POLYGON, vertices);
-		p.startDownloadingTexture();
+		//p.startDownloadingTexture();
 
 		Main.geometry.add(p);
 	}
@@ -411,9 +411,10 @@ public class Primitive implements org.json.JSONString {
 		}
 		Primitive p = new Primitive(GL_POLYGON, vertices);
 		p.initTextureArrays();
-		for (int i = 0; i < p.num_textures; i++)
+		for (int i = 0; i < p.num_textures; i++) {
 			p.local_textures[i] = obj.getJSONArray("local_textures").getString(
 					i);
+		}
 
 		Main.geometry.add(p);
 	}

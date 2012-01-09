@@ -7,6 +7,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 
+import org.json.JSONStringer;
+
 public class ServerCommunicator {
 
 	public int player_id, session_id;
@@ -134,6 +136,76 @@ public class ServerCommunicator {
 		}.start();
 	}
 
+	public void pelletFiredActionUpdate(String gun_type){
+		JSONStringer s = new JSONStringer();
+		try {
+			s.object();
+			s.key("pos");
+			s.value(Pellet.JSONVector3f(Main.pos));
+			s.key("gun_dir");
+			s.value(Pellet.JSONVector3f(Main.gun_direction));
+			s.key("tilt_angle");
+			s.value(Main.tilt_angle);
+			s.key("pan_angle");
+			s.value(Main.pan_angle);
+			s.key("pellet_type");
+			s.value(gun_type);
+			s.endObject();
+		}
+		catch (Exception e){
+			return;
+		}
+			
+		final String details = s.toString();
+		
+		new Thread() {
+			public void run() {
+				try {
+					String data = "";
+					data += URLEncoder.encode("player_id", "UTF-8")
+							+ "="
+							+ URLEncoder.encode(Integer.toString(player_id),
+									"UTF-8");
+					data += "&"
+							+ URLEncoder.encode("session_id", "UTF-8")
+							+ "="
+							+ URLEncoder.encode(Integer.toString(session_id),
+									"UTF-8");
+					data += "&"
+							+ URLEncoder.encode("action_type", "UTF-8")
+							+ "="
+							+ URLEncoder.encode("PELLET_FIRED",
+									"UTF-8");
+					data += "&" + URLEncoder.encode("action_details", "UTF-8")
+							+ "="
+							+ URLEncoder.encode(details, "UTF-8");
+
+					URL url = new URL(server_url + "actionupdate.php");
+					URLConnection conn = url.openConnection();
+					conn.setDoOutput(true);
+					OutputStreamWriter wr = new OutputStreamWriter(
+							conn.getOutputStream());
+					wr.write(data);
+					wr.flush();
+
+					// Get the response
+					BufferedReader rd = new BufferedReader(
+							new InputStreamReader(conn.getInputStream()));
+					String line;
+					while ((line = rd.readLine()) != null) {
+						System.out.println(line);
+					}
+					wr.close();
+					rd.close();
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}.start();
+
+	}
+	
 	public void actionUpdate(final ActionTracker.Action action) {
 		new Thread() {
 			public void run() {

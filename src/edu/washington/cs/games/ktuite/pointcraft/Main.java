@@ -1,7 +1,6 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
 import static org.lwjgl.opengl.GL11.GL_BLEND;
-import static org.lwjgl.opengl.GL11.GL_CLAMP;
 import static org.lwjgl.opengl.GL11.GL_COLOR_ARRAY;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
@@ -26,8 +25,6 @@ import static org.lwjgl.opengl.GL11.GL_RENDER;
 import static org.lwjgl.opengl.GL11.GL_SELECT;
 import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_S;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_T;
 import static org.lwjgl.opengl.GL11.GL_VERTEX_ARRAY;
 import static org.lwjgl.opengl.GL11.GL_VIEWPORT;
 import static org.lwjgl.opengl.GL11.glBegin;
@@ -64,7 +61,6 @@ import static org.lwjgl.opengl.GL11.glRotatef;
 import static org.lwjgl.opengl.GL11.glScalef;
 import static org.lwjgl.opengl.GL11.glSelectBuffer;
 import static org.lwjgl.opengl.GL11.glTexCoord2f;
-import static org.lwjgl.opengl.GL11.glTexParameteri;
 import static org.lwjgl.opengl.GL11.glTranslated;
 import static org.lwjgl.opengl.GL11.glTranslatef;
 import static org.lwjgl.opengl.GL11.glVertex2f;
@@ -112,6 +108,7 @@ public class Main {
 	private static boolean IS_RELEASE = false;
 	public static boolean IS_SIGGRAPH_DEMO = true;
 	public static float VERSION_NUMBER = 0.7f;
+	public static boolean IS_MINECRAFT_CONTROLS = true;
 
 	// stuff about the atmosphere
 	private float FOG_COLOR[] = new float[] { .89f, .89f, .89f, 1.0f };
@@ -120,7 +117,6 @@ public class Main {
 
 	public static Vector3f up_vec = new Vector3f(0, 1, 0);// 0.05343333f,
 															// 0.0966372f,
-															// -0.062121693f);
 
 	// stuff about the display
 	private static float point_size = 2;
@@ -187,7 +183,7 @@ public class Main {
 	private GUI login_gui;
 
 	public static void main(String[] args) {
-		
+
 		Main main = new Main();
 
 		server = new ServerCommunicator(
@@ -207,7 +203,7 @@ public class Main {
 
 	private void initDisplay() {
 		try {
-			Display.setDisplayMode(new DisplayMode(800, 600));
+			Display.setDisplayMode(new DisplayMode(1280, 720));
 			Display.setResizable(true);
 			Display.setVSyncEnabled(true);
 			Display.create();
@@ -318,9 +314,6 @@ public class Main {
 			System.exit(1);
 		}
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
 		Pellet.initSphereDisplayList();
 
 	}
@@ -374,9 +367,9 @@ public class Main {
 		if (IS_RELEASE)
 			PointStore.loadCube();
 		else {
-			 PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
-			//PointStore.loadCube();
-			// PointStore.load("data/uris.ply");
+			// PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
+			// PointStore.loadCube();
+			PointStore.load("data/lewis_hall.ply");
 		}
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 
@@ -393,7 +386,7 @@ public class Main {
 
 		glFogf(GL_FOG_END, 3.0f * world_scale);
 		glFogf(GL_FOG_START, .25f * world_scale);
-		fog_density /= world_scale;
+		// fog_density /= world_scale;
 		glFogf(GL_FOG_DENSITY, fog_density);
 
 		num_points = PointStore.num_points;
@@ -528,11 +521,20 @@ public class Main {
 					* pellet_scale;
 		}
 		if (!tilt_locked) {
-			if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
-				vel.y += walkforce / 2 * pellet_scale;
-			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
-				vel.y -= walkforce / 2 * pellet_scale;
+			if (IS_MINECRAFT_CONTROLS) {
+				if (Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
+					vel.y += walkforce / 2 * pellet_scale;
+				}
+				if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
+					vel.y -= walkforce / 2 * pellet_scale;
+				}
+			} else {
+				if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
+					vel.y += walkforce / 2 * pellet_scale;
+				}
+				if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
+					vel.y -= walkforce / 2 * pellet_scale;
+				}
 			}
 		} else {
 			if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
@@ -710,7 +712,7 @@ public class Main {
 		}
 
 		// sneak / go slowly
-		if (Keyboard.isKeyDown(Keyboard.KEY_SPACE))
+		if (!IS_MINECRAFT_CONTROLS && Keyboard.isKeyDown(Keyboard.KEY_SPACE))
 			vel.scale(.3f);
 
 		if (tilt_locked)
@@ -759,13 +761,13 @@ public class Main {
 			}
 		} else {
 			if (wheel < 0) {
-				pellet_scale -= .1f;
+				pellet_scale -= .05f;
 				if (pellet_scale <= 0)
-					pellet_scale = 0.1f;
+					pellet_scale = 0.05f;
 			} else if (wheel > 0) {
-				pellet_scale += .1f;
-				if (pellet_scale > 3)
-					pellet_scale = 3f;
+				pellet_scale += .05f;
+				if (pellet_scale > 5)
+					pellet_scale = 5f;
 			}
 		}
 
@@ -1257,6 +1259,8 @@ public class Main {
 		glColor3f(1f, 1f, 1f);
 		float f = (float) (0.05f * Math.sqrt(pellet_scale));
 
+		float aspectRatio = (float) Display.getHeight() / Display.getWidth();
+
 		glLineWidth(2);
 		int n = 30;
 		switch (which_gun) {
@@ -1265,7 +1269,7 @@ public class Main {
 			glBegin(GL_LINE_LOOP);
 			for (int i = 0; i < m; i++) {
 				float angle = (float) (Math.PI * 2 * i / m);
-				float x = (float) (Math.cos(angle) * f * 0.75 * 600 / 800);
+				float x = (float) (Math.cos(angle) * f * 0.75 * aspectRatio);
 				float y = (float) (Math.sin(angle) * f * 0.75);
 				glVertex2f(x, y);
 			}
@@ -1275,14 +1279,14 @@ public class Main {
 			glBegin(GL_LINES);
 			glVertex2f(0, f);
 			glVertex2f(0, -f);
-			glVertex2f(f * 600 / 800, 0);
-			glVertex2f(-f * 600 / 800, 0);
+			glVertex2f(f * aspectRatio, 0);
+			glVertex2f(-f * aspectRatio, 0);
 			glEnd();
 
 			glBegin(GL_LINE_LOOP);
 			for (int i = 0; i < n; i++) {
 				float angle = (float) (Math.PI * 2 * i / n);
-				float x = (float) (Math.cos(angle) * f * 0.75 * 600 / 800);
+				float x = (float) (Math.cos(angle) * f * 0.75 * aspectRatio);
 				float y = (float) (Math.sin(angle) * f * 0.75);
 				glVertex2f(x, y);
 			}
@@ -1293,7 +1297,7 @@ public class Main {
 			glBegin(GL_LINE_LOOP);
 			for (int i = 0; i < n; i++) {
 				float angle = (float) (Math.PI * 2 * i / n);
-				float x = (float) (Math.cos(angle) * f * 0.75 * 600 / 800);
+				float x = (float) (Math.cos(angle) * f * 0.75 * aspectRatio);
 				float y = (float) (Math.sin(angle) * f * 0.75);
 				glVertex2f(x, y);
 			}
@@ -1301,7 +1305,7 @@ public class Main {
 			glBegin(GL_LINE_LOOP);
 			for (int i = 0; i < n; i++) {
 				float angle = (float) (Math.PI * 2 * i / n);
-				float x = (float) (Math.cos(angle) * f * 0.55 * 600 / 800);
+				float x = (float) (Math.cos(angle) * f * 0.55 * aspectRatio);
 				float y = (float) (Math.sin(angle) * f * 0.55);
 				glVertex2f(x, y);
 			}
@@ -1310,17 +1314,17 @@ public class Main {
 		case PLANE:
 			glBegin(GL_LINE_LOOP);
 			glVertex2f(0, f);
-			glVertex2f(f * 600 / 800, 0);
+			glVertex2f(f * aspectRatio, 0);
 			glVertex2f(0, -f);
-			glVertex2f(-f * 600 / 800, 0);
+			glVertex2f(-f * aspectRatio, 0);
 			glEnd();
 			break;
 		case LINE:
 			glBegin(GL_LINES);
-			glVertex2f(f * 600 / 800, f);
-			glVertex2f(-f * 600 / 800, -f);
-			glVertex2f(-f * .2f * 600 / 800, f * .2f);
-			glVertex2f(f * .2f * 600 / 800, -f * .2f);
+			glVertex2f(f * aspectRatio, f);
+			glVertex2f(-f * aspectRatio, -f);
+			glVertex2f(-f * .2f * aspectRatio, f * .2f);
+			glVertex2f(f * .2f * aspectRatio, -f * .2f);
 			glEnd();
 			break;
 		case VERTICAL_LINE:
@@ -1329,7 +1333,7 @@ public class Main {
 						up_vec.y, 0), new Vector3f(0, 1, 0));
 				glPushMatrix();
 				glRotated(wall_angle * 180 / Math.PI, 0, 0, 1);
-				glScalef(1, 600f / 800, 1);
+				glScalef(1, aspectRatio, 1);
 			}
 			glBegin(GL_LINES);
 			glVertex2f(0, f);
@@ -1338,7 +1342,7 @@ public class Main {
 			glBegin(GL_LINE_LOOP);
 			for (int i = 0; i < n; i++) {
 				float angle = (float) (Math.PI * 2 * i / n);
-				float x = (float) (Math.cos(angle) * f * 0.25);
+				float x = (float) (Math.cos(angle) * f * 0.25 * aspectRatio);
 				float y = (float) (Math.sin(angle) * f * 0.25);
 				glVertex2f(x, y);
 			}
@@ -1349,16 +1353,16 @@ public class Main {
 			break;
 		case DESTRUCTOR:
 			glBegin(GL_LINES);
-			glVertex2f(f * 600 / 800, f);
-			glVertex2f(-f * 600 / 800, -f);
-			glVertex2f(-f * 600 / 800, f);
-			glVertex2f(f * 600 / 800, -f);
+			glVertex2f(f * aspectRatio, f);
+			glVertex2f(-f * aspectRatio, -f);
+			glVertex2f(-f * aspectRatio, f);
+			glVertex2f(f * aspectRatio, -f);
 			glEnd();
 
 			glBegin(GL_LINE_LOOP);
 			for (int i = 0; i < n; i++) {
 				float angle = (float) (Math.PI * 2 * i / n);
-				float x = (float) (Math.cos(angle) * f * 0.75 * 600 / 800);
+				float x = (float) (Math.cos(angle) * f * 0.75 * aspectRatio);
 				float y = (float) (Math.sin(angle) * f * 0.75);
 				glVertex2f(x, y);
 			}
@@ -1382,7 +1386,7 @@ public class Main {
 			glBegin(GL_LINE_LOOP);
 			for (int i = 0; i < n; i++) {
 				float angle = (float) (Math.PI * 2 * i / n);
-				float x = (float) (Math.cos(angle) * f * 0.55 * 600 / 800);
+				float x = (float) (Math.cos(angle) * f * 0.55 * aspectRatio);
 				float y = (float) (Math.sin(angle) * f * 0.55);
 				glVertex2f(x, y);
 			}
@@ -1391,25 +1395,25 @@ public class Main {
 		case COMBINE:
 			glBegin(GL_LINES);
 			glVertex2f(0, 0);
-			glVertex2f(f * 600 / 800 * .6f, f * .6f);
+			glVertex2f(f * aspectRatio * .6f, f * .6f);
 			glVertex2f(0, 0);
-			glVertex2f(-f * 600 / 800 * .6f, f * .6f);
+			glVertex2f(-f * aspectRatio * .6f, f * .6f);
 			glEnd();
 			break;
 		case DRAG_TO_EDIT:
 			glBegin(GL_LINES);
 			glVertex2f(0, f * .6f);
 			glVertex2f(0, -f * .6f);
-			glVertex2f(f * 600 / 800 * .6f, 0);
-			glVertex2f(-f * 600 / 800 * .6f, 0);
+			glVertex2f(f * aspectRatio * .6f, 0);
+			glVertex2f(-f * aspectRatio * .6f, 0);
 			glEnd();
 			break;
 		case DIRECTION_PICKER:
 			glBegin(GL_LINES);
 			glVertex2f(0, 0);
-			glVertex2f(f * 600 / 800 * .6f, f * .6f);
+			glVertex2f(f * aspectRatio * .6f, f * .6f);
 			glVertex2f(0, 0);
-			glVertex2f(-f * 600 / 800 * .6f, f * .6f);
+			glVertex2f(-f * aspectRatio * .6f, f * .6f);
 			glVertex2f(0, 0);
 			glVertex2f(0, f * 2 * .6f);
 			glEnd();
@@ -1417,11 +1421,11 @@ public class Main {
 		case TRIANGULATION:
 			glBegin(GL_LINES);
 			glVertex2f(0, 0);
-			glVertex2f(f * 600 / 800 * .6f, f * 1.1f);
+			glVertex2f(f * aspectRatio * .6f, f * 1.1f);
 			glVertex2f(0, 0);
-			glVertex2f(-f * 600 / 800 * .6f, f * 1.1f);
-			glVertex2f(f * 600 / 800 * .6f, f * 1.1f);
-			glVertex2f(-f * 600 / 800 * .6f, f * 1.1f);
+			glVertex2f(-f * aspectRatio * .6f, f * 1.1f);
+			glVertex2f(f * aspectRatio * .6f, f * 1.1f);
+			glVertex2f(-f * aspectRatio * .6f, f * 1.1f);
 			glEnd();
 			break;
 		default:
@@ -1498,6 +1502,7 @@ public class Main {
 			}
 
 			all_pellets_in_world.add(pellet);
+			server.pelletFiredActionUpdate(pellet.getType());
 		}
 	}
 
