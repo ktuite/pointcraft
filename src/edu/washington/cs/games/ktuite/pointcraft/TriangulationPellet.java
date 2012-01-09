@@ -169,7 +169,7 @@ public class TriangulationPellet extends Pellet {
 
 	private static void computeSpanningVectors() {
 		basis1.set((float) Math.cos(Main.pan_angle), 0,
-				(float) Math.sin(Main.pan_angle));
+				(float) Math.sin(-1 * Main.pan_angle));
 		Vector3f.cross(basis1, Main.gun_direction, basis2);
 
 	}

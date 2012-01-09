@@ -108,7 +108,7 @@ public class Main {
 	private static boolean IS_RELEASE = false;
 	public static boolean IS_SIGGRAPH_DEMO = true;
 	public static float VERSION_NUMBER = 0.7f;
-	public static boolean IS_MINECRAFT_CONTROLS = true;
+	public static boolean IS_MINECRAFT_CONTROLS = false;
 
 	// stuff about the atmosphere
 	private float FOG_COLOR[] = new float[] { .89f, .89f, .89f, 1.0f };
@@ -367,9 +367,9 @@ public class Main {
 		if (IS_RELEASE)
 			PointStore.loadCube();
 		else {
-			// PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
+			 PointStore.load("/Users/ktuite/Desktop/things/scan1/reoriented.ply");
 			// PointStore.loadCube();
-			PointStore.load("data/lewis_hall.ply");
+			//PointStore.load("data/lewis_hall.ply");
 		}
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 
