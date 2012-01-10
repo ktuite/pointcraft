@@ -22,6 +22,10 @@ public class InstructionalOverlay extends Widget {
 
 	private Button load_ply_button;
 
+	private Button load_cinematics_button;
+
+	private Button save_cinematics_button;
+
 	public void setPointerToMainProgram(Main m) {
 		main_program = m;
 	}
@@ -43,6 +47,8 @@ public class InstructionalOverlay extends Widget {
 		load_button = new Button("Load progress");
 		export_button = new Button("Export as .ply");
 		load_ply_button = new Button("Load ply");
+		save_cinematics_button = new Button("Save Scene");
+		load_cinematics_button = new Button("Load Scene");
 
 		start_button.addCallback(new Runnable() {
 			public void run() {
@@ -77,11 +83,28 @@ public class InstructionalOverlay extends Widget {
 			}
 		});
 
+		if (Main.IS_SIGGRAPH_DEMO) {
+			save_cinematics_button.addCallback(new Runnable() {
+				public void run() {
+					Save.saveCinematics();
+				}
+			});
+
+			load_cinematics_button.addCallback(new Runnable() {
+				public void run() {
+					Save.loadCinematics();
+				}
+			});	
+		}
+		
 		add(start_button);
 		add(save_button);
 		add(load_button);
 		add(export_button);
 		add(load_ply_button);
+		add(save_cinematics_button);
+		add(load_cinematics_button);
+
 		// add(a_label);
 	}
 
@@ -122,6 +145,15 @@ public class InstructionalOverlay extends Widget {
 		start_button.setPosition(
 				getInnerX() + (getInnerWidth() - start_button.getWidth()) / 2,
 				getInnerHeight() - 70);
-
+		
+		save_cinematics_button.adjustSize();
+		save_cinematics_button.setPosition(
+				load_button.getX() + load_button.getWidth() + 10,
+				load_button.getY());
+		
+		load_cinematics_button.adjustSize();
+		load_cinematics_button.setPosition(
+				save_cinematics_button.getX() + save_cinematics_button.getWidth() + 10,
+				save_cinematics_button.getY());
 	}
 }

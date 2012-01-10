@@ -208,8 +208,8 @@ public class Save {
 		try {
 			zf = new ZipFile(file);
 			Enumeration<? extends ZipEntry> entries = zf.entries();
-			
-			HashMap<String,ZipEntry> zipped_entries = new HashMap<String, ZipEntry>();
+
+			HashMap<String, ZipEntry> zipped_entries = new HashMap<String, ZipEntry>();
 
 			while (entries.hasMoreElements()) {
 				ZipEntry ze = (ZipEntry) entries.nextElement();
@@ -218,24 +218,25 @@ public class Save {
 							new InputStreamReader(zf.getInputStream(ze)));
 					readGeometryFile(br);
 					br.close();
-				}
-				else {
+				} else {
 					String entry_name = ze.getName();
-					entry_name = entry_name.substring(entry_name.indexOf("/") + 1);
+					entry_name = entry_name
+							.substring(entry_name.indexOf("/") + 1);
 					zipped_entries.put(entry_name, ze);
 				}
 
 			}
-			
-			
+
 			for (Primitive geom : Main.geometry) {
 				for (int i = 0; i < geom.local_textures.length; i++) {
-					
-					ZipEntry tex_entry = zipped_entries.get(geom.local_textures[i]);
+
+					ZipEntry tex_entry = zipped_entries
+							.get(geom.local_textures[i]);
 					InputStream in = zf.getInputStream(tex_entry);
-					
-					System.out.println("attempting to read texture" + tex_entry + ", size: " + in.available());
-					
+
+					System.out.println("attempting to read texture" + tex_entry
+							+ ", size: " + in.available());
+
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					byte[] bytes = new byte[4096];
 					int n;
@@ -301,7 +302,7 @@ public class Save {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private static void loadV4(String line) {
 		// version has pellet indices as well as pellet positions
 		JSONObject obj;
@@ -444,4 +445,100 @@ public class Save {
 		Mouse.setGrabbed(mouseGrabbed);
 	}
 
+	public static void loadCinematics() {
+		boolean mouseGrabbed = Mouse.isGrabbed();
+		Mouse.setGrabbed(false);
+		if (fc == null) {
+			fc = new JFileChooser();
+		}
+		int returnVal = fc.showSaveDialog(fc);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = fc.getSelectedFile();
+			InputStream in;
+			try {
+				in = new FileInputStream(file);
+				try {
+					readCinematicsFromFile(in);
+					in.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		Mouse.setGrabbed(mouseGrabbed);
+	}
+
+	private static void readCinematicsFromFile(InputStream in) {
+		BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		try {
+			String first_line = br.readLine();
+			JSONObject version_obj;
+			float file_version = 0;
+			try {
+				version_obj = new JSONObject(first_line);
+				file_version = (float) version_obj.getDouble("version");
+			} catch (JSONException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+			while (br.ready()) {
+				String line = br.readLine();
+
+				if (file_version == 4) {
+					loadCinematicsFromFile(line);
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void loadCinematicsFromFile(String line) {
+		try {
+			Cinematics.loadFromJSON(new JSONObject(line));
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private static void writeCinematicsToFile(OutputStream out) {
+		try {
+			out.write(("{\"version\":" + VERSION + "}\n").getBytes());
+			out.write(Cinematics.toJSONString().getBytes());
+			out.write("\n".getBytes());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void saveCinematics() {
+		boolean mouseGrabbed = Mouse.isGrabbed();
+		Mouse.setGrabbed(false);
+		if (fc == null) {
+			fc = new JFileChooser();
+		}
+		int returnVal = fc.showSaveDialog(fc);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = fc.getSelectedFile();
+			OutputStream out;
+			try {
+				out = new FileOutputStream(file);
+				try {
+					writeCinematicsToFile(out);
+					out.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		Mouse.setGrabbed(mouseGrabbed);
+	}
 }

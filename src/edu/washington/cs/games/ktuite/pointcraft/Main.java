@@ -374,8 +374,8 @@ public class Main {
 		if (IS_RELEASE)
 			PointStore.loadCube();
 		else {
-			 PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
-			//PointStore.loadCube();
+			 //PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
+			PointStore.loadCube();
 			// PointStore.load("data/uris.ply");
 		}
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
@@ -769,6 +769,41 @@ public class Main {
 			}
 		}
 
+		if (Main.IS_SIGGRAPH_DEMO) {
+			int n = -1;
+			boolean ctrl  = Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
+			boolean shift = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
+			
+			if (Keyboard.isKeyDown(Keyboard.KEY_F1)) {
+				n = 1;
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_F2)) {
+				n = 2;
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_F3)) {
+				n = 3;
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_F4)) {
+				n = 4;
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_F5)) {
+				n = 5;
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_F6)) {
+				n = 6;
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_F7)) {
+				n = 7;
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_F8)) {
+				n = 8;
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_F9)) {
+				n = 9;
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_F10)) {
+				n = 0;
+			}
+
+			if (n >= 0 && n <= 9) {
+				if (shift) {
+					Cinematics.recallScene(n);
+				} else if (ctrl) {
+					Cinematics.recordScene(n);
+				}
+			}
+		}
 	}
 
 	private void handleMouseDown() {
