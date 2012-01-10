@@ -49,8 +49,8 @@ public class Pellet implements org.json.JSONString {
 	public Pellet() {
 		pos = new Vector3f();
 		vel = new Vector3f();
-		radius = .0001f * Main.world_scale * Main.pellet_scale;
-		max_radius = radius;// * 1.5f;
+		radius = .0005f * Main.world_scale * Main.pellet_scale;
+		max_radius = radius * 1.5f;
 		birthday = Main.timer.getTime();
 		alive = true;
 		visible = true;
