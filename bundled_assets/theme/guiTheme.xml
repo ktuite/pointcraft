@@ -475,5 +475,6 @@
    	 	<theme name="label" ref="label"/>
    	 	<theme name="button" ref="button"/>
    	 	<theme name="textarea" ref="textarea"/>
+   	 	<theme name="checkbox" ref="checkbox"/>
     </theme>
 </themes>

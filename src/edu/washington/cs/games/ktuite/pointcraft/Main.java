@@ -182,6 +182,9 @@ public class Main {
 	public static boolean is_logged_in = !IS_RELEASE;
 	private GUI login_gui;
 
+	// SIGGRAPH stuff
+	public static boolean animatingToSavedView = false;
+	
 	public static void main(String[] args) {
 		try {
 			Main main = new Main();
@@ -374,7 +377,10 @@ public class Main {
 			// PointStore.load("/Users/ktuite/Desktop/things/scan1/reoriented.ply");
 			// PointStore.loadCube();
 			//PointStore.load("data/culdesac2.ply");
-			PointStore.load("data/uris.ply");
+			//PointStore.load("data/uris.ply");
+			 //PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
+			PointStore.loadCube();
+			// PointStore.load("data/uris.ply");
 		}
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 
@@ -774,6 +780,52 @@ public class Main {
 			}
 		}
 
+		if (Main.IS_SIGGRAPH_DEMO) {
+			int n = -1;
+			boolean ctrl  = Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
+			boolean shift = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
+			
+			if (Keyboard.isKeyDown(Keyboard.KEY_F1)) {
+				n = 1;
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_F2)) {
+				n = 2;
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_F3)) {
+				n = 3;
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_F4)) {
+				n = 4;
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_F5)) {
+				n = 5;
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_F6)) {
+				n = 6;
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_F7)) {
+				n = 7;
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_F8)) {
+				n = 8;
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_F9)) {
+				n = 9;
+			} else if (Keyboard.isKeyDown(Keyboard.KEY_F10)) {
+				n = 0;
+			}
+
+			if (n >= 0 && n <= 9) {
+				System.out.println("some kind of control function key pressed");
+				if (shift) {
+					Cinematics.recallScene(n);
+				} else if (ctrl) {
+					Cinematics.recordScene(n);
+				}
+			}
+		}
+		
+		
+		
+		if (Main.animatingToSavedView) {
+			Cinematics.interpSteps++;
+			Cinematics.interpPanTiltPos();
+			if (Cinematics.interpSteps > 100) {
+				animatingToSavedView = false;
+			}
+		}
 	}
 
 	private void handleMouseDown() {

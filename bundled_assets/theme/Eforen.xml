@@ -7,7 +7,7 @@
     Description:
         Contains image declarations for Eforen.png and EforenArrows.png
 --><themes>
-    <images file="Kathleen.png" format="RGBA">
+    <images file="Kathleen2.png" format="RGBA">
         <area name="white" xywh="25,20,1,1"/>
         <alias name="black" ref="white" tint="#000"/>
         <alias name="colorselector.cursor" ref="white"/>

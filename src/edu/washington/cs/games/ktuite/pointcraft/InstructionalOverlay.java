@@ -7,6 +7,8 @@ import org.lwjgl.input.Mouse;
 import de.matthiasmann.twl.Button;
 import de.matthiasmann.twl.Label;
 import de.matthiasmann.twl.Widget;
+import de.matthiasmann.twl.ToggleButton;
+import de.matthiasmann.twl.model.SimpleBooleanModel;
 
 public class InstructionalOverlay extends Widget {
 
@@ -21,8 +23,15 @@ public class InstructionalOverlay extends Widget {
 	private Button export_button;
 
 	private Button load_ply_button;
-	
-	private Button toggle_minecraft_controls;
+
+	// minecraft controls / toggle button experiment
+	private SimpleBooleanModel toggle_minecraft;
+	private Label toggle_minecraft_label;
+	private ToggleButton toggle_minecraft_controls;
+
+	private Button load_cinematics_button;
+
+	private Button save_cinematics_button;
 
 	public void setPointerToMainProgram(Main m) {
 		main_program = m;
@@ -45,7 +54,20 @@ public class InstructionalOverlay extends Widget {
 		load_button = new Button("Load progress");
 		export_button = new Button("Export as .ply");
 		load_ply_button = new Button("Load ply");
-		toggle_minecraft_controls = new Button("Use Minecraft controls");
+		save_cinematics_button = new Button("Save Scene");
+		load_cinematics_button = new Button("Load Scene");
+
+		// minecraft toggle setup
+		toggle_minecraft = new SimpleBooleanModel();
+		toggle_minecraft.setValue(false);
+		toggle_minecraft_controls = new ToggleButton(toggle_minecraft);
+		toggle_minecraft_controls.setTheme("checkbox");
+		toggle_minecraft_label = new Label("Minecraft controls");
+		toggle_minecraft.addCallback(new Runnable() {
+			public void run() {
+				Main.IS_MINECRAFT_CONTROLS = toggle_minecraft.getValue();
+			}
+		});
 
 		start_button.addCallback(new Runnable() {
 			public void run() {
@@ -79,43 +101,36 @@ public class InstructionalOverlay extends Widget {
 				}
 			}
 		});
-		
-		toggle_minecraft_controls.addCallback(new Runnable() {
-			public void run() {
-				Main.IS_MINECRAFT_CONTROLS = !Main.IS_MINECRAFT_CONTROLS;
-			}
-		});
-		
+
+		if (Main.IS_SIGGRAPH_DEMO) {
+			save_cinematics_button.addCallback(new Runnable() {
+				public void run() {
+					Save.saveCinematics();
+				}
+			});
+
+			load_cinematics_button.addCallback(new Runnable() {
+				public void run() {
+					Save.loadCinematics();
+				}
+			});
+		}
+
 		add(start_button);
 		add(save_button);
 		add(load_button);
 		add(export_button);
 		add(load_ply_button);
+		add(save_cinematics_button);
+		add(load_cinematics_button);
+		
+		add(toggle_minecraft_label);
 		add(toggle_minecraft_controls);
-		// add(a_label);
+
 	}
 
 	@Override
 	protected void layout() {
-		a_label.adjustSize();
-		a_label.setPosition(40, 180);
-
-		/*
-		 * start_button.adjustSize(); save_button.adjustSize();
-		 * load_button.adjustSize();
-		 * 
-		 * save_button.setPosition(getInnerX() + (getInnerWidth() -
-		 * save_button.getWidth()) / 2, getInnerHeight() - 100);
-		 * start_button.setPosition(save_button.getX() - 50 -
-		 * start_button.getWidth(), save_button.getY());
-		 * load_button.setPosition(save_button.getX() + 50 +
-		 * load_button.getWidth(), save_button.getY());
-		 */
-		
-		toggle_minecraft_controls.adjustSize();
-		toggle_minecraft_controls.setPosition(getInnerWidth() - save_button.getWidth() - 260,
-				getInnerY() + 100);
-
 		save_button.adjustSize();
 		save_button.setPosition(getInnerWidth() - save_button.getWidth() - 260,
 				getInnerY() + 30);
@@ -137,5 +152,23 @@ public class InstructionalOverlay extends Widget {
 				getInnerX() + (getInnerWidth() - start_button.getWidth()) / 2,
 				getInnerHeight() - 70);
 
+		save_cinematics_button.adjustSize();
+		save_cinematics_button.setPosition(
+				load_button.getX() + load_button.getWidth() + 10,
+				load_button.getY());
+
+		load_cinematics_button.adjustSize();
+		load_cinematics_button.setPosition(save_cinematics_button.getX()
+				+ save_cinematics_button.getWidth() + 10,
+				save_cinematics_button.getY());
+		
+		toggle_minecraft_controls.adjustSize();
+		toggle_minecraft_controls.setPosition(
+				getInnerWidth() - save_button.getWidth() - 260,
+				getInnerY() + 100);
+		
+		toggle_minecraft_label.adjustSize();
+		toggle_minecraft_label.setPosition(
+				toggle_minecraft_controls.getInnerX() + 20, toggle_minecraft_controls.getInnerY());
 	}
 }
