@@ -215,8 +215,10 @@ public class Primitive implements org.json.JSONString {
 	}
 
 	public void startDownloadingTexture() {
-		if (texture_url == null)
+		if (texture_url == null) {
+			System.out.println("initing texture url");
 			texture_url = new String[num_textures];
+		}
 
 		local_textures = new String[num_textures];
 
@@ -227,43 +229,42 @@ public class Primitive implements org.json.JSONString {
 
 		if (Main.server.texture_server == null) {
 			// TODO shit this only works for the first quad in a thing right now
+			System.out.println("making local texture");
 			TextureMaker.makeTexture(this);
 		} else {
-			if (texture_url == null) {
-				for (int i = 0; i < num_textures; i++) {
 
-					if (is_quad)
-						texture_url[i] = "quad.png?&v=";
-					else
-						texture_url[i] = "texture.png?&v=";
+			for (int i = 0; i < num_textures; i++) {
 
-					// triangle fan going on here
-					Pellet p = vertices.get(0);
-					Vector3f v = p.pos;
+				if (is_quad)
+					texture_url[i] = "quad.png?&v=";
+				else
+					texture_url[i] = "texture.png?&v=";
+
+				// triangle fan going on here
+				Pellet p = vertices.get(0);
+				Vector3f v = p.pos;
+				texture_url[i] += v.x + "," + v.y + "," + v.z + ",";
+
+				for (int j = i + 1; j < i + (is_quad ? 4 : 3); j++) {
+					p = vertices.get(j);
+					v = p.pos;
 					texture_url[i] += v.x + "," + v.y + "," + v.z + ",";
-
-					for (int j = i + 1; j < i + (is_quad ? 4 : 3); j++) {
-						p = vertices.get(j);
-						v = p.pos;
-						texture_url[i] += v.x + "," + v.y + "," + v.z + ",";
-					}
-					texture_url[i] += "garbage,&w=128,&h=128,";
-					if (player_position != null
-							&& player_viewing_direction != null) {
-						texture_url[i] += "&p=" + player_position.x + ","
-								+ player_position.y + "," + player_position.z
-								+ ",";
-						texture_url[i] += "&e=" + player_viewing_direction.x
-								+ "," + player_viewing_direction.y + ","
-								+ player_viewing_direction.z + ",";
-					}
 				}
+				texture_url[i] += "garbage,&w=128,&h=128,";
+				if (player_position != null && player_viewing_direction != null) {
+					texture_url[i] += "&p=" + player_position.x + ","
+							+ player_position.y + "," + player_position.z + ",";
+					texture_url[i] += "&e=" + player_viewing_direction.x + ","
+							+ player_viewing_direction.y + ","
+							+ player_viewing_direction.z + ",";
+				}
+
 			}
 
 			texture_count = 0;
 			for (int i = 0; i < num_textures; i++) {
 				final int f_i = i;
-				System.out.println(texture_url[f_i]);
+				System.out.println("fetching texture from remote server" + texture_url[f_i]);
 				final String final_url_string = Main.server.texture_server
 						+ texture_url[f_i];
 				new Thread() {
