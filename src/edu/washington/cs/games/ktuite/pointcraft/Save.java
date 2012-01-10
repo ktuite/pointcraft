@@ -97,10 +97,16 @@ public class Save {
 					String filename = geom.local_textures[i];
 					byte[] data = geom.texture_data.get(i);
 					if (filename != null && data != null) {
-						ZipEntry tex_entry = new ZipEntry(dir + filename);
-						out.putNextEntry(tex_entry);
-						saveTexture(out, filename, data);
-						out.closeEntry();
+						try {
+							ZipEntry tex_entry = new ZipEntry(dir + filename);
+							out.putNextEntry(tex_entry);
+							saveTexture(out, filename, data);
+							out.closeEntry();
+						} catch (ZipException e) {
+							e.printStackTrace();
+						} finally {
+
+						}
 					}
 				}
 			}
@@ -199,24 +205,25 @@ public class Save {
 		}
 	}
 
-	private static void loadModelAndFetchNewTextures(File file) throws IOException {
+	private static void loadModelAndFetchNewTextures(File file)
+			throws IOException {
 		BufferedReader in = new BufferedReader(new FileReader(file));
 		readGeometryFile(in);
 		in.close();
-		
-		for (Primitive geom : Main.geometry){
+
+		for (Primitive geom : Main.geometry) {
 			geom.startDownloadingTexture();
 		}
 	}
-	
+
 	private static void loadZipOfModelAndTexture(File file) {
 
 		ZipFile zf;
 		try {
 			zf = new ZipFile(file);
 			Enumeration<? extends ZipEntry> entries = zf.entries();
-			
-			HashMap<String,ZipEntry> zipped_entries = new HashMap<String, ZipEntry>();
+
+			HashMap<String, ZipEntry> zipped_entries = new HashMap<String, ZipEntry>();
 
 			while (entries.hasMoreElements()) {
 				ZipEntry ze = (ZipEntry) entries.nextElement();
@@ -225,33 +232,36 @@ public class Save {
 							new InputStreamReader(zf.getInputStream(ze)));
 					readGeometryFile(br);
 					br.close();
-				}
-				else {
+				} else {
 					String entry_name = ze.getName();
-					entry_name = entry_name.substring(entry_name.indexOf("/") + 1);
+					entry_name = entry_name
+							.substring(entry_name.indexOf("/") + 1);
 					zipped_entries.put(entry_name, ze);
 				}
 
 			}
-			
-			
+
 			for (Primitive geom : Main.geometry) {
 				for (int i = 0; i < geom.local_textures.length; i++) {
-					
-					ZipEntry tex_entry = zipped_entries.get(geom.local_textures[i]);
-					InputStream in = zf.getInputStream(tex_entry);
-					
-					System.out.println("attempting to read texture" + tex_entry + ", size: " + in.available());
-					
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					byte[] bytes = new byte[4096];
-					int n;
-					while ((n = in.read(bytes)) != -1) {
-						baos.write(bytes, 0, n);
+
+					ZipEntry tex_entry = zipped_entries
+							.get(geom.local_textures[i]);
+					if (tex_entry != null) {
+						InputStream in = zf.getInputStream(tex_entry);
+
+						System.out.println("attempting to read texture"
+								+ tex_entry + ", size: " + in.available());
+
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						byte[] bytes = new byte[4096];
+						int n;
+						while ((n = in.read(bytes)) != -1) {
+							baos.write(bytes, 0, n);
+						}
+						byte[] tex_byte_data = baos.toByteArray();
+						geom.texture_data.set(i, tex_byte_data);
+						geom.texture_count++;
 					}
-					byte[] tex_byte_data = baos.toByteArray();
-					geom.texture_data.set(i, tex_byte_data);
-					geom.texture_count++;
 				}
 			}
 
@@ -308,7 +318,7 @@ public class Save {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private static void loadV4(String line) {
 		// version has pellet indices as well as pellet positions
 		JSONObject obj;

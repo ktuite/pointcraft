@@ -89,6 +89,7 @@ public class TriangulationPellet extends Pellet {
 				} else if (closest_point != null) {
 					// TODO: implement this
 					pos.set(closest_point);
+					constructing = true;
 					addNewPelletToTriMesh(this);
 				} else if (Main.draw_points) {
 					// if it's not dead yet and also didn't hit a
@@ -210,9 +211,10 @@ public class TriangulationPellet extends Pellet {
 	private static void makeTriangles() {
 		if (edges == null)
 			return;
-		
-		ActionTracker.newTriangulation((Stack<Pellet>) current_vertices.clone(), (Stack<Primitive>)edges_to_display.clone());
 
+		ActionTracker.newTriangulation(
+				(Stack<Pellet>) current_vertices.clone(),
+				(Stack<Primitive>) edges_to_display.clone());
 
 		int n = current_vertices.size();
 

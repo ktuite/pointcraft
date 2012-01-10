@@ -115,6 +115,9 @@ public class PlaneScaffold extends Scaffold {
 		Vector3f.sub(pellets.get(0).pos, pellets.get(2).pos, leg_2);
 		Vector3f norm = new Vector3f();
 		Vector3f.cross(leg_1, leg_2, norm);
+		if (norm.length() == 0){
+			return;
+		}
 		norm.normalise();
 
 		a = norm.x;

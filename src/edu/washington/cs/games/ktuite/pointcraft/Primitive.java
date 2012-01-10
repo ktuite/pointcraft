@@ -40,6 +40,7 @@ public class Primitive implements org.json.JSONString {
 	public int texture_count;
 	private boolean is_quad = false;
 	private PlaneScaffold plane = null;
+	private static int unique_id = 0;
 
 	private void readObject(ObjectInputStream ois)
 			throws ClassNotFoundException, IOException {
@@ -136,6 +137,8 @@ public class Primitive implements org.json.JSONString {
 				if (texture_count == num_textures) {
 					try {
 						for (int i = 0; i < num_textures; i++) {
+							if (texture_data.get(i) == null)
+								break;
 							System.out.println(" texture set!!");
 							textures.set(i, TextureLoader.getTexture(
 									"PNG",
@@ -205,12 +208,14 @@ public class Primitive implements org.json.JSONString {
 	}
 
 	public void refreshTexture() {
+		System.out.println("refreshing texture");
 		texture_data = new Vector<byte[]>();
 		texture_data.setSize(num_textures);
 		textures = new Vector<Texture>();
 		textures.setSize(num_textures);
 		texture_url = null;
 		textures_loaded = false;
+		texture_count = 0;
 		startDownloadingTexture();
 	}
 
@@ -224,13 +229,14 @@ public class Primitive implements org.json.JSONString {
 
 		for (int i = 0; i < num_textures; i++) {
 			local_textures[i] = "tex_" + Main.server.session_id + "_"
-					+ Main.geometry.size() + "_" + i + ".png";
+					+ unique_id + "_" + i + ".png";
+			unique_id++;
 		}
 
 		if (Main.server.texture_server == null) {
 			// TODO shit this only works for the first quad in a thing right now
-			System.out.println("making local texture");
-			TextureMaker.makeTexture(this);
+			//System.out.println("making local texture");
+			//TextureMaker.makeTexture(this);
 		} else {
 
 			for (int i = 0; i < num_textures; i++) {

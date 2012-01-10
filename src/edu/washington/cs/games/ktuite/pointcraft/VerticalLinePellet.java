@@ -62,7 +62,7 @@ public class VerticalLinePellet extends Pellet {
 						pos.set(closest_point);
 						attachVerticalLine();
 
-					} else {
+					} else if (Main.draw_points) {
 						// it didn't hit some existing geometry or pellet
 						// so check the point cloud
 						int neighbors = queryKdTree(pos.x, pos.y, pos.z, radius);

@@ -49,8 +49,8 @@ public class Pellet implements org.json.JSONString {
 	public Pellet() {
 		pos = new Vector3f();
 		vel = new Vector3f();
-		radius = .0005f * Main.world_scale * Main.pellet_scale;
-		max_radius = radius * 1.5f;
+		radius = .0001f * Main.world_scale * Main.pellet_scale;
+		max_radius = radius;// * 1.5f;
 		birthday = Main.timer.getTime();
 		alive = true;
 		visible = true;
@@ -278,7 +278,7 @@ public class Pellet implements org.json.JSONString {
 		Sphere sphere = new Sphere();
 		sphere_display_list = glGenLists(1);
 		glNewList(sphere_display_list, GL_COMPILE);
-		sphere.draw(1, 32, 32);
+		sphere.draw(1, 12, 12);
 		glEndList();
 	}
 }

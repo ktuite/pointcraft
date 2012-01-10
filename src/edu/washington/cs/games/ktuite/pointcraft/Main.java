@@ -183,22 +183,24 @@ public class Main {
 	private GUI login_gui;
 
 	public static void main(String[] args) {
+		try {
+			Main main = new Main();
 
-		Main main = new Main();
+			server = new ServerCommunicator(
+					"http://www.photocitygame.com/pointcraft/");
 
-		server = new ServerCommunicator(
-				"http://www.photocitygame.com/pointcraft/");
+			main.initDisplay();
+			main.initGUI();
+			main.initGraphics();
 
-		main.initDisplay();
-		main.initGUI();
-		main.initGraphics();
+			main.loadData();
+			main.initData();
+			main.initGameVariables();
 
-		main.loadData();
-		main.initData();
-		main.initGameVariables();
-
-		main.run();
-		System.exit(0);
+			main.run();
+		} finally {
+			System.exit(0);
+		}
 	}
 
 	private void initDisplay() {
@@ -295,6 +297,7 @@ public class Main {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		glEnable(GL_LINE_SMOOTH);
+		glEnable(GL11.GL_POLYGON_SMOOTH);
 		// glEnable(GL_POINT_SMOOTH);
 
 		// skybox texture loaded
@@ -367,9 +370,11 @@ public class Main {
 		if (IS_RELEASE)
 			PointStore.loadCube();
 		else {
-			 PointStore.load("/Users/ktuite/Desktop/things/scan1/reoriented.ply");
+			// PointStore.load("/Users/ktuite/Code/photocity/plys/fountain-downsample-bin.ply");
+			// PointStore.load("/Users/ktuite/Desktop/things/scan1/reoriented.ply");
 			// PointStore.loadCube();
-			//PointStore.load("data/lewis_hall.ply");
+			//PointStore.load("data/culdesac2.ply");
+			PointStore.load("data/uris.ply");
 		}
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 
@@ -676,9 +681,7 @@ public class Main {
 					glFogf(GL_FOG_DENSITY, fog_density);
 				}
 
-				if (Keyboard.getEventKey() == Keyboard.KEY_U) {
-					WiggleTool.fixModel();
-				}
+		
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_X) {
 					ActionTracker.printStack();
