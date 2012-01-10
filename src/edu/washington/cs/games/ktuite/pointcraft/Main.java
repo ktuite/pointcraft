@@ -186,6 +186,9 @@ public class Main {
 	public static boolean is_logged_in = !IS_RELEASE;
 	private GUI login_gui;
 
+	// SIGGRAPH stuff
+	public static boolean animatingToSavedView = false;
+	
 	public static void main(String[] args) {
 		
 		Main main = new Main();
@@ -717,6 +720,7 @@ public class Main {
 			vel.scale(.5f);
 
 		// pos += vel
+		System.out.println("velocity : " + vel);
 		Vector3f.add(pos, vel, pos);
 
 		// friction (let player glide to a stop)
@@ -802,6 +806,14 @@ public class Main {
 				} else if (ctrl) {
 					Cinematics.recordScene(n);
 				}
+			}
+		}
+		
+		if (Main.animatingToSavedView) {
+			Cinematics.interpSteps++;
+			Cinematics.interpPanTiltPos();
+			if (Cinematics.interpSteps > 100) {
+				animatingToSavedView = false;
 			}
 		}
 	}
