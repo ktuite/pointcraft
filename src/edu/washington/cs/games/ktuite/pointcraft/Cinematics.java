@@ -24,11 +24,11 @@ class Scene implements org.json.JSONString {
 			s.key("tilt");
 			s.value(tilt);
 			s.key("pos_x");
-			s.value(pos.getX());
+			s.value((double)(pos.getX()));
 			s.key("pos_y");
-			s.value(pos.getY());
+			s.value((double)(pos.getY()));
 			s.key("pos_z");
-			s.value(pos.getZ());			
+			s.value((double)(pos.getZ()));			
 			s.endObject();
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -39,9 +39,11 @@ class Scene implements org.json.JSONString {
 	public void fromJSONString(JSONObject obj) throws JSONException {
 		pan = obj.getLong("pan");
 		tilt = obj.getLong("tilt");
-		pos.x = obj.getLong("pos_x");
-		pos.y = obj.getLong("pos_y");
-		pos.z = obj.getLong("pos_z");
+		pos = new Vector3f(0.0f, 0.0f, 0.0f);
+		pos.x = (float)obj.getDouble("pos_x");
+		pos.y = (float)obj.getDouble("pos_y");
+		pos.z = (float)obj.getDouble("pos_z");
+		System.out.println("Loaded: "+pan+", "+tilt+", "+pos+" <fromJSONString>");
 	}
 };
 
@@ -107,22 +109,12 @@ public class Cinematics  {
 
 	public static void interpPanTiltPos() {
 		float f = (float)interpSteps / 100.0f;
-		/*
-		float interp_radius = start_radius + (target_radius - start_radius) * interpSteps;
-		float interp_theta  = start_theta + (target_radius - start_radius) * interpSteps;
-		float x = Cinematics.rotation_center.x + (float)Math.cos(interp_theta)*interp_radius;
-		float z = Cinematics.rotation_center.y + (float)Math.sin(interp_theta)*interp_radius;
-		float y = start_pos.y + f * (target_pos.y - start_pos.y);
-		*/
-		
+		f = 3*f*f - 2*f*f*f;		
 		Main.pan_angle = Cinematics.start_pan_angle + f * (Cinematics.target_pan_angle - Cinematics.start_pan_angle);
 		Main.tilt_angle = Cinematics.start_tilt_angle + f * (Cinematics.target_tilt_angle - Cinematics.start_tilt_angle);
 		Main.pos.x = Cinematics.start_pos.x + f * (Cinematics.target_pos.x - Cinematics.start_pos.x);
 		Main.pos.y = Cinematics.start_pos.y + f * (Cinematics.target_pos.y - Cinematics.start_pos.y);
 		Main.pos.z = Cinematics.start_pos.z + f * (Cinematics.target_pos.z - Cinematics.start_pos.z);
-		System.out.println("pos: "+Main.pos
-						   + " interp/f:"+interpSteps+"/" + f
-						   + " pan/tilt:"+Main.pan_angle+"/"+Main.tilt_angle+"\n");
 	}
 	
 	public static Vector3f linearSolver(float a1, float b1, float c1, float a2, float b2, float c2) {
@@ -135,9 +127,7 @@ public class Cinematics  {
 		scenes[n] = new Scene();
 		scenes[n].pan = Main.pan_angle;
 		scenes[n].tilt = Main.tilt_angle;
-		scenes[n].pos.x = Main.pos.x;
-		scenes[n].pos.y = Main.pos.y;
-		scenes[n].pos.z = Main.pos.z;
+		scenes[n].pos = new Vector3f(Main.pos);
 		System.out.println("recording scene "+n);
 		System.out.println("set pan: "+scenes[n].pan+ ", tilt: "+scenes[n].tilt+", pos: "+scenes[n].pos);
 	}
@@ -150,8 +140,8 @@ public class Cinematics  {
 			Cinematics.target_pan_angle = scenes[n].pan;
 			Cinematics.start_tilt_angle = Main.tilt_angle;
 			Cinematics.target_tilt_angle = scenes[n].tilt;
-			Cinematics.start_pos = Main.pos;
-			Cinematics.target_pos = scenes[n].pos;
+			Cinematics.start_pos = new Vector3f(Main.pos);
+			Cinematics.target_pos = new Vector3f(scenes[n].pos);
 			Cinematics.interpSteps = 0;
 			Cinematics.setupInterp();
 		}
@@ -176,6 +166,7 @@ public class Cinematics  {
 	public static void loadFromJSON(JSONObject obj) throws JSONException {
 	
 		for (int i = 0; i < 10; i++){
+			scenes[i] = new Scene();
 			scenes[i].fromJSONString(obj.getJSONObject("scene_" + i));
 		}
 	}

@@ -728,28 +728,37 @@ public class Main {
 			vel.scale(.5f);
 
 		// pos += vel
-		Vector3f.add(pos, vel, pos);
+		//System.out.println("velocity : " + vel);
+		if (Main.animatingToSavedView) {
+			Cinematics.interpSteps++;
+			Cinematics.interpPanTiltPos();
+			if (Cinematics.interpSteps > 100) {
+				animatingToSavedView = false;
+			}
+		} else {
+			Vector3f.add(pos, vel, pos);
 
-		// friction (let player glide to a stop)
-		vel.scale(veldecay);
+			// friction (let player glide to a stop)
+			vel.scale(veldecay);
 
-		// use mouse to control where player is looking
-		if (!tilt_locked)
-			tilt_angle -= Mouse.getDY() / 10f;
-		if (tilt_animation != 0)
-			animateTilt();
+			// use mouse to control where player is looking
+			if (!tilt_locked)
+				tilt_angle -= Mouse.getDY() / 10f;
+			if (tilt_animation != 0)
+				animateTilt();
 
-		pan_angle += Mouse.getDX() / 10f;
+			pan_angle += Mouse.getDX() / 10f;
 
-		if (tilt_angle > 90)
-			tilt_angle = 90;
-		if (tilt_angle < -90)
-			tilt_angle = -90;
+			if (tilt_angle > 90)
+				tilt_angle = 90;
+			if (tilt_angle < -90)
+				tilt_angle = -90;
 
-		if (pan_angle > 360)
-			pan_angle -= 360;
-		if (pan_angle < -360)
-			pan_angle += 360;
+			if (pan_angle > 360)
+				pan_angle -= 360;
+			if (pan_angle < -360)
+				pan_angle += 360;
+		}
 
 		while (Mouse.next()) {
 			if (Mouse.getEventButtonState()) {
@@ -817,15 +826,6 @@ public class Main {
 			}
 		}
 		
-		
-		
-		if (Main.animatingToSavedView) {
-			Cinematics.interpSteps++;
-			Cinematics.interpPanTiltPos();
-			if (Cinematics.interpSteps > 100) {
-				animatingToSavedView = false;
-			}
-		}
 	}
 
 	private void handleMouseDown() {
