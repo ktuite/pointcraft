@@ -12,7 +12,7 @@ class Scene implements org.json.JSONString {
 	public Scene() {
 		pan  = 0.0f;
 		tilt = 0.0f;
-		pos  = new Vector3f(0.0f, 1.0f, 0.0f);  
+		pos = new Vector3f(0.0f, 0.0f, 0.0f);
 	};
 	
 	public String toJSONString() {
@@ -54,7 +54,9 @@ public class Cinematics  {
 		scenes[n] = new Scene();
 		scenes[n].pan = Main.pan_angle;
 		scenes[n].tilt = Main.tilt_angle;
-		scenes[n].pos = Main.pos;
+		scenes[n].pos.x = Main.pos.x;
+		scenes[n].pos.y = Main.pos.y;
+		scenes[n].pos.z = Main.pos.z;
 		System.out.println("recording scene "+n);
 		System.out.println("set pan: "+scenes[n].pan+ ", tilt: "+scenes[n].tilt+", pos: "+scenes[n].pos);
 	}
