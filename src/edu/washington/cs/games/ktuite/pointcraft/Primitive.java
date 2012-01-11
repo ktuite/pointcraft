@@ -192,23 +192,25 @@ public class Primitive implements org.json.JSONString {
 		glDisable(GL_POLYGON_OFFSET_FILL);
 
 		// draw a border around the polygons
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		for (int h = 0; h < num_textures; h++) {
-			glDisable(GL_TEXTURE_2D);
-			glColor3f(0, 0, 0);
-			glLineWidth(2);
-			Pellet pellet;
-			Vector3f vertex;
-			glBegin(gl_type);
-			for (int i = 0; i < tex_coords.length - 1; i++) {
-				pellet = vertices.get(i + h + 1);
+		if (Main.draw_lines) {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			for (int h = 0; h < num_textures; h++) {
+				glDisable(GL_TEXTURE_2D);
+				glColor3f(0, 0, 0);
+				glLineWidth(2);
+				Pellet pellet;
+				Vector3f vertex;
+				glBegin(gl_type);
+				for (int i = 0; i < tex_coords.length - 1; i++) {
+					pellet = vertices.get(i + h + 1);
+					vertex = pellet.pos;
+					glVertex3f(vertex.x, vertex.y, vertex.z);
+				}
+				pellet = vertices.get(0);
 				vertex = pellet.pos;
 				glVertex3f(vertex.x, vertex.y, vertex.z);
+				glEnd();
 			}
-			pellet = vertices.get(0);
-			vertex = pellet.pos;
-			glVertex3f(vertex.x, vertex.y, vertex.z);
-			glEnd();
 		}
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -332,11 +334,11 @@ public class Primitive implements org.json.JSONString {
 		Vector3f.sub(vertices.get(0).pos, vertices.get(2).pos, v2);
 		Vector3f norm = new Vector3f();
 		Vector3f.cross(v1, v2, norm);
-		
-		if (norm.length() == 0){
+
+		if (norm.length() == 0) {
 			return Float.MAX_VALUE;
 		}
-		
+
 		norm.normalise();
 
 		float a = norm.x;
@@ -439,7 +441,7 @@ public class Primitive implements org.json.JSONString {
 
 	private void fitPlaneWithVertices() {
 		List<Vector3f> v = new LinkedList<Vector3f>();
-		for (Pellet p : vertices){
+		for (Pellet p : vertices) {
 			v.add(p.pos);
 		}
 		setPlane(new PlaneScaffold(v));

@@ -468,7 +468,7 @@ public class Save {
 		if (fc == null) {
 			fc = new JFileChooser();
 		}
-		int returnVal = fc.showSaveDialog(fc);
+		int returnVal = fc.showOpenDialog(fc);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
 			InputStream in;

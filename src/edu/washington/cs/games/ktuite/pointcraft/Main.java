@@ -110,6 +110,7 @@ public class Main {
 
 	public static boolean IS_SIGGRAPH_DEMO = true;
 	public static boolean cinematics_mode = false & IS_SIGGRAPH_DEMO;
+	public static boolean draw_lines = true;
 
 	// stuff about the atmosphere
 	private float FOG_COLOR[] = new float[] { .89f, .89f, .89f, 1.0f };
@@ -389,8 +390,8 @@ public class Main {
 			// PointStore.load("data/culdesac2.ply");
 			// PointStore.load("data/uris.ply");
 			// PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
-			//PointStore.loadCube();
-			 PointStore.load("data/uris.ply");
+			 PointStore.loadCube();
+			//PointStore.load("data/uris.ply");
 		}
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 
@@ -577,6 +578,9 @@ public class Main {
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
 					Mouse.setGrabbed(!Mouse.isGrabbed());
+				}
+				else if (Keyboard.getEventKey() == Keyboard.KEY_L) {
+					draw_lines = !draw_lines;
 				}
 
 				if (!cinematics_mode) {

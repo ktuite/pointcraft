@@ -133,16 +133,18 @@ public class Cinematics {
 	public static void recallScene(int n) {
 		System.out.println("recalling saved scene");
 		assert (n >= 0 && n < 10);
-		if (!Main.animatingToSavedView && scenes[n] != null) {
-			Main.animatingToSavedView = true;
-			Cinematics.start_pan_angle = Main.pan_angle;
-			Cinematics.target_pan_angle = scenes[n].pan;
-			Cinematics.start_tilt_angle = Main.tilt_angle;
-			Cinematics.target_tilt_angle = scenes[n].tilt;
-			Cinematics.start_pos = new Vector3f(Main.pos);
-			Cinematics.target_pos = new Vector3f(scenes[n].pos);
-			Cinematics.interpSteps = 0;
-			Cinematics.setupInterp();
+		if (scenes[n] != null) {
+			if (!Main.animatingToSavedView) {
+				Main.animatingToSavedView = true;
+				Cinematics.start_pan_angle = Main.pan_angle;
+				Cinematics.target_pan_angle = scenes[n].pan;
+				Cinematics.start_tilt_angle = Main.tilt_angle;
+				Cinematics.target_tilt_angle = scenes[n].tilt;
+				Cinematics.start_pos = new Vector3f(Main.pos);
+				Cinematics.target_pos = new Vector3f(scenes[n].pos);
+				Cinematics.interpSteps = 0;
+				Cinematics.setupInterp();
+			}
 		}
 	}
 
@@ -151,8 +153,10 @@ public class Cinematics {
 		try {
 			s.object();
 			for (int i = 0; i < 10; i++) {
-				s.key("scene_" + i);
-				s.value(scenes[i]);
+				if (scenes[i] != null) {
+					s.key("scene_" + i);
+					s.value(scenes[i]);
+				}
 			}
 			s.endObject();
 		} catch (JSONException e) {
@@ -165,14 +169,17 @@ public class Cinematics {
 
 		for (int i = 0; i < 10; i++) {
 			scenes[i] = new Scene();
-			scenes[i].fromJSONString(obj.getJSONObject("scene_" + i));
+			if (obj.has("scene_" + i)) {
+				scenes[i].fromJSONString(obj.getJSONObject("scene_" + i));
+			}
 		}
 	}
 
 	public static void printAvailableScenes() {
 		for (int i = 0; i < 10; i++) {
 			if (scenes[i] != null) {
-				System.out.println("Scene #" + i + ": " + scenes[i].pos + ", " + scenes[i].pan + "," + scenes[i].tilt);
+				System.out.println("Scene #" + i + ": " + scenes[i].pos + ", "
+						+ scenes[i].pan + "," + scenes[i].tilt);
 			}
 		}
 
