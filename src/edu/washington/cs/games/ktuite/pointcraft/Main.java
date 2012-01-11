@@ -106,9 +106,10 @@ import de.matthiasmann.twl.theme.ThemeManager;
 
 public class Main {
 	private static boolean IS_RELEASE = false;
-	public static boolean IS_SIGGRAPH_DEMO = true;
 	public static float VERSION_NUMBER = 0.7f;
-	public static boolean IS_MINECRAFT_CONTROLS = false;
+
+	public static boolean IS_SIGGRAPH_DEMO = true;
+	public static boolean cinematics_mode = false & IS_SIGGRAPH_DEMO;
 
 	// stuff about the atmosphere
 	private float FOG_COLOR[] = new float[] { .89f, .89f, .89f, 1.0f };
@@ -132,6 +133,8 @@ public class Main {
 	private static float walkforce = 1 / 4000f * world_scale;
 	private double max_speed = 1 * world_scale;
 	private Texture skybox = null;
+
+	public static boolean minecraft_flight = false;
 
 	// stuff about the point cloud
 	private int num_points;
@@ -184,7 +187,7 @@ public class Main {
 
 	// SIGGRAPH stuff
 	public static boolean animatingToSavedView = false;
-	
+
 	public static void main(String[] args) {
 		try {
 			Main main = new Main();
@@ -201,14 +204,21 @@ public class Main {
 			main.initGameVariables();
 
 			main.run();
+		} catch (Exception e) {
+			e.printStackTrace();
 		} finally {
+
 			System.exit(0);
 		}
 	}
 
 	private void initDisplay() {
 		try {
-			Display.setDisplayMode(new DisplayMode(1280, 720));
+			if (IS_SIGGRAPH_DEMO) {
+				Display.setDisplayMode(new DisplayMode(1280, 720));
+			} else {
+				Display.setDisplayMode(new DisplayMode(800, 600));
+			}
 			Display.setResizable(true);
 			Display.setVSyncEnabled(true);
 			Display.create();
@@ -376,11 +386,11 @@ public class Main {
 			// PointStore.load("/Users/ktuite/Code/photocity/plys/fountain-downsample-bin.ply");
 			// PointStore.load("/Users/ktuite/Desktop/things/scan1/reoriented.ply");
 			// PointStore.loadCube();
-			//PointStore.load("data/culdesac2.ply");
-			//PointStore.load("data/uris.ply");
-			 //PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
-			PointStore.loadCube();
+			// PointStore.load("data/culdesac2.ply");
 			// PointStore.load("data/uris.ply");
+			// PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
+			//PointStore.loadCube();
+			 PointStore.load("data/uris.ply");
 		}
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 
@@ -394,6 +404,7 @@ public class Main {
 		walkforce = 1 / 4000f * world_scale;
 		max_speed = 1 * world_scale;
 		gun_speed = 0.001f * world_scale;
+		Pellet.default_radius = .0005f * Main.world_scale;
 
 		glFogf(GL_FOG_END, 3.0f * world_scale);
 		glFogf(GL_FOG_START, .25f * world_scale);
@@ -532,7 +543,7 @@ public class Main {
 					* pellet_scale;
 		}
 		if (!tilt_locked) {
-			if (IS_MINECRAFT_CONTROLS) {
+			if (minecraft_flight) {
 				if (Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
 					vel.y += walkforce / 2 * pellet_scale;
 				}
@@ -561,106 +572,150 @@ public class Main {
 		// basically it increases or decreases your vertical world height
 		while (Keyboard.next()) {
 			if (Keyboard.getEventKeyState()) {
-				/*
-				 * if (Keyboard.getEventKey() == Keyboard.KEY_S &&
-				 * (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29))) {
-				 * Save.saveHeckaData(); } if (Keyboard.getEventKey() ==
-				 * Keyboard.KEY_L) { Save.loadHeckaData(); }
-				 */
-
 				// PRINT KEY SO I CAN SEE THE KEY CODE
 				// System.out.println("Key: " + Keyboard.getEventKey());
-
-				if (Keyboard.getEventKey() == Keyboard.KEY_Z
-						&& (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29))) {
-					ActionTracker.undo();
-				}
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
 					Mouse.setGrabbed(!Mouse.isGrabbed());
 				}
 
-				if (Keyboard.getEventKey() == Keyboard.KEY_P
-						|| Keyboard.getEventKey() == Keyboard.KEY_C) {
-					draw_points = !draw_points;
-				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_O) {
-					draw_scaffolding = !draw_scaffolding;
-				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_I) {
-					draw_pellets = !draw_pellets;
-				}
+				if (!cinematics_mode) {
+					if (Keyboard.getEventKey() == Keyboard.KEY_Z
+							&& (Keyboard.isKeyDown(219) || Keyboard
+									.isKeyDown(29))) {
+						ActionTracker.undo();
+					}
 
-				if (Keyboard.getEventKey() == Keyboard.KEY_1) {
-					which_gun = GunMode.POLYGON;
-					System.out.println("regular pellet gun selected");
-				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_2) {
-					which_gun = GunMode.PELLET;
-					System.out.println("regular pellet gun selected");
-				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_3) {
-					which_gun = GunMode.LINE;
-					System.out.println("line fitting pellet gun selected");
-				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_4) {
-					which_gun = GunMode.PLANE;
-					System.out.println("plane fitting pellet gun selected");
-				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_5) {
-					which_gun = GunMode.VERTICAL_LINE;
-					System.out.println("vertical line pellet gun selected");
-				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_6) {
-					which_gun = GunMode.COMBINE;
-					System.out.println("hover edit gun");
-				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_7) {
-					which_gun = GunMode.DRAG_TO_EDIT;
-					System.out.println("drag edit gun");
-				}
+					if (Keyboard.getEventKey() == Keyboard.KEY_P
+							|| Keyboard.getEventKey() == Keyboard.KEY_C) {
+						draw_points = !draw_points;
+					}
+					if (Keyboard.getEventKey() == Keyboard.KEY_O) {
+						draw_scaffolding = !draw_scaffolding;
+					}
+					if (Keyboard.getEventKey() == Keyboard.KEY_I) {
+						draw_pellets = !draw_pellets;
+					}
 
-				if (Keyboard.getEventKey() == Keyboard.KEY_8) {
-					which_gun = GunMode.TRIANGULATION;
-					// which_gun = GunMode.LASER_BEAM;
-					// System.out.println("laser beam gun");
-				}
+					if (Keyboard.getEventKey() == Keyboard.KEY_1) {
+						which_gun = GunMode.POLYGON;
+						System.out.println("regular pellet gun selected");
+					}
+					if (Keyboard.getEventKey() == Keyboard.KEY_2) {
+						which_gun = GunMode.PELLET;
+						System.out.println("regular pellet gun selected");
+					}
+					if (Keyboard.getEventKey() == Keyboard.KEY_3) {
+						which_gun = GunMode.LINE;
+						System.out.println("line fitting pellet gun selected");
+					}
+					if (Keyboard.getEventKey() == Keyboard.KEY_4) {
+						which_gun = GunMode.PLANE;
+						System.out.println("plane fitting pellet gun selected");
+					}
+					if (Keyboard.getEventKey() == Keyboard.KEY_5) {
+						which_gun = GunMode.VERTICAL_LINE;
+						System.out.println("vertical line pellet gun selected");
+					}
+					if (Keyboard.getEventKey() == Keyboard.KEY_6) {
+						which_gun = GunMode.COMBINE;
+						System.out.println("hover edit gun");
+					}
+					if (Keyboard.getEventKey() == Keyboard.KEY_7) {
+						which_gun = GunMode.DRAG_TO_EDIT;
+						System.out.println("drag edit gun");
+					}
 
-				if (Keyboard.getEventKey() == Keyboard.KEY_9) {
-					which_gun = GunMode.DIRECTION_PICKER;
-					System.out
-							.println("shoot at a line to use that line's orientation");
-				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_DELETE
-						|| Keyboard.getEventKey() == Keyboard.KEY_BACK) {
-					which_gun = GunMode.DESTRUCTOR;
-					System.out.println("the gun that deletes things");
-				}
-				if (Keyboard.getEventKey() == Keyboard.KEY_0) {
-					which_gun = GunMode.CAMERA;
-					System.out.println("capture a screenshot");
-				}
+					if (Keyboard.getEventKey() == Keyboard.KEY_8) {
+						which_gun = GunMode.TRIANGULATION;
+						// which_gun = GunMode.LASER_BEAM;
+						// System.out.println("laser beam gun");
+					}
 
-				if (Keyboard.getEventKey() == Keyboard.KEY_T) {
-					rotate_world = !rotate_world;
-					/*
-					 * tilt_locked = !tilt_locked; if (tilt_locked) { last_tilt
-					 * = tilt_angle; tilt_animation = 30; } else {
-					 * tilt_animation = -30; }
-					 */
-				}
+					if (Keyboard.getEventKey() == Keyboard.KEY_9) {
+						which_gun = GunMode.DIRECTION_PICKER;
+						System.out
+								.println("shoot at a line to use that line's orientation");
+					}
+					if (Keyboard.getEventKey() == Keyboard.KEY_DELETE
+							|| Keyboard.getEventKey() == Keyboard.KEY_BACK) {
+						which_gun = GunMode.DESTRUCTOR;
+						System.out.println("the gun that deletes things");
+					}
+					if (Keyboard.getEventKey() == Keyboard.KEY_0) {
+						which_gun = GunMode.CAMERA;
+						System.out.println("capture a screenshot");
+					}
 
-				if (Keyboard.getEventKey() == Keyboard.KEY_N) {
-					if (which_gun == GunMode.PLANE)
-						PlanePellet.startNewPlane();
-					else if (which_gun == GunMode.LINE)
-						LinePellet.startNewLine();
-					else if (which_gun == GunMode.POLYGON)
-						PolygonPellet.startNewPolygon();
-					else if (which_gun == GunMode.VERTICAL_LINE)
-						VerticalLinePellet.clearAllVerticalLines();
-					else if (which_gun == GunMode.TRIANGULATION)
-						TriangulationPellet.startNewTriMesh();
+					if (Keyboard.getEventKey() == Keyboard.KEY_T) {
+						// rotate_world = !rotate_world;
+						/*
+						 * tilt_locked = !tilt_locked; if (tilt_locked) {
+						 * last_tilt = tilt_angle; tilt_animation = 30; } else {
+						 * tilt_animation = -30; }
+						 */
+					}
+
+					if (Keyboard.getEventKey() == Keyboard.KEY_X) {
+						ActionTracker.printStack();
+						for (Pellet p : all_pellets_in_world) {
+							System.out.println("\t\tPellet type: "
+									+ p.getType());
+						}
+					}
+
+					if (Keyboard.getEventKey() == Keyboard.KEY_N) {
+						if (which_gun == GunMode.PLANE)
+							PlanePellet.startNewPlane();
+						else if (which_gun == GunMode.LINE)
+							LinePellet.startNewLine();
+						else if (which_gun == GunMode.POLYGON)
+							PolygonPellet.startNewPolygon();
+						else if (which_gun == GunMode.VERTICAL_LINE)
+							VerticalLinePellet.clearAllVerticalLines();
+						else if (which_gun == GunMode.TRIANGULATION)
+							TriangulationPellet.startNewTriMesh();
+					}
+				} else {
+					int n = -1;
+					boolean ctrl = Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)
+							|| Keyboard.isKeyDown(Keyboard.KEY_RCONTROL)
+							|| Keyboard.isKeyDown(219) // mac keys
+							|| Keyboard.isKeyDown(29); // mac keys
+					boolean shift = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)
+							|| Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
+
+					if (Keyboard.getEventKey() == Keyboard.KEY_1) {
+						n = 1;
+					} else if (Keyboard.getEventKey() == Keyboard.KEY_2) {
+						n = 2;
+					} else if (Keyboard.getEventKey() == Keyboard.KEY_3) {
+						n = 3;
+					} else if (Keyboard.getEventKey() == Keyboard.KEY_4) {
+						n = 4;
+					} else if (Keyboard.getEventKey() == Keyboard.KEY_5) {
+						n = 5;
+					} else if (Keyboard.getEventKey() == Keyboard.KEY_6) {
+						n = 6;
+					} else if (Keyboard.getEventKey() == Keyboard.KEY_7) {
+						n = 7;
+					} else if (Keyboard.getEventKey() == Keyboard.KEY_8) {
+						n = 8;
+					} else if (Keyboard.getEventKey() == Keyboard.KEY_9) {
+						n = 9;
+					} else if (Keyboard.getEventKey() == Keyboard.KEY_0) {
+						n = 0;
+					} else if (Keyboard.getEventKey() == Keyboard.KEY_X) {
+						Cinematics.printAvailableScenes();
+					}
+
+					if (n >= 0 && n <= 9) {
+						if (shift) {
+							Cinematics.recallScene(n);
+						} else if (ctrl) {
+							Cinematics.recordScene(n);
+						}
+					}
 				}
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_EQUALS) {
@@ -687,31 +742,8 @@ public class Main {
 					glFogf(GL_FOG_DENSITY, fog_density);
 				}
 
-		
-
-				if (Keyboard.getEventKey() == Keyboard.KEY_X) {
-					ActionTracker.printStack();
-					for (Pellet p : all_pellets_in_world) {
-						System.out.println("\t\tPellet type: " + p.getType());
-					}
-				}
-
-				/*
-				 * if (Keyboard.getEventKey() == Keyboard.KEY_M) { if
-				 * (Keyboard.isKeyDown(219) || Keyboard.isKeyDown(29)) {
-				 * up_vec.set(0, 1, 0); pos.set(0, 0, 0); tilt_angle = 0; } else
-				 * { computeGunDirection(); up_vec.set(gun_direction);
-				 * up_vec.scale(-1); pos.set(0, 0, 0); tilt_angle = 0; } }
-				 */
-
 			}
 		}
-
-		/*
-		 * if (tilt_locked && which_gun != GunMode.OVERHEAD && tilt_animation ==
-		 * 0) { tilt_animation = -30; tilt_locked = true; // set to true until
-		 * done animating }
-		 */
 
 		// normalize the speed
 		double speed = Math.sqrt(vel.length());
@@ -721,14 +753,14 @@ public class Main {
 		}
 
 		// sneak / go slowly
-		if (!IS_MINECRAFT_CONTROLS && Keyboard.isKeyDown(Keyboard.KEY_SPACE))
+		if (!minecraft_flight && Keyboard.isKeyDown(Keyboard.KEY_SPACE))
 			vel.scale(.3f);
 
 		if (tilt_locked)
 			vel.scale(.5f);
 
 		// pos += vel
-		//System.out.println("velocity : " + vel);
+		// System.out.println("velocity : " + vel);
 		if (Main.animatingToSavedView) {
 			Cinematics.interpSteps++;
 			Cinematics.interpPanTiltPos();
@@ -761,10 +793,12 @@ public class Main {
 		}
 
 		while (Mouse.next()) {
-			if (Mouse.getEventButtonState()) {
-				handleMouseDown();
-			} else {
-				handleMouseUp();
+			if (!cinematics_mode) {
+				if (Mouse.getEventButtonState()) {
+					handleMouseDown();
+				} else {
+					handleMouseUp();
+				}
 			}
 		}
 
@@ -789,43 +823,6 @@ public class Main {
 			}
 		}
 
-		if (Main.IS_SIGGRAPH_DEMO) {
-			int n = -1;
-			boolean ctrl  = Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
-			boolean shift = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
-			
-			if (Keyboard.isKeyDown(Keyboard.KEY_F1)) {
-				n = 1;
-			} else if (Keyboard.isKeyDown(Keyboard.KEY_F2)) {
-				n = 2;
-			} else if (Keyboard.isKeyDown(Keyboard.KEY_F3)) {
-				n = 3;
-			} else if (Keyboard.isKeyDown(Keyboard.KEY_F4)) {
-				n = 4;
-			} else if (Keyboard.isKeyDown(Keyboard.KEY_F5)) {
-				n = 5;
-			} else if (Keyboard.isKeyDown(Keyboard.KEY_F6)) {
-				n = 6;
-			} else if (Keyboard.isKeyDown(Keyboard.KEY_F7)) {
-				n = 7;
-			} else if (Keyboard.isKeyDown(Keyboard.KEY_F8)) {
-				n = 8;
-			} else if (Keyboard.isKeyDown(Keyboard.KEY_F9)) {
-				n = 9;
-			} else if (Keyboard.isKeyDown(Keyboard.KEY_F10)) {
-				n = 0;
-			}
-
-			if (n >= 0 && n <= 9) {
-				System.out.println("some kind of control function key pressed");
-				if (shift) {
-					Cinematics.recallScene(n);
-				} else if (ctrl) {
-					Cinematics.recordScene(n);
-				}
-			}
-		}
-		
 	}
 
 	private void handleMouseDown() {
@@ -997,9 +994,10 @@ public class Main {
 			HoverPellet.illuminatePellet();
 		}
 
-		drawHud();
-
-		updateOnscreenGui();
+		if (!cinematics_mode) {
+			drawHud();
+			updateOnscreenGui();
+		}
 
 		Display.update();
 	}

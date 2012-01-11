@@ -30,6 +30,7 @@ public class Pellet implements org.json.JSONString {
 	private static Integer sphere_display_list;
 
 	public static boolean CONNECT_TO_PREVIOUS = true;
+	public static float default_radius = .0005f * Main.world_scale;
 
 	private void writeObject(ObjectOutputStream oos) throws IOException {
 		oos.defaultWriteObject();
@@ -49,7 +50,7 @@ public class Pellet implements org.json.JSONString {
 	public Pellet() {
 		pos = new Vector3f();
 		vel = new Vector3f();
-		radius = .0005f * Main.world_scale * Main.pellet_scale;
+		radius = default_radius * Main.pellet_scale;
 		max_radius = radius * 1.5f;
 		birthday = Main.timer.getTime();
 		alive = true;
@@ -98,7 +99,7 @@ public class Pellet implements org.json.JSONString {
 		if (!Main.draw_pellets)
 			return null;
 
-		for (int i = Main.all_pellets_in_world.size()-1; i >= 0; i--){
+		for (int i = Main.all_pellets_in_world.size() - 1; i >= 0; i--) {
 			Pellet pellet = Main.all_pellets_in_world.get(i);
 			if (pellet != this && pellet.visible) {
 				Vector3f dist = new Vector3f();
@@ -187,8 +188,8 @@ public class Pellet implements org.json.JSONString {
 			coloredDraw();
 		}
 	}
-	
-	public static void drawSphere(float radius){
+
+	public static void drawSphere(float radius) {
 		glPushMatrix();
 		glScalef(radius, radius, radius);
 		glCallList(sphere_display_list);
@@ -237,13 +238,13 @@ public class Pellet implements org.json.JSONString {
 		temp_pos.x = (float) obj.getJSONArray("pos").getDouble(0);
 		temp_pos.y = (float) obj.getJSONArray("pos").getDouble(1);
 		temp_pos.z = (float) obj.getJSONArray("pos").getDouble(2);
-		for (Pellet p : Main.all_pellets_in_world){
-			if (p.id == world_idx && p.pos == temp_pos){
+		for (Pellet p : Main.all_pellets_in_world) {
+			if (p.id == world_idx || p.pos == temp_pos) {
 				System.out.println("found existing pellet");
 				return p;
 			}
 		}
-		
+
 		Pellet p = null;
 		if (pellet_type.contains("POLYGON"))
 			p = new PolygonPellet();
@@ -253,11 +254,12 @@ public class Pellet implements org.json.JSONString {
 			p = new LinePellet();
 		else if (pellet_type.contains("PLANE"))
 			p = new PlanePellet();
-		
-		else 
+
+		else
 			p = new ScaffoldPellet();
-		
-		p.radius = (float) obj.getDouble("radius");
+
+		p.radius = default_radius / 5f;
+		p.max_radius = p.radius;
 		p.alive = true;
 		p.constructing = true;
 		p.visible = true;
@@ -273,12 +275,12 @@ public class Pellet implements org.json.JSONString {
 	public boolean refCountZero() {
 		return (ref_count == 0);
 	}
-	
-	public static void initSphereDisplayList(){
+
+	public static void initSphereDisplayList() {
 		Sphere sphere = new Sphere();
 		sphere_display_list = glGenLists(1);
 		glNewList(sphere_display_list, GL_COMPILE);
-		sphere.draw(1, 12, 12);
+		sphere.draw(1, 32, 32);
 		glEndList();
 	}
 }

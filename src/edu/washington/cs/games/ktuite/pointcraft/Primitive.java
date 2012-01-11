@@ -129,7 +129,7 @@ public class Primitive implements org.json.JSONString {
 			glEnd();
 
 		} else if (gl_type == GL_POLYGON) {
-			glColor4f(.9f, .9f, .9f, .9f);
+			glColor4f(.9f, .9f, .9f, 1);
 			if (textures_loaded) {
 				glEnable(GL_TEXTURE_2D);
 			} else {
@@ -165,6 +165,9 @@ public class Primitive implements org.json.JSONString {
 					new Vector2f(1, 0), new Vector2f(1, 1) };
 		}
 
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(1f, 1f);
 		for (int h = 0; h < num_textures; h++) {
 			if (textures_loaded) {
 				textures.get(h).bind();
@@ -186,15 +189,17 @@ public class Primitive implements org.json.JSONString {
 			glEnd();
 
 		}
+		glDisable(GL_POLYGON_OFFSET_FILL);
 
 		// draw a border around the polygons
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		for (int h = 0; h < num_textures; h++) {
 			glDisable(GL_TEXTURE_2D);
 			glColor3f(0, 0, 0);
-			glLineWidth(3);
+			glLineWidth(2);
 			Pellet pellet;
 			Vector3f vertex;
-			glBegin(GL_LINE_LOOP);
+			glBegin(gl_type);
 			for (int i = 0; i < tex_coords.length - 1; i++) {
 				pellet = vertices.get(i + h + 1);
 				vertex = pellet.pos;
@@ -205,6 +210,8 @@ public class Primitive implements org.json.JSONString {
 			glVertex3f(vertex.x, vertex.y, vertex.z);
 			glEnd();
 		}
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
 	public void refreshTexture() {
@@ -235,8 +242,8 @@ public class Primitive implements org.json.JSONString {
 
 		if (Main.server.texture_server == null) {
 			// TODO shit this only works for the first quad in a thing right now
-			//System.out.println("making local texture");
-			//TextureMaker.makeTexture(this);
+			// System.out.println("making local texture");
+			// TextureMaker.makeTexture(this);
 		} else {
 
 			for (int i = 0; i < num_textures; i++) {
@@ -270,7 +277,8 @@ public class Primitive implements org.json.JSONString {
 			texture_count = 0;
 			for (int i = 0; i < num_textures; i++) {
 				final int f_i = i;
-				System.out.println("fetching texture from remote server" + texture_url[f_i]);
+				System.out.println("fetching texture from remote server"
+						+ texture_url[f_i]);
 				final String final_url_string = Main.server.texture_server
 						+ texture_url[f_i];
 				new Thread() {
@@ -324,8 +332,11 @@ public class Primitive implements org.json.JSONString {
 		Vector3f.sub(vertices.get(0).pos, vertices.get(2).pos, v2);
 		Vector3f norm = new Vector3f();
 		Vector3f.cross(v1, v2, norm);
-		if (norm.lengthSquared() == 0)
-			return 0;
+		
+		if (norm.length() == 0){
+			return Float.MAX_VALUE;
+		}
+		
 		norm.normalise();
 
 		float a = norm.x;
@@ -392,7 +403,7 @@ public class Primitive implements org.json.JSONString {
 			vertices.add(Main.all_pellets_in_world.get(json_verts.getInt(i)));
 		}
 		Primitive p = new Primitive(GL_POLYGON, vertices);
-		//p.startDownloadingTexture();
+		// p.startDownloadingTexture();
 
 		Main.geometry.add(p);
 	}
@@ -404,7 +415,7 @@ public class Primitive implements org.json.JSONString {
 			vertices.add(Pellet.loadFromJSON(json_verts.getJSONObject(i)));
 		}
 		Primitive p = new Primitive(GL_POLYGON, vertices);
-		//p.startDownloadingTexture();
+		// p.startDownloadingTexture();
 
 		Main.geometry.add(p);
 	}
@@ -417,11 +428,20 @@ public class Primitive implements org.json.JSONString {
 		}
 		Primitive p = new Primitive(GL_POLYGON, vertices);
 		p.initTextureArrays();
+		p.fitPlaneWithVertices();
 		for (int i = 0; i < p.num_textures; i++) {
 			p.local_textures[i] = obj.getJSONArray("local_textures").getString(
 					i);
 		}
 
 		Main.geometry.add(p);
+	}
+
+	private void fitPlaneWithVertices() {
+		List<Vector3f> v = new LinkedList<Vector3f>();
+		for (Pellet p : vertices){
+			v.add(p.pos);
+		}
+		setPlane(new PlaneScaffold(v));
 	}
 }

@@ -94,6 +94,7 @@ public class HoverPellet extends Pellet {
 
 	public static void handleDrag() {
 		if (drag_started && target_pellet != null) {
+			System.out.println("handling drag..." + target_pellet_primitive);
 			if (target_pellet_primitive != null)
 				updatePelletInPlane();
 			else
@@ -113,7 +114,7 @@ public class HoverPellet extends Pellet {
 		float max_dot = 0;
 		for (Primitive p : Main.geometry) {
 			if (p.isPolygon()) {
-				if (p.getVertices().contains(target_pellet)){
+				if (p.getVertices().contains(target_pellet) && p.getPlane().isReady()){
 					float dot_with_gun = Math.abs(p.getPlane().planeNormalDotVector(Main.gun_direction));
 					if (dot_with_gun > max_dot){
 						target_pellet_primitive = p;

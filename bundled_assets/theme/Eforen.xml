@@ -319,8 +319,8 @@
         <area name="-eforen.checkbox.inactive.normal" splitx="28,30" splity="28,29" inset="-19" xywh="176,218,58,57"/>
         <area name="-eforen.checkbox.checkmark" inset="-19" center="true" xywh="298,218,58,57"/>
         <animation name="-eforen.checkbox.inactive.hover" timeSource="hover">
-            <frame ref="-eforen.checkbox.inactive.normal" tint="#005500" duration="500"/>
-            <frame ref="-eforen.checkbox.inactive.normal" tint="#00AA00" duration="1000"/>
+            <frame ref="-eforen.checkbox.inactive.normal" tint="#8800AA" duration="500"/>
+            <frame ref="-eforen.checkbox.inactive.normal" tint="#330066" duration="1000"/>
         </animation>
         <composed name="-eforen.checkbox.active.normal">
             <alias ref="-eforen.checkbox.inactive.normal"/>
@@ -330,12 +330,12 @@
 
         <select name="eforen.checkbox.background">
             <animation if="selected + armed" timeSource="armed">
-                <frame ref="-eforen.checkbox.inactive.normal" tint="#AA0000" duration="300"/>
-                <frame ref="-eforen.checkbox.inactive.normal" tint="#660000" duration="300"/>
+                <frame ref="-eforen.checkbox.inactive.normal" tint="#8800AA" duration="300"/>
+                <frame ref="-eforen.checkbox.inactive.normal" tint="#330066" duration="300"/>
             </animation>
             <animation if="selected + pressed" timeSource="pressed">
-                <frame ref="-eforen.checkbox.active.normal" tint="#007700" duration="500"/>
-                <frame ref="-eforen.checkbox.active.normal" tint="#AA0000" duration="500"/>
+                <frame ref="-eforen.checkbox.active.normal" tint="#8800AA" duration="500"/>
+                <frame ref="-eforen.checkbox.active.normal" tint="#330066" duration="500"/>
             </animation>
             <composed if="selected + hover">
                 <alias ref="-eforen.checkbox.inactive.hover"/>
@@ -347,12 +347,12 @@
             </composed>
             <alias ref="-eforen.checkbox.active.normal" if="selected"/>
             <animation if="armed" timeSource="armed">
-                <frame ref="-eforen.checkbox.active.normal" tint="#AA0000" duration="300"/>
-                <frame ref="-eforen.checkbox.active.normal" tint="#660000" duration="300"/>
+                <frame ref="-eforen.checkbox.active.normal" tint="#8800AA" duration="300"/>
+                <frame ref="-eforen.checkbox.active.normal" tint="#330066" duration="300"/>
             </animation>
             <animation if="pressed" timeSource="pressed">
-                <frame ref="-eforen.checkbox.inactive.normal" tint="#007700" duration="500"/>
-                <frame ref="-eforen.checkbox.inactive.normal" tint="#AA0000" duration="500"/>
+                <frame ref="-eforen.checkbox.inactive.normal" tint="#8800AA" duration="500"/>
+                <frame ref="-eforen.checkbox.inactive.normal" tint="#330066" duration="500"/>
             </animation>
             <alias ref="-eforen.checkbox.inactive.hover" if="hover"/>
             <alias ref="-eforen.checkbox.inactive.focused" if="keyboardFocus"/>

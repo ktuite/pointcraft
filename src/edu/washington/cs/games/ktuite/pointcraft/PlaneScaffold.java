@@ -33,6 +33,16 @@ public class PlaneScaffold extends Scaffold {
 		c = 0;
 		d = 0;
 	}
+	
+	public PlaneScaffold(List<Vector3f> v) {
+		super();
+		a = 0;
+		b = 0;
+		c = 0;
+		d = 0;
+		grid_vertices = v;
+		fitPlane();
+	}
 
 	public boolean isReady() {
 		if ((a == 0 && b == 0 && c == 0 && d == 0))

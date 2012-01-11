@@ -27,7 +27,12 @@ public class InstructionalOverlay extends Widget {
 	// minecraft controls / toggle button experiment
 	private SimpleBooleanModel toggle_minecraft;
 	private Label toggle_minecraft_label;
-	private ToggleButton toggle_minecraft_controls;
+	private ToggleButton toggle_minecraft_checkbox;
+	
+	// cinematics mode
+	private SimpleBooleanModel toggle_cinematics;
+	private Label toggle_cinematics_label;
+	private ToggleButton toggle_cinematics_checkbox;
 
 	private Button load_cinematics_button;
 
@@ -59,13 +64,25 @@ public class InstructionalOverlay extends Widget {
 
 		// minecraft toggle setup
 		toggle_minecraft = new SimpleBooleanModel();
-		toggle_minecraft.setValue(false);
-		toggle_minecraft_controls = new ToggleButton(toggle_minecraft);
-		toggle_minecraft_controls.setTheme("checkbox");
+		toggle_minecraft.setValue(Main.minecraft_flight);
+		toggle_minecraft_checkbox = new ToggleButton(toggle_minecraft);
+		toggle_minecraft_checkbox.setTheme("checkbox");
 		toggle_minecraft_label = new Label("Minecraft controls");
 		toggle_minecraft.addCallback(new Runnable() {
 			public void run() {
-				Main.IS_MINECRAFT_CONTROLS = toggle_minecraft.getValue();
+				Main.minecraft_flight = toggle_minecraft.getValue();
+			}
+		});
+		
+		// cinematics mode setup
+		toggle_cinematics = new SimpleBooleanModel();
+		toggle_cinematics.setValue(Main.cinematics_mode);
+		toggle_cinematics_checkbox = new ToggleButton(toggle_cinematics);
+		toggle_cinematics_checkbox.setTheme("checkbox");
+		toggle_cinematics_label = new Label("Cinematics mode");
+		toggle_cinematics.addCallback(new Runnable() {
+			public void run() {
+				Main.cinematics_mode = toggle_cinematics.getValue();
 			}
 		});
 
@@ -114,6 +131,11 @@ public class InstructionalOverlay extends Widget {
 					Save.loadCinematics();
 				}
 			});
+			
+			add(toggle_cinematics_label);
+			add(toggle_cinematics_checkbox);
+			add(save_cinematics_button);
+			add(load_cinematics_button);
 		}
 
 		add(start_button);
@@ -121,11 +143,12 @@ public class InstructionalOverlay extends Widget {
 		add(load_button);
 		add(export_button);
 		add(load_ply_button);
-		add(save_cinematics_button);
-		add(load_cinematics_button);
+
 		
 		add(toggle_minecraft_label);
-		add(toggle_minecraft_controls);
+		add(toggle_minecraft_checkbox);
+		
+
 
 	}
 
@@ -162,13 +185,22 @@ public class InstructionalOverlay extends Widget {
 				+ save_cinematics_button.getWidth() + 10,
 				save_cinematics_button.getY());
 		
-		toggle_minecraft_controls.adjustSize();
-		toggle_minecraft_controls.setPosition(
-				getInnerWidth() - save_button.getWidth() - 260,
+		toggle_minecraft_checkbox.adjustSize();
+		toggle_minecraft_checkbox.setPosition(
+				save_button.getInnerX(),
 				getInnerY() + 100);
 		
 		toggle_minecraft_label.adjustSize();
 		toggle_minecraft_label.setPosition(
-				toggle_minecraft_controls.getInnerX() + 20, toggle_minecraft_controls.getInnerY());
+				toggle_minecraft_checkbox.getInnerX() + 30, toggle_minecraft_checkbox.getInnerY());
+		
+		toggle_cinematics_checkbox.adjustSize();
+		toggle_cinematics_checkbox.setPosition(
+				save_button.getInnerX(),
+				getInnerY() + 130);
+		
+		toggle_cinematics_label.adjustSize();
+		toggle_cinematics_label.setPosition(
+				toggle_cinematics_checkbox.getInnerX() + 30, toggle_cinematics_checkbox.getInnerY());
 	}
 }
