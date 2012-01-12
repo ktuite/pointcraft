@@ -196,8 +196,8 @@ public class Primitive implements org.json.JSONString {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			for (int h = 0; h < num_textures; h++) {
 				glDisable(GL_TEXTURE_2D);
-				glColor3f(0, 0, 0);
-				glLineWidth(2);
+				glColor3f(.6f, .6f, .6f);
+				glLineWidth(1);
 				Pellet pellet;
 				Vector3f vertex;
 				glBegin(gl_type);
@@ -230,7 +230,6 @@ public class Primitive implements org.json.JSONString {
 
 	public void startDownloadingTexture() {
 		if (texture_url == null) {
-			System.out.println("initing texture url");
 			texture_url = new String[num_textures];
 		}
 
@@ -244,8 +243,8 @@ public class Primitive implements org.json.JSONString {
 
 		if (Main.server.texture_server == null) {
 			// TODO shit this only works for the first quad in a thing right now
-			// System.out.println("making local texture");
-			// TextureMaker.makeTexture(this);
+			//System.out.println("making local texture");
+			//TextureMaker.makeTexture(this);
 		} else {
 
 			for (int i = 0; i < num_textures; i++) {

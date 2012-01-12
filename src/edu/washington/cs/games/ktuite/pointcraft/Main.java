@@ -105,10 +105,10 @@ import de.matthiasmann.twl.renderer.lwjgl.LWJGLRenderer;
 import de.matthiasmann.twl.theme.ThemeManager;
 
 public class Main {
-	private static boolean IS_RELEASE = false;
-	public static float VERSION_NUMBER = 0.7f;
+	private static boolean IS_RELEASE = true;
+	public static float VERSION_NUMBER = 0.8f;
 
-	public static boolean IS_SIGGRAPH_DEMO = true;
+	public static boolean IS_SIGGRAPH_DEMO = true & !IS_RELEASE;
 	public static boolean cinematics_mode = false & IS_SIGGRAPH_DEMO;
 	public static boolean draw_lines = true;
 
@@ -385,13 +385,15 @@ public class Main {
 			PointStore.loadCube();
 		else {
 			// PointStore.load("/Users/ktuite/Code/photocity/plys/fountain-downsample-bin.ply");
-			// PointStore.load("/Users/ktuite/Desktop/things/scan1/reoriented.ply");
+			//PointStore.load("/Users/ktuite/Desktop/things/scan1/reoriented.ply");
 			// PointStore.loadCube();
 			// PointStore.load("data/culdesac2.ply");
-			// PointStore.load("data/uris.ply");
-			// PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
-			 PointStore.loadCube();
+			PointStore.load("data/intel.ply");
+			//PointStore.load("data/desk.ply");
+			//PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
+			 //PointStore.loadCube();
 			//PointStore.load("data/uris.ply");
+			//PointStore.load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 		}
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 
@@ -792,7 +794,7 @@ public class Main {
 
 			if (pan_angle > 360)
 				pan_angle -= 360;
-			if (pan_angle < -360)
+			if (pan_angle < 0)
 				pan_angle += 360;
 		}
 

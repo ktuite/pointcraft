@@ -57,7 +57,7 @@ public class InstructionalOverlay extends Widget {
 		start_button = new Button("Start modeling");
 		save_button = new Button("Save progress");
 		load_button = new Button("Load progress");
-		export_button = new Button("Export as .ply");
+		export_button = new Button("Export");
 		load_ply_button = new Button("Load ply");
 		save_cinematics_button = new Button("Save Scene");
 		load_cinematics_button = new Button("Load Scene");

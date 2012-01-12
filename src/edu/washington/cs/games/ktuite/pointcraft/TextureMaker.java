@@ -19,12 +19,13 @@ public class TextureMaker implements Runnable {
 	private final int n_y = 32;
 	private byte[] uncompressed_data;
 	private Primitive geom;
-	private static ExecutorService executor = Executors.newFixedThreadPool(Math.max(1, Runtime.getRuntime().availableProcessors()-1));
+	private static ExecutorService executor = Executors.newFixedThreadPool(Math
+			.max(1, Runtime.getRuntime().availableProcessors() - 1));
 
 	public static void makeTexture(final Primitive geom) {
 		executor.execute(new TextureMaker(geom));
 	}
-	
+
 	private TextureMaker(Primitive geom) {
 		world_vertices = new Vector3f[4];
 		world_vertices[0] = new Vector3f(geom.getVertices().get(0).pos);
@@ -80,17 +81,52 @@ public class TextureMaker implements Runnable {
 				interp.scale(beta);
 				Vector3f.add(interp, top_interp, interp);
 
-				float radius = .0005f * Main.world_scale * Main.pellet_scale;
-				int idx = PointStore.getNearestPoint(interp.x, interp.y,
+				float radius = (float) (Pellet.default_radius * 1.5);
+
+				/*
+				 * single point mode int idx =
+				 * PointStore.getNearestPoint(interp.x, interp.y, interp.z,
+				 * radius);
+				 * 
+				 * uncompressed_data[3 * (n_x * j + i) + 0] =
+				 * PointStore.point_colors .get(idx * 3 + 0);
+				 * uncompressed_data[3 * (n_x * j + i) + 1] =
+				 * PointStore.point_colors .get(idx * 3 + 1);
+				 * uncompressed_data[3 * (n_x * j + i) + 2] =
+				 * PointStore.point_colors .get(idx * 3 + 2);
+				 */
+
+				int[] indices = PointStore.getNearestPoints(interp.x, interp.y,
 						interp.z, radius);
+				if (indices != null) {
+					int r = 0;
+					int g = 0;
+					int b = 0;
+					float tot_weight = 0;
 
-				uncompressed_data[3 * (n_x * j + i) + 0] = PointStore.point_colors
-						.get(idx * 3 + 0);
-				uncompressed_data[3 * (n_x * j + i) + 1] = PointStore.point_colors
-						.get(idx * 3 + 1);
-				uncompressed_data[3 * (n_x * j + i) + 2] = PointStore.point_colors
-						.get(idx * 3 + 2);
+					for (int k = 0; k < indices.length; k++) {
+						int idx = indices[k];
+						Vector3f otherPt = new Vector3f(
+								PointStore.point_positions.get(idx * 3 + 0),
+								PointStore.point_positions.get(idx * 3 + 1),
+								PointStore.point_positions.get(idx * 3 + 2));
+						Vector3f.sub(otherPt, interp, otherPt);
+						float w = otherPt.length();
+						r += w*(int)PointStore.point_colors.get(idx * 3 + 0);
+						g += w*(int)PointStore.point_colors.get(idx * 3 + 1);
+						b += w*(int)PointStore.point_colors.get(idx * 3 + 2);
+						tot_weight += w;
+					}
 
+					r /= tot_weight;
+					g /= tot_weight;
+					b /= tot_weight;
+					System.out.println("rgb" + r +","+g+","+b);
+
+					uncompressed_data[3 * (n_x * j + i) + 0] = (byte) r;
+					uncompressed_data[3 * (n_x * j + i) + 1] = (byte) g;
+					uncompressed_data[3 * (n_x * j + i) + 2] = (byte) b;
+				}
 			}
 		}
 	}

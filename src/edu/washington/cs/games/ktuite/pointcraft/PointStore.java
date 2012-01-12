@@ -141,6 +141,20 @@ public class PointStore {
 		else
 			return 0;
 	}
+	
+	public static int[] getNearestPoints(float x, float y, float z, float radius) {
+		ArrayList<Vec3D> results = tree.getPointsWithinSphere(
+				new Vec3D(x, y, z), radius);
+		if (results != null){
+			int[] indices = new int[results.size()];
+			for (int i = 0; i < results.size(); i++){
+				indices[i] = index_map.get(results.get(i));
+			}
+			return indices;
+		}
+		else
+			return null;
+	}
 
 	public static int getNumPointsInSphere(float x, float y, float z,
 			float radius) {
@@ -202,6 +216,10 @@ public class PointStore {
 			int x_idx, y_idx, z_idx;
 			r_idx = g_idx = b_idx = x_idx = y_idx = z_idx = 0;
 			a_idx = -1;
+			for (int k = 0; k < 3; k++){
+				min_corner[k] = Float.MAX_VALUE;
+				max_corner[k] = -1 * Float.MAX_VALUE;
+			}
 
 			if (Main.server != null)
 				Main.server.texture_server = null;
