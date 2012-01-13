@@ -33,7 +33,7 @@ public class PlaneScaffold extends Scaffold {
 		c = 0;
 		d = 0;
 	}
-	
+
 	public PlaneScaffold(List<Vector3f> v) {
 		super();
 		a = 0;
@@ -125,7 +125,7 @@ public class PlaneScaffold extends Scaffold {
 		Vector3f.sub(pellets.get(0).pos, pellets.get(2).pos, leg_2);
 		Vector3f norm = new Vector3f();
 		Vector3f.cross(leg_1, leg_2, norm);
-		if (norm.length() == 0){
+		if (norm.length() == 0) {
 			return;
 		}
 		norm.normalise();
@@ -316,27 +316,28 @@ public class PlaneScaffold extends Scaffold {
 
 		return i;
 	}
-	
-	public Vector3f checkForIntersectionLineWithPlaneNoBounds(Vector3f p1, Vector3f p2) {
+
+	public Vector3f checkForIntersectionLineWithPlaneNoBounds(Vector3f p1,
+			Vector3f p2) {
 		Vector3f i = null;
 		float u_denom = a * (p1.x - p2.x) + b * (p1.y - p2.y) + c
 				* (p1.z - p2.z);
 		if (u_denom != 0) {
 			float u_num = a * p1.x + b * p1.y + c * p1.z + d;
 			float u = u_num / u_denom;
-			if (u > 0 && u < 1) {
-				i = new Vector3f();
-				i.x = p1.x + u * (p2.x - p1.x);
-				i.y = p1.y + u * (p2.y - p1.y);
-				i.z = p1.z + u * (p2.z - p1.z);
-			}
+
+			i = new Vector3f();
+			i.x = p1.x + u * (p2.x - p1.x);
+			i.y = p1.y + u * (p2.y - p1.y);
+			i.z = p1.z + u * (p2.z - p1.z);
+
 		}
 
 		return i;
 	}
-	
-	public float planeNormalDotVector(Vector3f v){
-		Vector3f norm = new Vector3f(a,b,c);
+
+	public float planeNormalDotVector(Vector3f v) {
+		Vector3f norm = new Vector3f(a, b, c);
 		norm.normalise();
 		return Vector3f.dot(v, norm);
 	}

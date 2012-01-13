@@ -130,7 +130,9 @@ public class Primitive implements org.json.JSONString {
 
 		} else if (gl_type == GL_POLYGON) {
 			glColor4f(.9f, .9f, .9f, 1);
-			if (textures_loaded) {
+			if (!Main.draw_textures) {
+				glDisable(GL_TEXTURE_2D);
+			} else if (textures_loaded) {
 				glEnable(GL_TEXTURE_2D);
 			} else {
 				glDisable(GL_TEXTURE_2D);
@@ -165,31 +167,33 @@ public class Primitive implements org.json.JSONString {
 					new Vector2f(1, 0), new Vector2f(1, 1) };
 		}
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glEnable(GL_POLYGON_OFFSET_FILL);
-		glPolygonOffset(1f, 1f);
-		for (int h = 0; h < num_textures; h++) {
-			if (textures_loaded) {
-				textures.get(h).bind();
-			}
+		if (Main.draw_polygons) {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			glEnable(GL_POLYGON_OFFSET_FILL);
+			glPolygonOffset(1f, 1f);
+			for (int h = 0; h < num_textures; h++) {
+				if (textures_loaded && Main.draw_textures) {
+					textures.get(h).bind();
+				}
 
-			glBegin(gl_type);
-			Pellet pellet;
-			Vector3f vertex;
-			for (int i = 0; i < tex_coords.length - 1; i++) {
-				pellet = vertices.get(i + h + 1);
+				glBegin(gl_type);
+				Pellet pellet;
+				Vector3f vertex;
+				for (int i = 0; i < tex_coords.length - 1; i++) {
+					pellet = vertices.get(i + h + 1);
+					vertex = pellet.pos;
+					glTexCoord2f(tex_coords[i + 1].x, tex_coords[i + 1].y);
+					glVertex3f(vertex.x, vertex.y, vertex.z);
+				}
+				pellet = vertices.get(0);
 				vertex = pellet.pos;
-				glTexCoord2f(tex_coords[i + 1].x, tex_coords[i + 1].y);
+				glTexCoord2f(tex_coords[0].x, tex_coords[0].y);
 				glVertex3f(vertex.x, vertex.y, vertex.z);
-			}
-			pellet = vertices.get(0);
-			vertex = pellet.pos;
-			glTexCoord2f(tex_coords[0].x, tex_coords[0].y);
-			glVertex3f(vertex.x, vertex.y, vertex.z);
-			glEnd();
+				glEnd();
 
+			}
+			glDisable(GL_POLYGON_OFFSET_FILL);
 		}
-		glDisable(GL_POLYGON_OFFSET_FILL);
 
 		// draw a border around the polygons
 		if (Main.draw_lines) {
@@ -243,8 +247,8 @@ public class Primitive implements org.json.JSONString {
 
 		if (Main.server.texture_server == null) {
 			// TODO shit this only works for the first quad in a thing right now
-			//System.out.println("making local texture");
-			//TextureMaker.makeTexture(this);
+			// System.out.println("making local texture");
+			TextureMaker.makeTexture(this);
 		} else {
 
 			for (int i = 0; i < num_textures; i++) {

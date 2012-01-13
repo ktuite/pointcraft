@@ -81,7 +81,7 @@ public class PolygonPellet extends Pellet {
 						ActionTracker.newPolygonPellet(neighbor_pellet);
 					}
 
-				} /*else if (current_cycle.size() >= 3
+				} else if (current_cycle.size() >= 3
 						&& plane.distanceToPointNoBounds(pos) < radius) {
 					pos.set(plane.closestPoint(pos));
 					constructing = true;
@@ -98,7 +98,7 @@ public class PolygonPellet extends Pellet {
 						makePolygon();
 
 					ActionTracker.newPolygonPellet(this);
-				} */ else if (closest_point != null) {
+				} else if (closest_point != null) {
 					System.out.println("pellet stuck to some geometry");
 					constructing = true;
 
@@ -190,9 +190,10 @@ public class PolygonPellet extends Pellet {
 		polygon.setPlayerPositionAndViewingDirection(pos, vel);
 		Main.geometry.add(polygon);
 
-		ActionTracker
-				.newPolygon(polygon, (Stack<Pellet>) current_cycle.clone(), (Stack<Primitive>) edges_to_display.clone());
-		
+		ActionTracker.newPolygon(polygon,
+				(Stack<Pellet>) current_cycle.clone(),
+				(Stack<Primitive>) edges_to_display.clone());
+
 		edges_to_display.clear();
 		current_cycle.clear();
 		plane.pellets.clear();

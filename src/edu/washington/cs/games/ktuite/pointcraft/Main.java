@@ -105,7 +105,7 @@ import de.matthiasmann.twl.renderer.lwjgl.LWJGLRenderer;
 import de.matthiasmann.twl.theme.ThemeManager;
 
 public class Main {
-	private static boolean IS_RELEASE = true;
+	private static boolean IS_RELEASE = false;
 	public static float VERSION_NUMBER = 0.8f;
 
 	public static boolean IS_SIGGRAPH_DEMO = true & !IS_RELEASE;
@@ -157,6 +157,8 @@ public class Main {
 	public static boolean draw_points = true;
 	public static boolean draw_scaffolding = true;
 	public static boolean draw_pellets = true;
+	public static boolean draw_textures = true;
+	public static boolean draw_polygons = true;
 	public static boolean rotate_world = false;
 
 	public static int picked_polygon = -1;
@@ -207,6 +209,8 @@ public class Main {
 			main.run();
 		} catch (Exception e) {
 			e.printStackTrace();
+			File file = new File("pointcraft_crash_model");
+			Save.writeZipOfModelAndTextures(file);
 		} finally {
 
 			System.exit(0);
@@ -388,11 +392,13 @@ public class Main {
 			//PointStore.load("/Users/ktuite/Desktop/things/scan1/reoriented.ply");
 			// PointStore.loadCube();
 			// PointStore.load("data/culdesac2.ply");
-			PointStore.load("data/intel.ply");
+			//PointStore.load("data/brown_house_dense.ply");
 			//PointStore.load("data/desk.ply");
 			//PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
-			 //PointStore.loadCube();
-			//PointStore.load("data/uris.ply");
+			//PointStore.loadCube();
+			PointStore.load("data/johnson.ply");
+			//PointStore.load("data/lewis_hall.ply");
+			//PointStore.load("data/red_square.ply");
 			//PointStore.load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 		}
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
@@ -654,12 +660,10 @@ public class Main {
 					}
 
 					if (Keyboard.getEventKey() == Keyboard.KEY_T) {
-						// rotate_world = !rotate_world;
-						/*
-						 * tilt_locked = !tilt_locked; if (tilt_locked) {
-						 * last_tilt = tilt_angle; tilt_animation = 30; } else {
-						 * tilt_animation = -30; }
-						 */
+						draw_textures = !draw_textures;
+					}
+					if (Keyboard.getEventKey() == Keyboard.KEY_U) {
+						draw_polygons = !draw_polygons;
 					}
 
 					if (Keyboard.getEventKey() == Keyboard.KEY_X) {

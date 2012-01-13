@@ -15,8 +15,8 @@ import org.lwjgl.util.vector.Vector3f;
 public class TextureMaker implements Runnable {
 
 	private Vector3f[] world_vertices;
-	private final int n_x = 32;
-	private final int n_y = 32;
+	private final int n_x = 64;
+	private final int n_y = 64;
 	private byte[] uncompressed_data;
 	private Primitive geom;
 	private static ExecutorService executor = Executors.newFixedThreadPool(Math
@@ -81,7 +81,7 @@ public class TextureMaker implements Runnable {
 				interp.scale(beta);
 				Vector3f.add(interp, top_interp, interp);
 
-				float radius = (float) (Pellet.default_radius * 1.5);
+				float radius = (float) (Pellet.default_radius );
 
 				/*
 				 * single point mode int idx =
@@ -99,9 +99,9 @@ public class TextureMaker implements Runnable {
 				int[] indices = PointStore.getNearestPoints(interp.x, interp.y,
 						interp.z, radius);
 				if (indices != null) {
-					int r = 0;
-					int g = 0;
-					int b = 0;
+					long r = 0;
+					long g = 0;
+					long b = 0;
 					float tot_weight = 0;
 
 					for (int k = 0; k < indices.length; k++) {
@@ -111,17 +111,16 @@ public class TextureMaker implements Runnable {
 								PointStore.point_positions.get(idx * 3 + 1),
 								PointStore.point_positions.get(idx * 3 + 2));
 						Vector3f.sub(otherPt, interp, otherPt);
-						float w = otherPt.length();
-						r += w*(int)PointStore.point_colors.get(idx * 3 + 0);
-						g += w*(int)PointStore.point_colors.get(idx * 3 + 1);
-						b += w*(int)PointStore.point_colors.get(idx * 3 + 2);
+						float w = 1/otherPt.length();
+						r += w*(short)(PointStore.point_colors.get(idx * 3 + 0)& 0xFF);
+						g += w*(short)(PointStore.point_colors.get(idx * 3 + 1)& 0xFF);
+						b += w*(short)(PointStore.point_colors.get(idx * 3 + 2)& 0xFF);
 						tot_weight += w;
 					}
 
 					r /= tot_weight;
 					g /= tot_weight;
 					b /= tot_weight;
-					System.out.println("rgb" + r +","+g+","+b);
 
 					uncompressed_data[3 * (n_x * j + i) + 0] = (byte) r;
 					uncompressed_data[3 * (n_x * j + i) + 1] = (byte) g;

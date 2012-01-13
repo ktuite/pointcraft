@@ -49,7 +49,6 @@ public class HoverPellet extends Pellet {
 	public static void fixPolygonOfPellet(Pellet p) {
 		for (Primitive g : Main.geometry) {
 			if (g.isPolygon() && g.getVertices().contains(p)) {
-				System.out.println("a polygon cotnains editied pellet");
 				g.refreshTexture();
 			}
 		}
@@ -94,7 +93,6 @@ public class HoverPellet extends Pellet {
 
 	public static void handleDrag() {
 		if (drag_started && target_pellet != null) {
-			System.out.println("handling drag..." + target_pellet_primitive);
 			if (target_pellet_primitive != null)
 				updatePelletInPlane();
 			else
@@ -139,8 +137,10 @@ public class HoverPellet extends Pellet {
 		Vector3f new_pos = target_pellet_primitive.getPlane()
 				.checkForIntersectionLineWithPlaneNoBounds(p1, p2);
 
-		if (new_pos != null)
+		if (new_pos != null){
 			target_pellet.pos.set(new_pos);
+		}
+		
 	}
 
 }
