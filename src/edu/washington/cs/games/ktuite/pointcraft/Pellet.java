@@ -239,7 +239,7 @@ public class Pellet implements org.json.JSONString {
 		temp_pos.y = (float) obj.getJSONArray("pos").getDouble(1);
 		temp_pos.z = (float) obj.getJSONArray("pos").getDouble(2);
 		for (Pellet p : Main.all_pellets_in_world) {
-			if (p.id == world_idx || p.pos == temp_pos) {
+			if (p.pos == temp_pos) {
 				System.out.println("found existing pellet");
 				return p;
 			}
@@ -258,7 +258,7 @@ public class Pellet implements org.json.JSONString {
 		else
 			p = new ScaffoldPellet();
 
-		p.radius = default_radius * 1.5f;
+		p.radius = default_radius  / 7f;
 		p.max_radius = p.radius;
 		p.alive = true;
 		p.constructing = true;
