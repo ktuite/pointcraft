@@ -93,19 +93,22 @@ public class Save {
 
 			// write images to zip
 			for (Primitive geom : Main.geometry) {
-				for (int i = 0; i < geom.local_textures.length; i++) {
-					String filename = geom.local_textures[i];
-					byte[] data = geom.texture_data.get(i);
-					if (filename != null && data != null) {
-						try {
-							ZipEntry tex_entry = new ZipEntry(dir + filename);
-							out.putNextEntry(tex_entry);
-							saveTexture(out, filename, data);
-							out.closeEntry();
-						} catch (ZipException e) {
-							e.printStackTrace();
-						} finally {
+				if (geom.local_textures != null) {
+					for (int i = 0; i < geom.local_textures.length; i++) {
+						String filename = geom.local_textures[i];
+						byte[] data = geom.texture_data.get(i);
+						if (filename != null && data != null) {
+							try {
+								ZipEntry tex_entry = new ZipEntry(dir
+										+ filename);
+								out.putNextEntry(tex_entry);
+								saveTexture(out, filename, data);
+								out.closeEntry();
+							} catch (ZipException e) {
+								e.printStackTrace();
+							} finally {
 
+							}
 						}
 					}
 				}

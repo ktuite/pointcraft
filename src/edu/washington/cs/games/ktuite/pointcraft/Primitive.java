@@ -220,6 +220,125 @@ public class Primitive implements org.json.JSONString {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
+	public void drawSolid() {
+		if (gl_type == GL_LINES) {
+			return;
+		} else if (gl_type == GL_POLYGON) {
+			glColor4f(.9f, .9f, .9f, 1);
+			if (!Main.draw_textures) {
+				glDisable(GL_TEXTURE_2D);
+			} else if (textures_loaded) {
+				glEnable(GL_TEXTURE_2D);
+			} else {
+				glDisable(GL_TEXTURE_2D);
+				if (texture_count == num_textures) {
+					try {
+						for (int i = 0; i < num_textures; i++) {
+							if (texture_data.get(i) == null)
+								break;
+							System.out.println(" texture set!!");
+							textures.set(i, TextureLoader.getTexture(
+									"PNG",
+									new ByteArrayInputStream(texture_data
+											.get(i))));
+						}
+						// texture_data.clear(); // dont clear these anymore
+						// because we want to save them at the end
+						textures_loaded = true;
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+
+		}
+
+		Vector2f[] tex_coords = null;
+		if (is_quad) {
+			tex_coords = new Vector2f[] { new Vector2f(0, 0),
+					new Vector2f(1, 0), new Vector2f(1, 1), new Vector2f(0, 1) };
+		} else {
+			tex_coords = new Vector2f[] { new Vector2f(0, 0),
+					new Vector2f(1, 0), new Vector2f(1, 1) };
+		}
+
+		if (Main.draw_polygons) {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			glEnable(GL_POLYGON_OFFSET_FILL);
+			glPolygonOffset(1f, 1f);
+			for (int h = 0; h < num_textures; h++) {
+				if (textures_loaded && Main.draw_textures) {
+					textures.get(h).bind();
+				}
+
+				glBegin(gl_type);
+				Pellet pellet;
+				Vector3f vertex;
+				for (int i = 0; i < tex_coords.length - 1; i++) {
+					pellet = vertices.get(i + h + 1);
+					vertex = pellet.pos;
+					glTexCoord2f(tex_coords[i + 1].x, tex_coords[i + 1].y);
+					glVertex3f(vertex.x, vertex.y, vertex.z);
+				}
+				pellet = vertices.get(0);
+				vertex = pellet.pos;
+				glTexCoord2f(tex_coords[0].x, tex_coords[0].y);
+				glVertex3f(vertex.x, vertex.y, vertex.z);
+				glEnd();
+
+			}
+			glDisable(GL_POLYGON_OFFSET_FILL);
+		}
+
+	}
+
+	public void drawWireframe() {
+		if (gl_type == GL_LINES) {
+			glColor3f(0, 0, 0);
+			glLineWidth(line_width);
+
+			glBegin(gl_type);
+			for (Pellet p : vertices) {
+				Vector3f vertex = p.pos;
+				glVertex3f(vertex.x, vertex.y, vertex.z);
+			}
+			glEnd();
+			return;
+		}
+
+		Vector2f[] tex_coords = null;
+		if (is_quad) {
+			tex_coords = new Vector2f[] { new Vector2f(0, 0),
+					new Vector2f(1, 0), new Vector2f(1, 1), new Vector2f(0, 1) };
+		} else {
+			tex_coords = new Vector2f[] { new Vector2f(0, 0),
+					new Vector2f(1, 0), new Vector2f(1, 1) };
+		}
+		// draw a border around the polygons
+		if (Main.draw_lines) {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			for (int h = 0; h < num_textures; h++) {
+				glDisable(GL_TEXTURE_2D);
+				glColor3f(.6f, .6f, .6f);
+				glLineWidth(1);
+				Pellet pellet;
+				Vector3f vertex;
+				glBegin(gl_type);
+				for (int i = 0; i < tex_coords.length - 1; i++) {
+					pellet = vertices.get(i + h + 1);
+					vertex = pellet.pos;
+					glVertex3f(vertex.x, vertex.y, vertex.z);
+				}
+				pellet = vertices.get(0);
+				vertex = pellet.pos;
+				glVertex3f(vertex.x, vertex.y, vertex.z);
+				glEnd();
+			}
+		}
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+
 	public void refreshTexture() {
 		System.out.println("refreshing texture");
 		texture_data = new Vector<byte[]>();

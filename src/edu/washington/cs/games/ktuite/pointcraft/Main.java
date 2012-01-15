@@ -1,70 +1,6 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
-import static org.lwjgl.opengl.GL11.GL_BLEND;
-import static org.lwjgl.opengl.GL11.GL_COLOR_ARRAY;
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
-import static org.lwjgl.opengl.GL11.GL_EXP2;
-import static org.lwjgl.opengl.GL11.GL_FOG;
-import static org.lwjgl.opengl.GL11.GL_FOG_COLOR;
-import static org.lwjgl.opengl.GL11.GL_FOG_DENSITY;
-import static org.lwjgl.opengl.GL11.GL_FOG_END;
-import static org.lwjgl.opengl.GL11.GL_FOG_MODE;
-import static org.lwjgl.opengl.GL11.GL_FOG_START;
-import static org.lwjgl.opengl.GL11.GL_LINES;
-import static org.lwjgl.opengl.GL11.GL_LINE_LOOP;
-import static org.lwjgl.opengl.GL11.GL_LINE_SMOOTH;
-import static org.lwjgl.opengl.GL11.GL_MODELVIEW;
-import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
-import static org.lwjgl.opengl.GL11.GL_POINTS;
-import static org.lwjgl.opengl.GL11.GL_PROJECTION;
-import static org.lwjgl.opengl.GL11.GL_PROJECTION_MATRIX;
-import static org.lwjgl.opengl.GL11.GL_QUADS;
-import static org.lwjgl.opengl.GL11.GL_RENDER;
-import static org.lwjgl.opengl.GL11.GL_SELECT;
-import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.GL_VERTEX_ARRAY;
-import static org.lwjgl.opengl.GL11.GL_VIEWPORT;
-import static org.lwjgl.opengl.GL11.glBegin;
-import static org.lwjgl.opengl.GL11.glBlendFunc;
-import static org.lwjgl.opengl.GL11.glClear;
-import static org.lwjgl.opengl.GL11.glClearColor;
-import static org.lwjgl.opengl.GL11.glColor3f;
-import static org.lwjgl.opengl.GL11.glDisable;
-import static org.lwjgl.opengl.GL11.glDisableClientState;
-import static org.lwjgl.opengl.GL11.glDrawArrays;
-import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL11.glEnableClientState;
-import static org.lwjgl.opengl.GL11.glEnd;
-import static org.lwjgl.opengl.GL11.glFlush;
-import static org.lwjgl.opengl.GL11.glFog;
-import static org.lwjgl.opengl.GL11.glFogf;
-import static org.lwjgl.opengl.GL11.glFogi;
-import static org.lwjgl.opengl.GL11.glGetDouble;
-import static org.lwjgl.opengl.GL11.glGetInteger;
-import static org.lwjgl.opengl.GL11.glInitNames;
-import static org.lwjgl.opengl.GL11.glLineWidth;
-import static org.lwjgl.opengl.GL11.glLoadIdentity;
-import static org.lwjgl.opengl.GL11.glLoadMatrix;
-import static org.lwjgl.opengl.GL11.glLoadName;
-import static org.lwjgl.opengl.GL11.glMatrixMode;
-import static org.lwjgl.opengl.GL11.glOrtho;
-import static org.lwjgl.opengl.GL11.glPointSize;
-import static org.lwjgl.opengl.GL11.glPopMatrix;
-import static org.lwjgl.opengl.GL11.glPushMatrix;
-import static org.lwjgl.opengl.GL11.glPushName;
-import static org.lwjgl.opengl.GL11.glRenderMode;
-import static org.lwjgl.opengl.GL11.glRotated;
-import static org.lwjgl.opengl.GL11.glRotatef;
-import static org.lwjgl.opengl.GL11.glScalef;
-import static org.lwjgl.opengl.GL11.glSelectBuffer;
-import static org.lwjgl.opengl.GL11.glTexCoord2f;
-import static org.lwjgl.opengl.GL11.glTranslated;
-import static org.lwjgl.opengl.GL11.glTranslatef;
-import static org.lwjgl.opengl.GL11.glVertex2f;
-import static org.lwjgl.opengl.GL11.glVertex3f;
+import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.util.glu.GLU.gluLookAt;
 import static org.lwjgl.util.glu.GLU.gluPerspective;
 import static org.lwjgl.util.glu.GLU.gluPickMatrix;
@@ -316,7 +252,6 @@ public class Main {
 
 		glEnable(GL_LINE_SMOOTH);
 		glEnable(GL11.GL_POLYGON_SMOOTH);
-		// glEnable(GL_POINT_SMOOTH);
 
 		// skybox texture loaded
 		try {
@@ -396,8 +331,9 @@ public class Main {
 			//PointStore.load("data/desk.ply");
 			//PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
 			//PointStore.loadCube();
-			PointStore.load("data/johnson.ply");
+			//PointStore.load("data/flower.ply");
 			//PointStore.load("data/lewis_hall.ply");
+			PointStore.load("data/uris.ply");
 			//PointStore.load("data/red_square.ply");
 			//PointStore.load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 		}
@@ -911,7 +847,7 @@ public class Main {
 		// this goes here to make the points appear as they should
 		// with new up vector
 		// but gun direction and gun origin is wrong
-		gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
+		//gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
 
 		glEnable(GL_FOG);
 		if (draw_points)
@@ -942,6 +878,7 @@ public class Main {
 	}
 
 	private void displayLoop() {
+		glMatrixMode(GL_MODELVIEW);
 		glClearColor(FOG_COLOR[0], FOG_COLOR[1], FOG_COLOR[2], 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glPushMatrix();
@@ -975,8 +912,14 @@ public class Main {
 				LaserBeamPellet.drawLaserBeamPellet();
 		}
 
+		glClearColor(.3f,.3f,.3f, 1.0f);
+		
 		for (Primitive geom : geometry) {
-			geom.draw();
+			geom.drawSolid();
+		}
+		
+		for (Primitive geom : geometry) {
+			geom.drawWireframe();
 		}
 
 		for (Primitive geom : TriangulationPellet.edges_to_display) {
@@ -1008,6 +951,7 @@ public class Main {
 			drawHud();
 			updateOnscreenGui();
 		}
+
 
 		Display.update();
 	}
@@ -1190,6 +1134,7 @@ public class Main {
 		 * glVertex3d(point_positions.get(0 + 3 * i), point_positions.get(1 + 3
 		 * * i), point_positions.get(2 + 3 * i)); } glEnd();
 		 */
+		
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_COLOR_ARRAY);
 
@@ -1217,6 +1162,7 @@ public class Main {
 		 * all_dead_pellets_in_world.add(pellet); } }
 		 */
 
+		glEnable(GL_DEPTH_TEST);
 		for (Pellet pellet : all_pellets_in_world) {
 			if (pellet.alive) {
 				if (pellet.visible) {
@@ -1319,7 +1265,7 @@ public class Main {
 		glPushMatrix();
 		glLoadIdentity();
 		glOrtho(-1, 1, 1, -1, -1, 1);
-		glColor3f(1f, 1f, 1f);
+		glColor4f(1f, 1f, 1f,1f);
 		float f = (float) (0.05f * Math.sqrt(pellet_scale));
 
 		float aspectRatio = (float) Display.getHeight() / Display.getWidth();
