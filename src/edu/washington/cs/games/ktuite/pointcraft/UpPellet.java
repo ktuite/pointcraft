@@ -59,10 +59,12 @@ public class UpPellet extends Pellet {
 		Scaffold geom = getIntersectedScaffoldGeometry();
 		if (geom instanceof LineScaffold) {
 			LineScaffold line = (LineScaffold) geom;
+			Vector3f up = new Vector3f();
 			Vector3f.sub(line.pellets.get(0).pos, line.pellets.get(1).pos,
-					Main.up_vec);
-			Main.up_vec.normalise();
-			System.out.println("new up vector: " + Main.up_vec);
+					up);
+			up.normalise();
+			VerticalLinePellet.setNewUpVector(up);
+			System.out.println("new up vector: " + up);
 			return true;
 		}
 		return false;

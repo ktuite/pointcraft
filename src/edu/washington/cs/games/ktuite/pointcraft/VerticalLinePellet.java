@@ -13,6 +13,7 @@ public class VerticalLinePellet extends Pellet {
 	public boolean is_upward_pellet = false;
 	public boolean is_downward_pellet = false;
 	private Vector3f last_good_position = new Vector3f();
+	public static Vector3f up_vector = new Vector3f();
 
 	/*
 	 * A Pellet is a magical thing that you can shoot out of a gun that will
@@ -146,19 +147,20 @@ public class VerticalLinePellet extends Pellet {
 		}
 	}
 
+	public static void setNewUpVector(Vector3f new_up){
+		up_vector.set(new_up);
+	}
+	
 	private void attachVerticalLine() {
 		if (bottom_pellet == null || top_pellet == null) {
 			float speed = vel.length() / 2;
-
-			Vector3f new_up = new Vector3f();
-			new_up.set(Main.up_vec);
-			new_up.normalise();
-			new_up.scale(radius * 1.5f);
+			up_vector.normalise();
+			up_vector.scale(radius * 1.5f);
 
 			top_pellet = new VerticalLinePellet();
 			top_pellet.pos.set(pos);
-			Vector3f.add(top_pellet.pos, new_up, top_pellet.pos);
-			top_pellet.vel.set(new_up);
+			Vector3f.add(top_pellet.pos, up_vector, top_pellet.pos);
+			top_pellet.vel.set(up_vector);
 			top_pellet.vel.normalise();
 			top_pellet.vel.scale(speed);
 			top_pellet.is_upward_pellet = true;
@@ -166,8 +168,8 @@ public class VerticalLinePellet extends Pellet {
 
 			bottom_pellet = new VerticalLinePellet();
 			bottom_pellet.pos.set(pos);
-			Vector3f.sub(bottom_pellet.pos, new_up, bottom_pellet.pos);
-			bottom_pellet.vel.set(new_up);
+			Vector3f.sub(bottom_pellet.pos, up_vector, bottom_pellet.pos);
+			bottom_pellet.vel.set(up_vector);
 			bottom_pellet.vel.normalise();
 			bottom_pellet.vel.scale(speed * -1);
 			bottom_pellet.is_downward_pellet = true;

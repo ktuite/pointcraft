@@ -1,7 +1,6 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.util.glu.GLU.gluLookAt;
 import static org.lwjgl.util.glu.GLU.gluPerspective;
 import static org.lwjgl.util.glu.GLU.gluPickMatrix;
 
@@ -25,10 +24,8 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.Timer;
-import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
-import org.lwjgl.util.vector.Vector4f;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.openal.Audio;
 import org.newdawn.slick.openal.AudioLoader;
@@ -52,9 +49,6 @@ public class Main {
 	private float FOG_COLOR[] = new float[] { .89f, .89f, .89f, 1.0f };
 	public static Audio launch_effect;
 	public static Audio attach_effect;
-
-	public static Vector3f up_vec = new Vector3f(0, 1, 0);// 0.05343333f,
-															// 0.0966372f,
 
 	// stuff about the display
 	private static float point_size = 2;
@@ -324,19 +318,19 @@ public class Main {
 			PointStore.loadCube();
 		else {
 			// PointStore.load("/Users/ktuite/Code/photocity/plys/fountain-downsample-bin.ply");
-			//PointStore.load("/Users/ktuite/Desktop/things/scan1/reoriented.ply");
+			// PointStore.load("/Users/ktuite/Desktop/things/scan1/reoriented.ply");
 			// PointStore.loadCube();
-			//PointStore.load("data/culdesac2.ply");
-			//PointStore.load("data/brown_house_dense.ply");
-			//PointStore.load("data/desk.ply");
-			//PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
-			//PointStore.loadCube();
-			//PointStore.load("data/desk.ply");
-			//PointStore.load("data/flower.ply");
+			// PointStore.load("data/culdesac2.ply");
+			// PointStore.load("data/brown_house_dense.ply");
+			// PointStore.load("data/desk.ply");
+			// PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
+			// PointStore.loadCube();
+			// PointStore.load("data/desk.ply");
+			// PointStore.load("data/flower.ply");
 			PointStore.load("data/lewis_hall.ply");
-			//PointStore.load("data/uris.ply");
-			//PointStore.load("data/red_square.ply");
-			//PointStore.load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
+			// PointStore.load("data/uris.ply");
+			// PointStore.load("data/red_square.ply");
+			// PointStore.load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 		}
 		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 
@@ -523,8 +517,7 @@ public class Main {
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
 					Mouse.setGrabbed(!Mouse.isGrabbed());
-				}
-				else if (Keyboard.getEventKey() == Keyboard.KEY_L) {
+				} else if (Keyboard.getEventKey() == Keyboard.KEY_L) {
 					draw_lines = !draw_lines;
 				}
 
@@ -848,7 +841,7 @@ public class Main {
 		// this goes here to make the points appear as they should
 		// with new up vector
 		// but gun direction and gun origin is wrong
-		//gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
+		// gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
 
 		glEnable(GL_FOG);
 		if (draw_points)
@@ -893,14 +886,6 @@ public class Main {
 		glScalef(overhead_scale, overhead_scale, overhead_scale);
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
 
-		// TODO: figure out up vec stuff
-		// this goes here to make the points appear as they should
-		// with new up vector
-		// but gun direction and gun origin is wrong
-
-		if (rotate_world)
-			gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
-
 		glEnable(GL_FOG);
 		if (draw_points)
 			drawPoints(); // draw the actual 3d things
@@ -913,12 +898,12 @@ public class Main {
 				LaserBeamPellet.drawLaserBeamPellet();
 		}
 
-		glClearColor(.3f,.3f,.3f, 1.0f);
-		
+		glClearColor(.3f, .3f, .3f, 1.0f);
+
 		for (Primitive geom : geometry) {
 			geom.drawSolid();
 		}
-		
+
 		for (Primitive geom : geometry) {
 			geom.drawWireframe();
 		}
@@ -952,7 +937,6 @@ public class Main {
 			drawHud();
 			updateOnscreenGui();
 		}
-
 
 		Display.update();
 	}
@@ -1005,9 +989,6 @@ public class Main {
 		glRotatef(tilt_angle, 1.0f, 0.0f, 0.0f); // rotate our camera up/down
 		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
-
-		if (rotate_world)
-			gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
 
 		// draw polygons for picking
 		for (int i = 0; i < all_pellets_in_world.size(); i++) {
@@ -1069,9 +1050,6 @@ public class Main {
 		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
 
-		if (rotate_world)
-			gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
-
 		// draw polygons for picking
 		for (int i = 0; i < geometry.size(); i++) {
 			Primitive g = geometry.get(i);
@@ -1127,15 +1105,6 @@ public class Main {
 	}
 
 	private void drawPoints() {
-		/*
-		 * glPointSize(point_size); glBegin(GL_POINTS); for (int i = 0; i <
-		 * num_points; i += 1) { float r = (float) (point_colors.get(0 + 3 *
-		 * i)); float g = (float) (point_colors.get(1 + 3 * i)); float b =
-		 * (float) (point_colors.get(2 + 3 * i)); glColor3f(r, g, b);
-		 * glVertex3d(point_positions.get(0 + 3 * i), point_positions.get(1 + 3
-		 * * i), point_positions.get(2 + 3 * i)); } glEnd();
-		 */
-		
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_COLOR_ARRAY);
 
@@ -1150,19 +1119,6 @@ public class Main {
 	}
 
 	private void drawPellets() {
-		// temp
-		/*
-		 * for (LinePellet pellet : LinePellet.intersection_points) { if
-		 * (pellet.alive) { glPushMatrix(); glTranslatef(pellet.pos.x,
-		 * pellet.pos.y, pellet.pos.z); pellet.draw(); glPopMatrix(); } else {
-		 * all_dead_pellets_in_world.add(pellet); } }
-		 * 
-		 * for (PlanePellet pellet : PlanePellet.intersection_points) { if
-		 * (pellet.alive) { glPushMatrix(); glTranslatef(pellet.pos.x,
-		 * pellet.pos.y, pellet.pos.z); pellet.draw(); glPopMatrix(); } else {
-		 * all_dead_pellets_in_world.add(pellet); } }
-		 */
-
 		glEnable(GL_DEPTH_TEST);
 		for (Pellet pellet : all_pellets_in_world) {
 			if (pellet.alive) {
@@ -1266,7 +1222,7 @@ public class Main {
 		glPushMatrix();
 		glLoadIdentity();
 		glOrtho(-1, 1, 1, -1, -1, 1);
-		glColor4f(1f, 1f, 1f,1f);
+		glColor4f(1f, 1f, 1f, 1f);
 		float f = (float) (0.05f * Math.sqrt(pellet_scale));
 
 		float aspectRatio = (float) Display.getHeight() / Display.getWidth();
@@ -1338,13 +1294,6 @@ public class Main {
 			glEnd();
 			break;
 		case VERTICAL_LINE:
-			if (rotate_world) {
-				float wall_angle = Vector3f.angle(new Vector3f(up_vec.x,
-						up_vec.y, 0), new Vector3f(0, 1, 0));
-				glPushMatrix();
-				glRotated(wall_angle * 180 / Math.PI, 0, 0, 1);
-				glScalef(1, aspectRatio, 1);
-			}
 			glBegin(GL_LINES);
 			glVertex2f(0, f);
 			glVertex2f(0, -f);
@@ -1496,21 +1445,6 @@ public class Main {
 			pellet.vel.scale(gun_speed);
 			pellet.vel.scale(pellet_scale);
 
-			if (rotate_world) {
-				float angle = Vector3f.angle(
-						new Vector3f(up_vec.x, up_vec.y, 0), new Vector3f(0, 1,
-								0));
-
-				Matrix4f mat = new Matrix4f();
-				mat.setIdentity();
-				mat.rotate(angle, new Vector3f(0, 0, -1));
-
-				Vector4f new_pos = new Vector4f();
-				new_pos.set(pos.x, pos.y, pos.z, 1);
-				Matrix4f.transform(mat, new_pos, new_pos);
-				pellet.pos.set(new_pos.x, new_pos.y, new_pos.z);
-			}
-
 			all_pellets_in_world.add(pellet);
 			server.pelletFiredActionUpdate(pellet.getType());
 		}
@@ -1528,21 +1462,6 @@ public class Main {
 		pellet.vel.scale(gun_speed);
 		pellet.vel.scale(pellet_scale);
 		pellet.pos.set(pos);
-
-		if (rotate_world) {
-			float angle = Vector3f.angle(new Vector3f(up_vec.x, up_vec.y, 0),
-					new Vector3f(0, 1, 0));
-
-			Matrix4f mat = new Matrix4f();
-			mat.setIdentity();
-			mat.rotate(angle, new Vector3f(0, 0, -1));
-
-			Vector4f new_pos = new Vector4f();
-			new_pos.set(pos.x, pos.y, pos.z, 1);
-			Matrix4f.transform(mat, new_pos, new_pos);
-
-			pellet.pos.set(new_pos.x, new_pos.y, new_pos.z);
-		}
 		all_pellets_in_world.add(pellet);
 
 	}
@@ -1559,74 +1478,10 @@ public class Main {
 		gun_direction.z = horiz.y;
 		gun_direction.y = -1 * (float) Math.sin(tilt_angle * 3.14159 / 180f);
 		gun_direction.normalise();
-
-		if (rotate_world) {
-			float angle = Vector3f.angle(new Vector3f(up_vec.x, up_vec.y, 0),
-					new Vector3f(0, 1, 0));
-
-			Matrix4f mat = new Matrix4f();
-			mat.setIdentity();
-			mat.rotate(angle, new Vector3f(0, 0, -1));
-
-			Vector4f new_direction = new Vector4f();
-			new_direction.set(gun_direction.x, gun_direction.y,
-					gun_direction.z, 1);
-			Matrix4f.transform(mat, new_direction, new_direction);
-			gun_direction.set(new_direction);
-		}
-	}
-
-	public static void rotateVector(Vector3f v) {
-		float angle = -1 * Vector3f.angle(up_vec, new Vector3f(0, 1, 0));
-
-		Vector3f cross = new Vector3f();
-		Vector3f.cross(up_vec, new Vector3f(0, 1, 0), cross);
-
-		Matrix4f mat = new Matrix4f();
-		mat.setIdentity();
-		mat.rotate(angle, cross);
-
-		Vector4f new_direction = new Vector4f();
-		new_direction.set(v.x, v.y, v.z, 1);
-		Matrix4f.transform(mat, new_direction, new_direction);
-		v.set(new_direction);
 	}
 
 	public static Vector3f getTransformedPos() {
-		if (!rotate_world)
-			return pos;
-
-		float angle = Vector3f.angle(new Vector3f(up_vec.x, up_vec.y, 0),
-				new Vector3f(0, 1, 0));
-
-		Matrix4f mat = new Matrix4f();
-		mat.setIdentity();
-		mat.rotate(angle, new Vector3f(0, 0, -1));
-
-		Vector4f new_pos = new Vector4f();
-		new_pos.set(pos.x, pos.y, pos.z, 1);
-		Matrix4f.transform(mat, new_pos, new_pos);
-		return new Vector3f(new_pos);
-	}
-
-	@SuppressWarnings("unused")
-	private void calculateUpVectorAdjustment(Vector3f new_up) {
-		new_up.set(-0.05343333f, -0.9966372f, 0.062121693f);
-		Vector3f old_up = new Vector3f(0, 1, 0);
-		new_up.negate();
-		Vector3f rotation_axis = new Vector3f();
-		Vector3f.cross(old_up, new_up, rotation_axis);
-		float rotation_angle = -1
-				* (float) Math.acos(Vector3f.dot(old_up, new_up)) * 180
-				/ (float) Math.PI;
-
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glRotatef(rotation_angle, rotation_axis.x, rotation_axis.y,
-				rotation_axis.z);
-
-		System.out.println("rotation angle: " + rotation_angle);
-		System.out.println("rotation axis: " + rotation_axis);
+		return pos;
 	}
 
 	/**
