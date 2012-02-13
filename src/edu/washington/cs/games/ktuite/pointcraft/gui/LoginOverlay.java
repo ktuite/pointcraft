@@ -146,7 +146,7 @@ public class LoginOverlay extends Widget {
 						.toLowerCase();
 				String error_text = Main.server.attemptLogin(username, hashed);
 				if (error_text == null) {
-					Main.is_logged_in = true;
+					GuiManager.is_logged_in = true;
 				} else {
 					errorLabel.setText(error_text);
 					//btnLogin.setText("USE OFFLINE MODE");

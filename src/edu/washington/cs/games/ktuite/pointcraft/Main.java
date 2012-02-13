@@ -36,9 +36,8 @@ import de.matthiasmann.twl.renderer.lwjgl.LWJGLRenderer;
 import de.matthiasmann.twl.theme.ThemeManager;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Primitive;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Scaffold;
-import edu.washington.cs.games.ktuite.pointcraft.gui.InstructionalOverlay;
+import edu.washington.cs.games.ktuite.pointcraft.gui.GuiManager;
 import edu.washington.cs.games.ktuite.pointcraft.gui.LoginOverlay;
-import edu.washington.cs.games.ktuite.pointcraft.gui.OnscreenOverlay;
 import edu.washington.cs.games.ktuite.pointcraft.tools.CameraGun;
 import edu.washington.cs.games.ktuite.pointcraft.tools.DestructorPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.HoverPellet;
@@ -54,7 +53,7 @@ import edu.washington.cs.games.ktuite.pointcraft.tools.UpPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.VerticalLinePellet;
 
 public class Main {
-	private static boolean IS_RELEASE = false;
+	public static boolean IS_RELEASE = false;
 	public static float VERSION_NUMBER = 0.8f;
 
 	public static boolean IS_SIGGRAPH_DEMO = true & !IS_RELEASE;
@@ -81,6 +80,8 @@ public class Main {
 	private double max_speed = 1 * world_scale;
 	private Texture skybox = null;
 
+	public GuiManager gui_manager = null;
+	
 	public static boolean minecraft_flight = false;
 
 	// stuff about the point cloud
@@ -124,15 +125,7 @@ public class Main {
 		PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM, TRIANGULATION
 	}
 
-	public GunMode which_gun;
-
-	private GUI onscreen_gui;
-	private GUI instructional_gui;
-	private OnscreenOverlay onscreen_overlay;
-	private InstructionalOverlay instruction_overlay;
-
-	public static boolean is_logged_in = !IS_RELEASE;
-	private GUI login_gui;
+	public static GunMode which_gun;
 
 	// SIGGRAPH stuff
 	public static boolean animatingToSavedView = false;
@@ -183,38 +176,7 @@ public class Main {
 	}
 
 	private void initGUI() {
-
-		LWJGLRenderer renderer;
-		try {
-			renderer = new LWJGLRenderer();
-			onscreen_overlay = new OnscreenOverlay();
-			onscreen_gui = new GUI(onscreen_overlay, renderer);
-			URL url = ResourceLoader.getResource("theme/onscreen.xml");
-			ThemeManager themeManager = ThemeManager.createThemeManager(url,
-					renderer);
-			onscreen_gui.applyTheme(themeManager);
-
-			instruction_overlay = new InstructionalOverlay();
-			instruction_overlay.setPointerToMainProgram(this);
-			instructional_gui = new GUI(instruction_overlay, renderer);
-			URL url2 = ResourceLoader.getResource("theme/guiTheme.xml");
-			ThemeManager themeManager2 = ThemeManager.createThemeManager(url2,
-					renderer);
-			instructional_gui.applyTheme(themeManager2);
-
-			login_gui = new GUI(new LoginOverlay(), renderer);
-			URL url3 = ResourceLoader.getResource("theme/login.xml");
-			ThemeManager themeManager3 = ThemeManager.createThemeManager(url3,
-					renderer);
-			login_gui.applyTheme(themeManager3);
-
-		} catch (LWJGLException e) {
-			e.printStackTrace();
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		gui_manager = new GuiManager(this);
 	}
 
 	private void initGraphics() {
@@ -376,11 +338,11 @@ public class Main {
 		while (!Display.isCloseRequested()) {
 			Timer.tick();
 
-			if (!is_logged_in) {
+			if (!GuiManager.is_logged_in) {
 				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT
 						| GL11.GL_DEPTH_BUFFER_BIT);
 				glClearColor(1, 1, 1, 1);
-				login_gui.update();
+				gui_manager.updateLoginGui();
 				Display.update();
 			} else {
 				if (Mouse.isGrabbed()) {
@@ -389,7 +351,8 @@ public class Main {
 					displayLoop(); // draw things on the screen
 
 				} else {
-					updateInstructionalGui();
+					gui_manager.updateInstructionalGui();
+					Display.update();
 					instructionalEventLoop();
 				}
 
@@ -938,29 +901,13 @@ public class Main {
 
 		if (!cinematics_mode) {
 			drawHud();
-			updateOnscreenGui();
+			gui_manager.updateOnscreenGui();
 		}
 
 		Display.update();
 	}
 
-	private void updateOnscreenGui() {
-		if (onscreen_gui != null) {
-			onscreen_overlay.label_current_mode.setText("Current Gun: "
-					+ which_gun);
-			onscreen_overlay.label_last_action.setText("Last Action: "
-					+ ActionTracker.showLatestAction());
-			onscreen_gui.update();
-		}
-	}
 
-	private void updateInstructionalGui() {
-		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
-		if (instructional_gui != null) {
-			instructional_gui.update();
-		}
-		Display.update();
-	}
 
 	private void drawPoints() {
 		glEnableClientState(GL_VERTEX_ARRAY);

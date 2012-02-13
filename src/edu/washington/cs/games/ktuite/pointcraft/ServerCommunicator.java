@@ -9,6 +9,7 @@ import java.net.URLEncoder;
 
 import org.json.JSONStringer;
 
+import edu.washington.cs.games.ktuite.pointcraft.gui.GuiManager;
 import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
 
 public class ServerCommunicator {
@@ -38,7 +39,7 @@ public class ServerCommunicator {
 			System.out.println("no server available");
 		}
 		
-		if (is_connected && Main.is_logged_in){
+		if (is_connected && GuiManager.is_logged_in){
 			getKathleenSession();
 		}
 
@@ -301,7 +302,7 @@ public class ServerCommunicator {
 	}
 
 	public void startOfflineMode() {
-		Main.is_logged_in = true;
+		GuiManager.is_logged_in = true;
 		player_id = -1;
 		session_id = -1;
 	}
