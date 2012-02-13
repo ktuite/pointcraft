@@ -2,7 +2,6 @@ package edu.washington.cs.games.ktuite.pointcraft;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.util.glu.GLU.gluPerspective;
-import static org.lwjgl.util.glu.GLU.gluPickMatrix;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +11,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.Stack;
 
 import org.lwjgl.BufferUtils;
@@ -424,19 +422,6 @@ public class Main {
 
 	}
 
-	/*
-	 * private static void undoLastPellet() { if
-	 * (PolygonPellet.current_cycle.size() > 0) {
-	 * PolygonPellet.current_cycle.pop(); // all_pellets_in_world.pop(); } if
-	 * (geometry.size() > 0 && geometry.peek().isPolygon()) { Primitive
-	 * last_poly = geometry.pop(); for (int i = 0; i < last_poly.numVertices() -
-	 * 1; i++) { geometry.pop(); if (all_pellets_in_world.size() > 0) { //
-	 * all_pellets_in_world.pop(); } } PolygonPellet.current_cycle.clear(); }
-	 * else if (geometry.size() > 0) { geometry.pop(); } // TODO: horribly broke
-	 * undoing for making cycles except it wasnt that // great to begin with
-	 * 
-	 * }
-	 */
 	private void updateGameObjects() {
 		if (which_gun == GunMode.DRAG_TO_EDIT)
 			computeGunDirection();
@@ -943,11 +928,11 @@ public class Main {
 
 		glPopMatrix();
 
-		pickPolygon();
+		PickerHelper.pickPolygon();
 
 		if (which_gun == GunMode.COMBINE || which_gun == GunMode.DRAG_TO_EDIT) {
 			HoverPellet.dimAllPellets();
-			pickPellet();
+			PickerHelper.pickPellet();
 			HoverPellet.illuminatePellet();
 		}
 
@@ -975,151 +960,6 @@ public class Main {
 			instructional_gui.update();
 		}
 		Display.update();
-	}
-
-	private void pickPellet() {
-		int x = Display.getDisplayMode().getWidth() / 2;
-		int y = Display.getDisplayMode().getHeight() / 2;
-		final int BUFSIZE = 512;
-		int[] selectBuf = new int[BUFSIZE];
-		IntBuffer selectBuffer = BufferUtils.createIntBuffer(BUFSIZE);
-		IntBuffer viewport = BufferUtils.createIntBuffer(16);
-		int hits;
-
-		glGetInteger(GL_VIEWPORT, viewport);
-		glSelectBuffer(selectBuffer);
-		glRenderMode(GL_SELECT);
-
-		glInitNames();
-		glPushName(-1);
-
-		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
-		/* create 5x5 pixel picking region near cursor location */
-		gluPickMatrix((float) x, (float) (viewport.get(3) - y), 5.0f, 5.0f,
-				viewport);
-		gluPerspective(60, Display.getDisplayMode().getWidth()
-				/ Display.getDisplayMode().getHeight(), .001f, 1000.0f);
-
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glRotatef(tilt_angle, 1.0f, 0.0f, 0.0f); // rotate our camera up/down
-		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
-		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
-
-		// draw polygons for picking
-		for (int i = 0; i < all_pellets_in_world.size(); i++) {
-			Pellet pellet = all_pellets_in_world.get(i);
-			if (pellet.alive) {
-				if (pellet.visible) {
-					glPushMatrix();
-					glTranslatef(pellet.pos.x, pellet.pos.y, pellet.pos.z);
-					glLoadName(i);
-					pellet.coloredDraw();
-					glPopMatrix();
-				}
-			}
-		}
-
-		glPopMatrix();
-		glMatrixMode(GL_PROJECTION);
-
-		glPopMatrix();
-		glFlush();
-
-		hits = glRenderMode(GL_RENDER);
-		selectBuffer.get(selectBuf);
-		HoverPellet.hover_pellet = processHits(hits, selectBuf); // which
-																	// polygon
-																	// actually
-		// selected
-
-	}
-
-	private void pickPolygon() {
-		int x = Display.getDisplayMode().getWidth() / 2;
-		int y = Display.getDisplayMode().getHeight() / 2;
-		final int BUFSIZE = 512;
-		int[] selectBuf = new int[BUFSIZE];
-		IntBuffer selectBuffer = BufferUtils.createIntBuffer(BUFSIZE);
-		IntBuffer viewport = BufferUtils.createIntBuffer(16);
-		int hits;
-
-		glGetInteger(GL_VIEWPORT, viewport);
-		glSelectBuffer(selectBuffer);
-		glRenderMode(GL_SELECT);
-
-		glInitNames();
-		glPushName(-1);
-
-		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
-		/* create 5x5 pixel picking region near cursor location */
-		gluPickMatrix((float) x, (float) (viewport.get(3) - y), 5.0f, 5.0f,
-				viewport);
-		gluPerspective(60, Display.getDisplayMode().getWidth()
-				/ Display.getDisplayMode().getHeight(), .001f, 1000.0f);
-
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glRotatef(tilt_angle, 1.0f, 0.0f, 0.0f); // rotate our camera up/down
-		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
-		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
-
-		// draw polygons for picking
-		for (int i = 0; i < geometry.size(); i++) {
-			Primitive g = geometry.get(i);
-			if (g.isPolygon()) {
-				glLoadName(i);
-				g.draw();
-			}
-		}
-
-		glPopMatrix();
-		glMatrixMode(GL_PROJECTION);
-
-		glPopMatrix();
-		glFlush();
-
-		hits = glRenderMode(GL_RENDER);
-		selectBuffer.get(selectBuf);
-		picked_polygon = processHits(hits, selectBuf); // which polygon actually
-														// selected
-	}
-
-	private int processHits(int hits, int buffer[]) {
-		int names, ptr = 0;
-
-		int selected_geometry = -1;
-		int min_dist = Integer.MAX_VALUE;
-
-		// System.out.println("hits = " + hits);
-		// ptr = (GLuint *) buffer;
-		for (int i = 0; i < hits; i++) { /* for each hit */
-			names = buffer[ptr];
-			// System.out.println(" number of names for hit = " + names);
-			ptr++;
-			// System.out.println("  z1 is " + buffer[ptr]);
-			int temp_min_dist = buffer[ptr];
-			ptr++;
-			// System.out.println(" z2 is " + buffer[ptr]);
-			ptr++;
-
-			// System.out.print("\n   the name is ");
-			for (int j = 0; j < names; j++) { /* for each name */
-				// System.out.println("" + buffer[ptr]);
-				if (temp_min_dist < min_dist) {
-					min_dist = temp_min_dist;
-					selected_geometry = buffer[ptr];
-				}
-				ptr++;
-			}
-			// System.out.println();
-		}
-
-		return selected_geometry;
 	}
 
 	private void drawPoints() {
