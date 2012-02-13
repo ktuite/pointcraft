@@ -351,7 +351,7 @@ public class Primitive implements org.json.JSONString {
 		startDownloadingTexture();
 	}
 
-	public void startDownloadingTexture() {
+	public synchronized void startDownloadingTexture() {
 		if (texture_url == null) {
 			texture_url = new String[num_textures];
 		}
@@ -367,7 +367,7 @@ public class Primitive implements org.json.JSONString {
 		if (Main.server.texture_server == null) {
 			// TODO shit this only works for the first quad in a thing right now
 			// System.out.println("making local texture");
-			TextureMaker.makeTexture(this);
+			//TextureMaker.makeTexture(this);
 		} else {
 
 			for (int i = 0; i < num_textures; i++) {

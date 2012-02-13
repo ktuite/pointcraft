@@ -224,7 +224,7 @@ public class Main {
 		proj_ortho.put(5, proj_ortho.get(5) * 40f);
 
 		glLoadIdentity();
-		gluPerspective(60, width / height, .0001f, 100000.0f);
+		gluPerspective(60, width / height, .001f, 100000.0f);
 		proj_persp = BufferUtils.createDoubleBuffer(16);
 		glGetDouble(GL_PROJECTION_MATRIX, proj_persp);
 		proj_intermediate = BufferUtils.createDoubleBuffer(16);
@@ -326,14 +326,15 @@ public class Main {
 			// PointStore.load("/Users/ktuite/Code/photocity/plys/fountain-downsample-bin.ply");
 			//PointStore.load("/Users/ktuite/Desktop/things/scan1/reoriented.ply");
 			// PointStore.loadCube();
-			// PointStore.load("data/culdesac2.ply");
+			//PointStore.load("data/culdesac2.ply");
 			//PointStore.load("data/brown_house_dense.ply");
 			//PointStore.load("data/desk.ply");
 			//PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
 			//PointStore.loadCube();
+			//PointStore.load("data/desk.ply");
 			//PointStore.load("data/flower.ply");
-			//PointStore.load("data/lewis_hall.ply");
-			PointStore.load("data/uris.ply");
+			PointStore.load("data/lewis_hall.ply");
+			//PointStore.load("data/uris.ply");
 			//PointStore.load("data/red_square.ply");
 			//PointStore.load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 		}

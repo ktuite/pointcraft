@@ -258,7 +258,7 @@ public class Pellet implements org.json.JSONString {
 		else
 			p = new ScaffoldPellet();
 
-		p.radius = default_radius  / 7f;
+		p.radius = default_radius  / 2f;
 		p.max_radius = p.radius;
 		p.alive = true;
 		p.constructing = true;

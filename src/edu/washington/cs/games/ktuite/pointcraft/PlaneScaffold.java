@@ -68,7 +68,7 @@ public class PlaneScaffold extends Scaffold {
 		if (center != null) {
 			Vector3f dist_to_center = new Vector3f();
 			Vector3f.sub(pos, center, dist_to_center);
-			if (dist_to_center.length() > plane_extent * 1.2)
+			if (dist_to_center.length() > plane_extent * 2)
 				return dist;
 
 			if (isReady()) {

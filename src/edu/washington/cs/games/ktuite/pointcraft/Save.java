@@ -183,6 +183,10 @@ public class Save {
 	}
 
 	private static void readGeometryFile(BufferedReader in) throws IOException {
+		Main.geometry.clear();
+		Main.geometry_v.clear();
+		Main.all_pellets_in_world.clear();
+		
 		String first_line = in.readLine();
 		JSONObject version_obj;
 		float file_version = 0;
