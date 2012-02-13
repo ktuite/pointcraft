@@ -31,6 +31,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.lwjgl.input.Mouse;
 
+import edu.washington.cs.games.ktuite.pointcraft.geometry.Primitive;
+import edu.washington.cs.games.ktuite.pointcraft.geometry.Scaffold;
+import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
+
 public class Save {
 
 	public static int VERSION = 4;

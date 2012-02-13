@@ -1,4 +1,4 @@
-package edu.washington.cs.games.ktuite.pointcraft;
+package edu.washington.cs.games.ktuite.pointcraft.gui;
 
 import de.matthiasmann.twl.Label;
 import de.matthiasmann.twl.Widget;

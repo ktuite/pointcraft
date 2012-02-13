@@ -12,6 +12,10 @@ import javax.imageio.ImageIO;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Vector3f;
 
+import edu.washington.cs.games.ktuite.pointcraft.geometry.Primitive;
+import edu.washington.cs.games.ktuite.pointcraft.tools.CameraGun;
+import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
+
 public class TextureMaker implements Runnable {
 
 	private Vector3f[] world_vertices;

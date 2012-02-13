@@ -1,4 +1,4 @@
-package edu.washington.cs.games.ktuite.pointcraft;
+package edu.washington.cs.games.ktuite.pointcraft.geometry;
 
 import static org.lwjgl.opengl.GL11.GL_LINES;
 import static org.lwjgl.opengl.GL11.glBegin;
@@ -17,6 +17,11 @@ import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Vector3f;
+
+import edu.washington.cs.games.ktuite.pointcraft.ActionTracker;
+import edu.washington.cs.games.ktuite.pointcraft.Main;
+import edu.washington.cs.games.ktuite.pointcraft.tools.LinePellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
 
 public class PlaneScaffold extends Scaffold {
 

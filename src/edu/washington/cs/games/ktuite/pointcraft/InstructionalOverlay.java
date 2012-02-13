@@ -1,4 +1,4 @@
-package edu.washington.cs.games.ktuite.pointcraft;
+package edu.washington.cs.games.ktuite.pointcraft.gui;
 
 import java.io.File;
 
@@ -9,6 +9,8 @@ import de.matthiasmann.twl.Label;
 import de.matthiasmann.twl.Widget;
 import de.matthiasmann.twl.ToggleButton;
 import de.matthiasmann.twl.model.SimpleBooleanModel;
+import edu.washington.cs.games.ktuite.pointcraft.Main;
+import edu.washington.cs.games.ktuite.pointcraft.Save;
 
 public class InstructionalOverlay extends Widget {
 

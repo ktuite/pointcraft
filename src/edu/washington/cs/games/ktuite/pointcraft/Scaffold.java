@@ -1,4 +1,4 @@
-package edu.washington.cs.games.ktuite.pointcraft;
+package edu.washington.cs.games.ktuite.pointcraft.geometry;
 
 import java.util.List;
 import java.util.Stack;
@@ -6,6 +6,8 @@ import java.util.Stack;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.lwjgl.util.vector.Vector3f;
+
+import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
 
 /* these primitives built out of pellets...
  * keep a list of pellets and then draw lines or polygons between them.

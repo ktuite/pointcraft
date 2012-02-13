@@ -7,6 +7,18 @@ import org.json.JSONException;
 import org.json.JSONStringer;
 import org.lwjgl.util.vector.Vector3f;
 
+import edu.washington.cs.games.ktuite.pointcraft.geometry.LineScaffold;
+import edu.washington.cs.games.ktuite.pointcraft.geometry.PlaneScaffold;
+import edu.washington.cs.games.ktuite.pointcraft.geometry.Primitive;
+import edu.washington.cs.games.ktuite.pointcraft.geometry.Scaffold;
+import edu.washington.cs.games.ktuite.pointcraft.tools.HoverPellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.LinePellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.PlanePellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.PolygonPellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.TriangulationPellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.VerticalLinePellet;
+
 public class ActionTracker {
 
 	// The different types of actions

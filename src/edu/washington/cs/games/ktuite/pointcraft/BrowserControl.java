@@ -1,4 +1,4 @@
-package edu.washington.cs.games.ktuite.pointcraft;
+package edu.washington.cs.games.ktuite.pointcraft.gui;
 
 import java.lang.reflect.Method;
 

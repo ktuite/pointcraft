@@ -1,4 +1,4 @@
-package edu.washington.cs.games.ktuite.pointcraft;
+package edu.washington.cs.games.ktuite.pointcraft.tools;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -13,6 +13,9 @@ import javax.imageio.*;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
+
+import edu.washington.cs.games.ktuite.pointcraft.Main;
+import edu.washington.cs.games.ktuite.pointcraft.Save;
 
 
 public class CameraGun {

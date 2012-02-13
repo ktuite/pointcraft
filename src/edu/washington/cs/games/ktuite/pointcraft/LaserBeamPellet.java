@@ -1,9 +1,10 @@
-package edu.washington.cs.games.ktuite.pointcraft;
+package edu.washington.cs.games.ktuite.pointcraft.tools;
 
 import java.util.List;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import edu.washington.cs.games.ktuite.pointcraft.PointStore;
 import edu.washington.cs.games.ktuite.pointcraft.Main.GunMode;
 
 import static org.lwjgl.opengl.GL11.*;

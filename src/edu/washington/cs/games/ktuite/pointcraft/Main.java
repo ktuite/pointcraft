@@ -36,6 +36,24 @@ import org.newdawn.slick.util.ResourceLoader;
 import de.matthiasmann.twl.GUI;
 import de.matthiasmann.twl.renderer.lwjgl.LWJGLRenderer;
 import de.matthiasmann.twl.theme.ThemeManager;
+import edu.washington.cs.games.ktuite.pointcraft.geometry.Primitive;
+import edu.washington.cs.games.ktuite.pointcraft.geometry.Scaffold;
+import edu.washington.cs.games.ktuite.pointcraft.gui.InstructionalOverlay;
+import edu.washington.cs.games.ktuite.pointcraft.gui.LoginOverlay;
+import edu.washington.cs.games.ktuite.pointcraft.gui.OnscreenOverlay;
+import edu.washington.cs.games.ktuite.pointcraft.tools.CameraGun;
+import edu.washington.cs.games.ktuite.pointcraft.tools.DestructorPellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.HoverPellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.LaserBeamPellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.LinePellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.OrbPellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.PlanePellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.PolygonPellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.ScaffoldPellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.TriangulationPellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.UpPellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.VerticalLinePellet;
 
 public class Main {
 	private static boolean IS_RELEASE = false;

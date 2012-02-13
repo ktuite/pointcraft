@@ -1,8 +1,10 @@
-package edu.washington.cs.games.ktuite.pointcraft;
+package edu.washington.cs.games.ktuite.pointcraft.tools;
 
 
 import org.lwjgl.util.vector.Vector3f;
 
+import edu.washington.cs.games.ktuite.pointcraft.ActionTracker;
+import edu.washington.cs.games.ktuite.pointcraft.Main;
 import static org.lwjgl.opengl.GL11.*;
 
 public class ScaffoldPellet extends Pellet {

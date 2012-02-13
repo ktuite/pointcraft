@@ -1,4 +1,4 @@
-package edu.washington.cs.games.ktuite.pointcraft;
+package edu.washington.cs.games.ktuite.pointcraft.tools;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -9,6 +9,14 @@ import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.lwjgl.util.glu.Sphere;
 import org.lwjgl.util.vector.Vector3f;
+
+import edu.washington.cs.games.ktuite.pointcraft.ActionTracker;
+import edu.washington.cs.games.ktuite.pointcraft.Main;
+import edu.washington.cs.games.ktuite.pointcraft.PointStore;
+import edu.washington.cs.games.ktuite.pointcraft.geometry.LineScaffold;
+import edu.washington.cs.games.ktuite.pointcraft.geometry.PlaneScaffold;
+import edu.washington.cs.games.ktuite.pointcraft.geometry.Primitive;
+import edu.washington.cs.games.ktuite.pointcraft.geometry.Scaffold;
 import static org.lwjgl.opengl.GL11.*;
 
 public class Pellet implements org.json.JSONString {

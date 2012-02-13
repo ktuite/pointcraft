@@ -1,4 +1,4 @@
-package edu.washington.cs.games.ktuite.pointcraft;
+package edu.washington.cs.games.ktuite.pointcraft.gui;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -10,6 +10,7 @@ import de.matthiasmann.twl.EditField;
 import de.matthiasmann.twl.GUI;
 import de.matthiasmann.twl.Label;
 import de.matthiasmann.twl.Widget;
+import edu.washington.cs.games.ktuite.pointcraft.Main;
 
 public class LoginOverlay extends Widget {
 

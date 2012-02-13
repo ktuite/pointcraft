@@ -1,10 +1,15 @@
-package edu.washington.cs.games.ktuite.pointcraft;
+package edu.washington.cs.games.ktuite.pointcraft.tools;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
 import org.lwjgl.util.vector.Vector3f;
+
+import edu.washington.cs.games.ktuite.pointcraft.ActionTracker;
+import edu.washington.cs.games.ktuite.pointcraft.Main;
+import edu.washington.cs.games.ktuite.pointcraft.geometry.PlaneScaffold;
+import edu.washington.cs.games.ktuite.pointcraft.geometry.Primitive;
 import static org.lwjgl.opengl.GL11.*;
 
 public class PolygonPellet extends Pellet {

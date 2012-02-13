@@ -9,6 +9,8 @@ import java.net.URLEncoder;
 
 import org.json.JSONStringer;
 
+import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
+
 public class ServerCommunicator {
 
 	public int player_id, session_id;

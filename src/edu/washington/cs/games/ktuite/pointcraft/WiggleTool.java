@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import edu.washington.cs.games.ktuite.pointcraft.geometry.Primitive;
+import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
+
 public class WiggleTool {
 
 	public static void testWiggle() {
