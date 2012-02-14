@@ -5,8 +5,6 @@ import static org.lwjgl.util.glu.GLU.gluPerspective;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
@@ -31,13 +29,9 @@ import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
 
-import de.matthiasmann.twl.GUI;
-import de.matthiasmann.twl.renderer.lwjgl.LWJGLRenderer;
-import de.matthiasmann.twl.theme.ThemeManager;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Primitive;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Scaffold;
 import edu.washington.cs.games.ktuite.pointcraft.gui.GuiManager;
-import edu.washington.cs.games.ktuite.pointcraft.gui.LoginOverlay;
 import edu.washington.cs.games.ktuite.pointcraft.tools.CameraGun;
 import edu.washington.cs.games.ktuite.pointcraft.tools.DestructorPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.HoverPellet;
@@ -56,7 +50,7 @@ public class Main {
 	public static boolean IS_RELEASE = false;
 	public static float VERSION_NUMBER = 0.8f;
 
-	public static boolean IS_SIGGRAPH_DEMO = true & !IS_RELEASE;
+	public static boolean IS_SIGGRAPH_DEMO = false; //true & !IS_RELEASE;
 	public static boolean cinematics_mode = false & IS_SIGGRAPH_DEMO;
 	public static boolean draw_lines = true;
 

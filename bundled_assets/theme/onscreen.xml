@@ -3,6 +3,7 @@
 <themes>
 
     <images file="chat.png" format="RGBA" filter="linear">
+        <area name="white" xywh="1,1,1,1"/>
         <area name="tooltip.background" border="3" xywh="1,24,7,7" splitx="L3,R3" splity="T3,B3"/>
         <area name="evilframe.background" border="27,10,10,10" xywh="40,1,20,29" splitx="L5,R5" splity="T19,B5"/>
         
@@ -18,6 +19,25 @@
             <frame ref="none" duration="500"/>
         </animation>
         <area name="editfield.selection" tint="#E000FEFF" xywh="1,1,1,1"/>
+        
+        <composed name="itemslot.background" border="5" sizeOverwriteH="40" sizeOverwriteV="40">
+            <alias ref="-innerframe.background"/>
+            <alias ref="white" if="dropOk" tint="#90FFFFFF"/>
+            <alias ref="white" if="dropBlocked" tint="#90FF0000"/>
+        </composed>
+    </images>
+    
+   	<images file="tool_strip.png">
+        <area name="icon.polygon" xywh="0,0,32,32" center="true"/>
+        <area name="icon.pellet" xywh="32,0,32,32" center="true"/>
+        <area name="icon.line" xywh="64,0,32,32" center="true"/>
+        <area name="icon.plane" xywh="96,0,32,32" center="true"/>
+        <area name="icon.wall" xywh="128,0,32,32" center="true"/>
+        <area name="icon.combine" xywh="160,0,32,32" center="true"/>
+        <area name="icon.drag" xywh="192,0,32,32" center="true"/>
+        <area name="icon.direction" xywh="224,0,32,32" center="true"/>
+        <area name="icon.triangle" xywh="256,0,32,32" center="true"/>
+        <area name="icon.camera" xywh="288,0,32,32" center="true"/>
     </images>
 
     <include filename="cursors.xml"/>
@@ -93,7 +113,46 @@
         <theme name="renderer" ref="-defaults"/>
         <param name="autocompletion-height"><int>150</int></param>
     </theme>
-
+    
+    <theme name="inventorypanel" ref="-defaults" allowWildcard="true">
+        <param name="slotSpacing"><int>5</int></param>
+    </theme>
+    
+    <theme name="itemslot" ref="-defaults" allowWildcard="true">
+        <param name="background"><image>itemslot.background</image></param>
+        <param name="border"><border>background.border</border></param>
+        <param name="icons"><map>
+            <param name=""><image>icon.*</image></param>
+        </map></param>
+    </theme>
+    
+    <theme name="resizableframe" ref="-defaults" allowWildcard="true">
+        <param name="background"><image>evilframe.background</image></param>
+        <param name="border"><border>background.border</border></param>
+        <param name="titleAreaTop"><int>1</int></param>
+        <param name="titleAreaLeft"><int>8</int></param>
+        <param name="titleAreaRight"><int>-8</int></param>
+        <param name="titleAreaBottom"><int>15</int></param>
+        <param name="hasCloseButton"><bool>false</bool></param>
+        <param name="closeButtonX"><int>0</int></param>
+        <param name="closeButtonY"><int>0</int></param>
+        <param name="hasResizeHandle"><bool>false</bool></param>
+        <param name="resizeHandleX"><int>0</int></param>
+        <param name="resizeHandleY"><int>0</int></param>
+        <param name="fadeColorInactive"><color>white</color></param>
+        <param name="fadeDurationActivate"><int>0</int></param>
+        <param name="fadeDurationDeactivate"><int>0</int></param>
+        <param name="fadeDurationShow"><int>0</int></param>
+        <param name="fadeDurationHide"><int>0</int></param>
+        <param name="mouseCursor"><cursor>arrow.*</cursor></param>
+        <theme name="title" ref="-defaults">
+            <param name="textAlignment"><enum type="alignment">left</enum></param>
+            <param name="font"><font>black</font></param>
+        </theme>
+        <theme name="closeButton" ref="-defaults"/>
+        <theme name="resizeHandle" ref="-defaults"/>
+    </theme>
+    
     <theme name="onscreenoverlay" ref="-defaults">
     </theme>
     

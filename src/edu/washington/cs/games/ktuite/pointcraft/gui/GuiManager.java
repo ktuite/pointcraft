@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.lwjgl.LWJGLException;
-import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.util.ResourceLoader;
 
@@ -74,8 +73,9 @@ public class GuiManager {
 	
 	public void updateOnscreenGui() {
 		if (onscreen_gui != null) {
-			onscreen_overlay.label_current_mode.setText("Current Gun: "
-					+ Main.which_gun);
+			onscreen_overlay.updateCurrentTool(Main.which_gun);
+			
+			
 			onscreen_overlay.label_last_action.setText("Last Action: "
 					+ ActionTracker.showLatestAction());
 			onscreen_gui.update();
