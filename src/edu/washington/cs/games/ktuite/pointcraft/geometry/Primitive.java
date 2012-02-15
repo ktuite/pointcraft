@@ -23,6 +23,7 @@ import org.newdawn.slick.opengl.TextureLoader;
 
 import edu.washington.cs.games.ktuite.pointcraft.Main;
 import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
+import edu.washington.cs.games.ktuite.pointcraft.geometry.Scoring;
 
 /* these primitives built out of pellets...
  * keep a list of pellets and then draw lines or polygons between them.
@@ -45,6 +46,8 @@ public class Primitive implements org.json.JSONString {
 	private PlaneScaffold plane = null;
 	private static int unique_id = 0;
 
+	private float[] drawColor = {.9f, 0f, .9f, 1f};
+	
 	private void readObject(ObjectInputStream ois)
 			throws ClassNotFoundException, IOException {
 		ois.defaultReadObject();
@@ -96,8 +99,12 @@ public class Primitive implements org.json.JSONString {
 		player_position = new Vector3f(pos);
 		player_viewing_direction = new Vector3f(view);
 		player_viewing_direction.normalise();
-		if (vertices.size() >= 4)
+		if (vertices.size() >= 4) {
+			// scoring
+			double dummy = Scoring.computeTextureScore(this);
+			drawColor[0] = drawColor[1] = drawColor[2] = (float)dummy;
 			startDownloadingTexture();
+		}
 	}
 
 	public boolean isPolygon() {
@@ -132,33 +139,7 @@ public class Primitive implements org.json.JSONString {
 			glEnd();
 
 		} else if (gl_type == GL_POLYGON) {
-			glColor4f(.9f, .9f, .9f, 1);
-			if (!Main.draw_textures) {
-				glDisable(GL_TEXTURE_2D);
-			} else if (textures_loaded) {
-				glEnable(GL_TEXTURE_2D);
-			} else {
-				glDisable(GL_TEXTURE_2D);
-				if (texture_count == num_textures) {
-					try {
-						for (int i = 0; i < num_textures; i++) {
-							if (texture_data.get(i) == null)
-								break;
-							System.out.println(" texture set!!");
-							textures.set(i, TextureLoader.getTexture(
-									"PNG",
-									new ByteArrayInputStream(texture_data
-											.get(i))));
-						}
-						// texture_data.clear(); // dont clear these anymore
-						// because we want to save them at the end
-						textures_loaded = true;
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-
+			drawSolid();
 		}
 
 		Vector2f[] tex_coords = null;
@@ -227,7 +208,7 @@ public class Primitive implements org.json.JSONString {
 		if (gl_type == GL_LINES) {
 			return;
 		} else if (gl_type == GL_POLYGON) {
-			glColor4f(.9f, .9f, .9f, 1);
+			glColor4f(drawColor[0], drawColor[1], drawColor[2], drawColor[3]);
 			if (!Main.draw_textures) {
 				glDisable(GL_TEXTURE_2D);
 			} else if (textures_loaded) {
