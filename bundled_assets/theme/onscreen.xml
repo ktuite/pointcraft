@@ -35,8 +35,8 @@
         <area name="icon.wall" xywh="128,0,32,32" center="true"/>
         <area name="icon.combine" xywh="160,0,32,32" center="true"/>
         <area name="icon.drag" xywh="192,0,32,32" center="true"/>
-        <area name="icon.direction" xywh="224,0,32,32" center="true"/>
-        <area name="icon.triangle" xywh="256,0,32,32" center="true"/>
+        <area name="icon.triangle" xywh="224,0,32,32" center="true"/>
+        <area name="icon.direction" xywh="256,0,32,32" center="true"/>
         <area name="icon.camera" xywh="288,0,32,32" center="true"/>
     </images>
 

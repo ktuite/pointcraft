@@ -17,7 +17,7 @@ public class VerticalLinePellet extends Pellet {
 	public boolean is_upward_pellet = false;
 	public boolean is_downward_pellet = false;
 	private Vector3f last_good_position = new Vector3f();
-	public static Vector3f up_vector = new Vector3f();
+	public static Vector3f up_vector = new Vector3f(0,1,0);
 
 	/*
 	 * A Pellet is a magical thing that you can shoot out of a gun that will

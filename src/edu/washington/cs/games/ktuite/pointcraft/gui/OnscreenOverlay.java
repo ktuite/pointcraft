@@ -5,11 +5,13 @@ import de.matthiasmann.twl.ResizableFrame;
 import de.matthiasmann.twl.Widget;
 import edu.washington.cs.games.ktuite.pointcraft.Main;
 import edu.washington.cs.games.ktuite.pointcraft.Main.GunMode;
+import edu.washington.cs.games.ktuite.pointcraft.geometry.Scoring;
 
 public class OnscreenOverlay extends Widget {
 
 	public Label label_current_mode;
 	public Label label_last_action;
+	public Label label_score;
 	public InventoryPanel inventory_panel;
 	final ResizableFrame frame;
 
@@ -20,6 +22,9 @@ public class OnscreenOverlay extends Widget {
 		label_last_action = new Label("Last action: no actions yet");
 		label_last_action.setTheme("sublabel");
 		add(label_last_action);
+		
+		label_score = new Label("Score: 0");
+		add(label_score);
 		
 		inventory_panel = new InventoryPanel(10, 1);
 		
@@ -42,6 +47,9 @@ public class OnscreenOverlay extends Widget {
 		label_last_action.adjustSize();
 		label_last_action.setPosition(10, 30);
 		
+		label_score.adjustSize();
+		label_score.setPosition(getInnerWidth() - label_score.getWidth() - 10, 10);
+		
 		positionFrame();
 	}
 	
@@ -55,6 +63,7 @@ public class OnscreenOverlay extends Widget {
 	public void updateCurrentTool(GunMode which_gun) {
 		label_current_mode.setText("Current Gun: "
 				+ Main.which_gun);
+		label_score.setText("Score: " + Scoring.points_explained);
 		frame.setTitle("Current Tool: " + which_gun);
 		inventory_panel.setSlotFromMode(which_gun);
 		

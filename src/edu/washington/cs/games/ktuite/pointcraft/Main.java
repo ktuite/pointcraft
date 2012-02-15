@@ -287,7 +287,8 @@ public class Main {
 
 	private void loadData() {
 		if (IS_RELEASE)
-			PointStore.loadCube();
+			PointStore.load("data/lewis_hall.ply");
+			//PointStore.loadCube();
 		else {
 			// PointStore.load("/Users/ktuite/Code/photocity/plys/fountain-downsample-bin.ply");
 			// PointStore.load("/Users/ktuite/Desktop/things/scan1/reoriented.ply");
