@@ -7,7 +7,7 @@ import edu.washington.cs.games.ktuite.pointcraft.PointStore;
 
 public class Scoring {
 	public static int points_explained = 0;
-	
+
 	private static Vector2f barycentricCoords(double x, double y, double z,
 			double ax, double ay, double az, double bx, double by, double bz,
 			double cx, double cy, double cz) {
@@ -44,18 +44,26 @@ public class Scoring {
 	}
 
 	public static double computeTextureScore(Primitive p) {
-		Vector3f a = p.getVertices().get(0).pos;
-		Vector3f b = p.getVertices().get(1).pos;
-		Vector3f c = p.getVertices().get(2).pos;
-		double epsilon = 0.05;
 		int count = 0;
-		for (int i = 0; i < PointStore.num_points; i++) {
-			Vector3f v = PointStore.getIthPoint(i);
-			if (pointInTri(v.x, v.y, v.z, a.x, a.y, a.z, b.x, b.y, b.z, c.x,
-					c.y, c.z, epsilon)) {
-				count++;
+		for (int h = 0; h < p.numVertices() - 3; h++) {
+			Vector3f a = p.getVertices().get(0).pos;
+			Vector3f b = p.getVertices().get(h + 1).pos;
+			Vector3f c = p.getVertices().get(h + 2).pos;
+			double epsilon = 0.05;
+
+			for (int i = 0; i < PointStore.num_points; i++) {
+				if (PointStore.point_properties.get(i) == 0) {
+					Vector3f v = PointStore.getIthPoint(i);
+					if (pointInTri(v.x, v.y, v.z, a.x, a.y, a.z, b.x, b.y, b.z,
+							c.x, c.y, c.z, epsilon)) {
+						count++;
+						//PointStore.point_properties.put(i, (byte) 1);
+						PointStore.changePointColorToRed(i);
+					}
+				}
 			}
 		}
+
 		points_explained += count;
 		return ((double) count) / 1000.0;
 	}

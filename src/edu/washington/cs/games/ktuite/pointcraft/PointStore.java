@@ -24,17 +24,30 @@ public class PointStore {
 	public static int num_points;
 	public static FloatBuffer point_positions;
 	public static ByteBuffer point_colors;
+	public static ByteBuffer point_properties;
 	private static PointOctree tree;
 	public static float min_corner[] = { Float.MAX_VALUE, Float.MAX_VALUE,
 			Float.MAX_VALUE };
 	public static float max_corner[] = { -1 * Float.MAX_VALUE,
 			-1 * Float.MAX_VALUE, -1 * Float.MAX_VALUE };
-	private static Map<Vec3D,Integer> index_map;
+	private static Map<Vec3D, Integer> index_map;
+
+	private static void initBuffers() {
+		point_colors = BufferUtils.createByteBuffer(num_points * 3);
+		point_positions = BufferUtils.createFloatBuffer(num_points * 3);
+		point_properties = BufferUtils.createByteBuffer(num_points * 3);
+		point_colors.rewind();
+		point_positions.rewind();
+		point_properties.rewind();
+
+		for (int i = 0; i < num_points; i++) {
+			point_properties.put(i, (byte) 0);
+		}
+	}
 
 	public static void loadRandom() {
 		num_points = 2000;
-		point_colors = BufferUtils.createByteBuffer(num_points * 3);
-		point_positions = BufferUtils.createFloatBuffer(num_points * 3);
+		initBuffers();
 
 		for (int i = 0; i < num_points; i++) {
 			for (int k = 0; k < 3; k++) {
@@ -56,8 +69,7 @@ public class PointStore {
 		int n = 50000;
 		num_points = n * 6;
 		float s = 0.05f;
-		point_colors = BufferUtils.createByteBuffer(num_points * 3);
-		point_positions = BufferUtils.createFloatBuffer(num_points * 3);
+		initBuffers();
 
 		for (int i = 0; i < num_points; i++) {
 			double[] pos = new double[3];
@@ -141,18 +153,17 @@ public class PointStore {
 		else
 			return 0;
 	}
-	
+
 	public static int[] getNearestPoints(float x, float y, float z, float radius) {
 		ArrayList<Vec3D> results = tree.getPointsWithinSphere(
 				new Vec3D(x, y, z), radius);
-		if (results != null){
+		if (results != null) {
 			int[] indices = new int[results.size()];
-			for (int i = 0; i < results.size(); i++){
+			for (int i = 0; i < results.size(); i++) {
 				indices[i] = index_map.get(results.get(i));
 			}
 			return indices;
-		}
-		else
+		} else
 			return null;
 	}
 
@@ -195,19 +206,19 @@ public class PointStore {
 		tree = new PointOctree(center, max_span);
 		tree.setMinNodeSize(max_span / 2);
 
-		index_map = new HashMap<Vec3D,Integer>();
-		
+		index_map = new HashMap<Vec3D, Integer>();
+
 		for (int i = 0; i < num_points; i++) {
 			final Vec3D vec = new Vec3D((float) point_positions.get(i * 3 + 0),
-										(float) point_positions.get(i * 3 + 1),
-										(float) point_positions.get(i * 3 + 2));
+					(float) point_positions.get(i * 3 + 1),
+					(float) point_positions.get(i * 3 + 2));
 			index_map.put(vec, i);
 			tree.addPoint(vec);
 		}
 		System.out.println("done adding " + tree.getPoints().size()
 				+ " points to lookup tree");
-		
-		//tree.intersectsRay(arg0, arg1, arg2)
+
+		// tree.intersectsRay(arg0, arg1, arg2)
 	}
 
 	private static void parsePlyFile(BufferedReader buf, String filename) {
@@ -216,7 +227,7 @@ public class PointStore {
 			int x_idx, y_idx, z_idx;
 			r_idx = g_idx = b_idx = x_idx = y_idx = z_idx = 0;
 			a_idx = -1;
-			for (int k = 0; k < 3; k++){
+			for (int k = 0; k < 3; k++) {
 				min_corner[k] = Float.MAX_VALUE;
 				max_corner[k] = -1 * Float.MAX_VALUE;
 			}
@@ -283,10 +294,7 @@ public class PointStore {
 			System.out.println(x_idx + "," + y_idx + "," + z_idx + "    "
 					+ r_idx + "," + g_idx + "," + b_idx);
 
-			point_colors = BufferUtils.createByteBuffer(num_points * 3);
-			point_positions = BufferUtils.createFloatBuffer(num_points * 3);
-			point_colors.rewind();
-			point_positions.rewind();
+			initBuffers();
 
 			len += count * 4;
 
@@ -411,5 +419,11 @@ public class PointStore {
 		return new Vector3f((float) point_positions.get(i * 3 + 0),
 				(float) point_positions.get(i * 3 + 1),
 				(float) point_positions.get(i * 3 + 2));
+	}
+	
+	public static void changePointColorToRed(int i) {
+		point_colors.put(i * 3 + 0, (byte) 255);
+		point_colors.put(i * 3 + 1, (byte) 0);
+		point_colors.put(i * 3 + 2, (byte) 0);
 	}
 }
