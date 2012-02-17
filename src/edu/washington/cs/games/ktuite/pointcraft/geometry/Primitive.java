@@ -22,6 +22,7 @@ import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 
 import edu.washington.cs.games.ktuite.pointcraft.Main;
+import edu.washington.cs.games.ktuite.pointcraft.TextureMaker;
 import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Scoring;
 
@@ -350,8 +351,8 @@ public class Primitive implements org.json.JSONString {
 
 		if (Main.server.texture_server == null) {
 			// TODO shit this only works for the first quad in a thing right now
-			// System.out.println("making local texture");
-			//TextureMaker.makeTexture(this);
+			System.out.println("making local texture");
+			TextureMaker.makeTexture(this);
 		} else {
 
 			for (int i = 0; i < num_textures; i++) {

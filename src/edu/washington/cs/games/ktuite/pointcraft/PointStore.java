@@ -13,6 +13,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.lwjgl.BufferUtils;
+import org.lwjgl.util.vector.Matrix3f;
+import org.lwjgl.util.vector.Vector;
+import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
 import toxi.geom.PointOctree;
@@ -21,7 +24,7 @@ import toxi.geom.Vec3D;
 public class PointStore {
 
 	// stuff about the point cloud
-	public static int num_points;
+	public static int num_points, num_cameras;
 	public static FloatBuffer point_positions;
 	public static ByteBuffer point_colors;
 	public static ByteBuffer point_properties;
@@ -31,11 +34,13 @@ public class PointStore {
 	public static float max_corner[] = { -1 * Float.MAX_VALUE,
 			-1 * Float.MAX_VALUE, -1 * Float.MAX_VALUE };
 	private static Map<Vec3D, Integer> index_map;
+	public static FloatBuffer camera_frusta_lines;
 
 	private static void initBuffers() {
 		point_colors = BufferUtils.createByteBuffer(num_points * 3);
 		point_positions = BufferUtils.createFloatBuffer(num_points * 3);
 		point_properties = BufferUtils.createByteBuffer(num_points * 3);
+		camera_frusta_lines = BufferUtils.createFloatBuffer(num_cameras * 3);
 		point_colors.rewind();
 		point_positions.rewind();
 		point_properties.rewind();
@@ -135,9 +140,13 @@ public class PointStore {
 	public static void load(String filename) {
 		try {
 			BufferedReader buf = new BufferedReader(new FileReader(filename));
+			String first_line = buf.readLine();
 
-			if (buf.readLine().startsWith("ply")) {
+			if (first_line.startsWith("ply")) {
 				parsePlyFile(buf, filename);
+				buildLookupTree();
+			} else if (first_line.contains("# Bundle file")) {
+				parseBundleFile(first_line, buf, filename);
 				buildLookupTree();
 			}
 		} catch (Exception e) {
@@ -195,6 +204,9 @@ public class PointStore {
 	}
 
 	private static void buildLookupTree() {
+		point_positions.rewind();
+		point_colors.rewind();
+
 		System.out.println("starting to build lookup tree");
 		Vec3D center = new Vec3D(min_corner[0], min_corner[1], min_corner[2]);
 		float max_span = max_corner[0] - min_corner[0];
@@ -227,13 +239,8 @@ public class PointStore {
 			int x_idx, y_idx, z_idx;
 			r_idx = g_idx = b_idx = x_idx = y_idx = z_idx = 0;
 			a_idx = -1;
-			for (int k = 0; k < 3; k++) {
-				min_corner[k] = Float.MAX_VALUE;
-				max_corner[k] = -1 * Float.MAX_VALUE;
-			}
 
-			if (Main.server != null)
-				Main.server.texture_server = null;
+			initPointStore();
 
 			boolean binary = false;
 			int chars_read = 0;
@@ -409,8 +416,115 @@ public class PointStore {
 			point_colors.rewind();
 			point_positions.rewind();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+
+	private static void initPointStore() {
+		for (int k = 0; k < 3; k++) {
+			min_corner[k] = Float.MAX_VALUE;
+			max_corner[k] = -1 * Float.MAX_VALUE;
+		}
+
+		if (Main.server != null)
+			Main.server.texture_server = null;
+	}
+
+	private static void parseBundleFile(String first_line, BufferedReader buf,
+			String filename) throws IOException {
+		System.out.println("Reading bundle file");
+
+		String version = "";
+		if (first_line.contains("v0.3"))
+			version = "0.3";
+		else if (first_line.contains("v0.5"))
+			version = "0.5";
+
+		String second_line = buf.readLine();
+		num_cameras = 0;
+		num_points = 0;
+
+		num_cameras = Integer.parseInt(second_line.split("\\s+")[0]);
+		num_points = Integer.parseInt(second_line.split("\\s+")[1]);
+
+		System.out.println("Version #: " + version + ", Reading " + num_cameras
+				+ " cameras and " + num_points + " points");
+
+		initBuffers();
+
+		Main.draw_cameras = true;
+		
+		for (int i = 0; i < num_cameras; i++) {
+			double focal_length;
+			Matrix3f r = new Matrix3f();
+			Vector3f t = new Vector3f();
+			Vector2f rd = new Vector2f();
+			String[] s;
+
+			if (version == "0.5") {
+				buf.readLine(); // file name
+			}
+			
+			s = buf.readLine().split("\\s+");
+			focal_length = Double.parseDouble(s[0]);
+			rd.x = Float.parseFloat(s[1]);
+			rd.y = Float.parseFloat(s[2]);
+
+			s = buf.readLine().split("\\s+");
+
+			r.m00 = Float.parseFloat(s[0]);
+			r.m10 = Float.parseFloat(s[1]);
+			r.m20 = Float.parseFloat(s[2]);
+
+			s = buf.readLine().split("\\s+");
+
+			r.m01 = Float.parseFloat(s[0]);
+			r.m11 = Float.parseFloat(s[1]);
+			r.m21 = Float.parseFloat(s[2]);
+
+			s = buf.readLine().split("\\s+");
+
+			r.m02 = Float.parseFloat(s[0]);
+			r.m12 = Float.parseFloat(s[1]);
+			r.m22 = Float.parseFloat(s[2]);
+
+			s = buf.readLine().split("\\s+");
+
+			t.x = Float.parseFloat(s[0]);
+			t.y = Float.parseFloat(s[1]);
+			t.z = Float.parseFloat(s[2]);
+			
+			Vector3f pt = (Vector3f) Matrix3f.transform(Matrix3f.transpose(r, null), t, null).scale(-1f);
+			camera_frusta_lines.put(i*3 + 0, pt.x);
+			camera_frusta_lines.put(i*3 + 1, pt.y);
+			camera_frusta_lines.put(i*3 + 2, pt.z);
+
+		}
+
+		for (int i = 0; i < num_points; i++) {
+			if (version == "0.5") {
+				buf.readLine(); // player id who owns the point
+			}
+			String[] point = buf.readLine().split("\\s+");
+			String[] color = buf.readLine().split("\\s+");
+			buf.readLine(); // features
+
+			point_colors.put((byte) Integer.parseInt(color[0]));
+			point_colors.put((byte) Integer.parseInt(color[1]));
+			point_colors.put((byte) Integer.parseInt(color[2]));
+
+			point_positions.put(Float.parseFloat(point[0]));
+			point_positions.put(Float.parseFloat(point[1]));
+			point_positions.put(Float.parseFloat(point[2]));
+
+			for (int k = 0; k < 3; k++) {
+				if (point_positions.get(i * 3 + k) < min_corner[k]) {
+					min_corner[k] = (float) point_positions.get(i * 3 + k);
+				}
+				if (point_positions.get(i * 3 + k) > max_corner[k]) {
+					max_corner[k] = (float) point_positions.get(i * 3 + k);
+				}
+			}
 		}
 
 	}
@@ -420,7 +534,7 @@ public class PointStore {
 				(float) point_positions.get(i * 3 + 1),
 				(float) point_positions.get(i * 3 + 2));
 	}
-	
+
 	public static void changePointColorToRed(int i) {
 		point_colors.put(i * 3 + 0, (byte) 255);
 		point_colors.put(i * 3 + 1, (byte) 0);

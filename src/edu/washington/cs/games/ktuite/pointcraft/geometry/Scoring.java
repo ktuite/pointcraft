@@ -57,8 +57,8 @@ public class Scoring {
 					if (pointInTri(v.x, v.y, v.z, a.x, a.y, a.z, b.x, b.y, b.z,
 							c.x, c.y, c.z, epsilon)) {
 						count++;
-						//PointStore.point_properties.put(i, (byte) 1);
-						PointStore.changePointColorToRed(i);
+						PointStore.point_properties.put(i, (byte) 1);
+						//PointStore.changePointColorToRed(i);
 					}
 				}
 			}

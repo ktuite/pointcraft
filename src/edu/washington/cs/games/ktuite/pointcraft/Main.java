@@ -50,7 +50,7 @@ public class Main {
 	public static boolean IS_RELEASE = false;
 	public static float VERSION_NUMBER = 0.8f;
 
-	public static boolean IS_SIGGRAPH_DEMO = false; //true & !IS_RELEASE;
+	public static boolean IS_SIGGRAPH_DEMO = false; // true & !IS_RELEASE;
 	public static boolean cinematics_mode = false & IS_SIGGRAPH_DEMO;
 	public static boolean draw_lines = true;
 
@@ -75,7 +75,7 @@ public class Main {
 	private Texture skybox = null;
 
 	public GuiManager gui_manager = null;
-	
+
 	public static boolean minecraft_flight = false;
 
 	// stuff about the point cloud
@@ -100,6 +100,7 @@ public class Main {
 	public static boolean draw_pellets = true;
 	public static boolean draw_textures = true;
 	public static boolean draw_polygons = true;
+	public static boolean draw_cameras = false;
 	public static boolean rotate_world = false;
 
 	public static int picked_polygon = -1;
@@ -114,6 +115,7 @@ public class Main {
 	public static DoubleBuffer proj_persp;
 	public static DoubleBuffer proj_intermediate;
 	public float overhead_scale = 1;
+	
 
 	public enum GunMode {
 		PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM, TRIANGULATION
@@ -288,7 +290,7 @@ public class Main {
 	private void loadData() {
 		if (IS_RELEASE)
 			PointStore.load("data/lewis_hall.ply");
-			//PointStore.loadCube();
+		// PointStore.loadCube();
 		else {
 			// PointStore.load("/Users/ktuite/Code/photocity/plys/fountain-downsample-bin.ply");
 			// PointStore.load("/Users/ktuite/Desktop/things/scan1/reoriented.ply");
@@ -300,7 +302,9 @@ public class Main {
 			// PointStore.loadCube();
 			// PointStore.load("data/desk.ply");
 			// PointStore.load("data/flower.ply");
-			PointStore.load("data/lewis_hall.ply");
+			// PointStore.load("data/lewis_hall.ply");
+			PointStore
+					.load("/Users/ktuite/Code/sketchymodeler/texviewer/cse/kidder.bundle");
 			// PointStore.load("data/uris.ply");
 			// PointStore.load("data/red_square.ply");
 			// PointStore.load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
@@ -807,7 +811,7 @@ public class Main {
 		glEnable(GL_FOG);
 		if (draw_points)
 			drawPoints(); // draw the actual 3d things
-
+		
 		if (draw_pellets) {
 			drawPellets();
 			if (which_gun == GunMode.ORB)
@@ -850,6 +854,9 @@ public class Main {
 		glEnable(GL_FOG);
 		if (draw_points)
 			drawPoints(); // draw the actual 3d things
+
+		if (draw_cameras)
+			drawCameraFrusta();
 
 		if (draw_pellets) {
 			drawPellets();
@@ -902,8 +909,6 @@ public class Main {
 		Display.update();
 	}
 
-
-
 	private void drawPoints() {
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_COLOR_ARRAY);
@@ -913,9 +918,24 @@ public class Main {
 
 		glPointSize(point_size);
 		glDrawArrays(GL_POINTS, 0, num_points);
-
+		
+		//GL11.glVertexPointer(3, 0, PointStore.camera_frusta_lines);
+		//glPointSize(10);
+		//glDrawArrays(GL_POINTS, 0, PointStore.num_cameras);
+		
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_COLOR_ARRAY);
+	}
+	
+	private void drawCameraFrusta(){
+		glColor4f(.3f, .3f, .5f, 1f);
+		glPointSize(10);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		
+		GL11.glVertexPointer(3, 0, PointStore.camera_frusta_lines);
+		glDrawArrays(GL_POINTS, 0, PointStore.num_cameras);
+		
+		glDisableClientState(GL_VERTEX_ARRAY);
 	}
 
 	private void drawPellets() {
