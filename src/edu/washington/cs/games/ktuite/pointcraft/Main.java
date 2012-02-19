@@ -115,7 +115,6 @@ public class Main {
 	public static DoubleBuffer proj_persp;
 	public static DoubleBuffer proj_intermediate;
 	public float overhead_scale = 1;
-	
 
 	public enum GunMode {
 		PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM, TRIANGULATION
@@ -314,8 +313,7 @@ public class Main {
 	}
 
 	private void initData() {
-		world_scale = (float) ((float) ((PointStore.max_corner[1] - PointStore.min_corner[1])) / 0.071716);
-		// lewis hall height for scale ref...
+		// world scale set up by point store
 
 		System.out.println("world scale: " + world_scale);
 		walkforce = 1 / 4000f * world_scale;
@@ -811,7 +809,7 @@ public class Main {
 		glEnable(GL_FOG);
 		if (draw_points)
 			drawPoints(); // draw the actual 3d things
-		
+
 		if (draw_pellets) {
 			drawPellets();
 			if (which_gun == GunMode.ORB)
@@ -918,23 +916,20 @@ public class Main {
 
 		glPointSize(point_size);
 		glDrawArrays(GL_POINTS, 0, num_points);
-		
-		//GL11.glVertexPointer(3, 0, PointStore.camera_frusta_lines);
-		//glPointSize(10);
-		//glDrawArrays(GL_POINTS, 0, PointStore.num_cameras);
-		
+
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_COLOR_ARRAY);
 	}
-	
-	private void drawCameraFrusta(){
-		glColor4f(.3f, .3f, .5f, 1f);
-		glPointSize(10);
+
+	private void drawCameraFrusta() {
+		glColor4f(.3f, .3f, .3f, .6f);
+		glLineWidth(1);
+		
 		glEnableClientState(GL_VERTEX_ARRAY);
-		
+
 		GL11.glVertexPointer(3, 0, PointStore.camera_frusta_lines);
-		glDrawArrays(GL_POINTS, 0, PointStore.num_cameras);
-		
+		glDrawArrays(GL_LINES, 0, PointStore.num_cameras * 16);
+
 		glDisableClientState(GL_VERTEX_ARRAY);
 	}
 

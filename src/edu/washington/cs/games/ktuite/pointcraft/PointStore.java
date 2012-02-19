@@ -10,11 +10,12 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Matrix3f;
-import org.lwjgl.util.vector.Vector;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
@@ -35,12 +36,35 @@ public class PointStore {
 			-1 * Float.MAX_VALUE, -1 * Float.MAX_VALUE };
 	private static Map<Vec3D, Integer> index_map;
 	public static FloatBuffer camera_frusta_lines;
+	private static List<Camera> cameras = new LinkedList<Camera>();
+
+	private static class Camera {
+		Matrix3f r;
+		@SuppressWarnings("unused")
+		Vector3f t;
+		Vector3f pos;
+		float focal_length;
+		int w;
+		int h;
+
+		public Camera(float focal_length2, Matrix3f r2, Vector3f t2,
+				Vector3f pos2, int w2, int h2) {
+			focal_length = focal_length2;
+			r = r2;
+			t = t2;
+			pos = pos2;
+			w = w2;
+			h = h2;
+		}
+
+	}
 
 	private static void initBuffers() {
 		point_colors = BufferUtils.createByteBuffer(num_points * 3);
 		point_positions = BufferUtils.createFloatBuffer(num_points * 3);
 		point_properties = BufferUtils.createByteBuffer(num_points * 3);
-		camera_frusta_lines = BufferUtils.createFloatBuffer(num_cameras * 3);
+		camera_frusta_lines = BufferUtils
+				.createFloatBuffer(num_cameras * 3 * 16);
 		point_colors.rewind();
 		point_positions.rewind();
 		point_properties.rewind();
@@ -453,20 +477,24 @@ public class PointStore {
 		initBuffers();
 
 		Main.draw_cameras = true;
-		
+
 		for (int i = 0; i < num_cameras; i++) {
-			double focal_length;
+			float focal_length;
 			Matrix3f r = new Matrix3f();
 			Vector3f t = new Vector3f();
 			Vector2f rd = new Vector2f();
 			String[] s;
+			int w = 1600; // default image width
+			int h = 1200; // and height
 
 			if (version == "0.5") {
-				buf.readLine(); // file name
+				s = buf.readLine().split("\\s+"); // file name
+				w = Integer.parseInt(s[1]);
+				h = Integer.parseInt(s[2]);
 			}
-			
+
 			s = buf.readLine().split("\\s+");
-			focal_length = Double.parseDouble(s[0]);
+			focal_length = Float.parseFloat(s[0]);
 			rd.x = Float.parseFloat(s[1]);
 			rd.y = Float.parseFloat(s[2]);
 
@@ -493,12 +521,11 @@ public class PointStore {
 			t.x = Float.parseFloat(s[0]);
 			t.y = Float.parseFloat(s[1]);
 			t.z = Float.parseFloat(s[2]);
-			
-			Vector3f pt = (Vector3f) Matrix3f.transform(Matrix3f.transpose(r, null), t, null).scale(-1f);
-			camera_frusta_lines.put(i*3 + 0, pt.x);
-			camera_frusta_lines.put(i*3 + 1, pt.y);
-			camera_frusta_lines.put(i*3 + 2, pt.z);
 
+			Vector3f pos = (Vector3f) Matrix3f.transform(
+					Matrix3f.transpose(r, null), t, null).scale(-1f);
+
+			cameras.add(new Camera(focal_length, r, t, pos, w, h));
 		}
 
 		for (int i = 0; i < num_points; i++) {
@@ -526,7 +553,75 @@ public class PointStore {
 				}
 			}
 		}
+		
+		Main.world_scale = (float) ((float) ((PointStore.max_corner[1] - PointStore.min_corner[1])) / 0.071716);
+		// lewis hall height for scale ref...
+		
+		buildCameraFrustaWithWorldScale();
 
+	}
+
+	private static void buildCameraFrustaWithWorldScale() {
+		for (int i = 0; i < cameras.size(); i++) {
+			Camera c = cameras.get(i);
+			float scale = Main.world_scale / 2000f;
+			float ref_length = (float) (2.0e-3 * Math.min(8000f, c.focal_length));
+			float xExt = 0.5f * c.w * ref_length * scale / c.focal_length;
+			float yExt = 0.5f * c.h * ref_length * scale / c.focal_length;
+			Vector3f pos = c.pos;
+
+			Vector3f pt0 = new Vector3f(-xExt, -yExt, -ref_length * scale);
+			pt0 = Vector3f.add(
+					Matrix3f.transform(Matrix3f.transpose(c.r, null), pt0, null),
+					pos, null);
+
+			Vector3f pt1 = new Vector3f(-xExt, yExt, -ref_length * scale);
+			pt1 = Vector3f.add(
+					Matrix3f.transform(Matrix3f.transpose(c.r, null), pt1, null),
+					pos, null);
+
+			Vector3f pt2 = new Vector3f(xExt, yExt, -ref_length * scale);
+			pt2 = Vector3f.add(
+					Matrix3f.transform(Matrix3f.transpose(c.r, null), pt2, null),
+					pos, null);
+
+			Vector3f pt3 = new Vector3f(xExt, -yExt, -ref_length * scale);
+			pt3 = Vector3f.add(
+					Matrix3f.transform(Matrix3f.transpose(c.r, null), pt3, null),
+					pos, null);
+
+			// center of plane
+			Vector3f pt4 = new Vector3f(0, 0, -ref_length * scale);
+			pt4 = Vector3f.add(Matrix3f.transform(c.r, pt4, null), pos, null);
+
+			int n = 16;
+			addFrustaVertex(i, n, 0, pos);
+			addFrustaVertex(i, n, 1, pt0);
+			addFrustaVertex(i, n, 2, pos);
+			addFrustaVertex(i, n, 3, pt1);
+			addFrustaVertex(i, n, 4, pos);
+			addFrustaVertex(i, n, 5, pt2);
+			addFrustaVertex(i, n, 6, pos);
+			addFrustaVertex(i, n, 7, pt3);
+
+			addFrustaVertex(i, n, 8, pt0);
+			addFrustaVertex(i, n, 9, pt1);
+
+			addFrustaVertex(i, n, 10, pt1);
+			addFrustaVertex(i, n, 11, pt2);
+
+			addFrustaVertex(i, n, 12, pt2);
+			addFrustaVertex(i, n, 13, pt3);
+
+			addFrustaVertex(i, n, 14, pt3);
+			addFrustaVertex(i, n, 15, pt0);
+		}
+	}
+
+	private static void addFrustaVertex(int i, int n, int s, Vector3f v) {
+		camera_frusta_lines.put(i * n * 3 + s * 3 + 0, v.x);
+		camera_frusta_lines.put(i * n * 3 + s * 3 + 1, v.y);
+		camera_frusta_lines.put(i * n * 3 + s * 3 + 2, v.z);
 	}
 
 	public static Vector3f getIthPoint(int i) {
