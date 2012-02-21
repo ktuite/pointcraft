@@ -309,9 +309,8 @@ public class Main {
 			// PointStore.loadCube();
 			// PointStore.load("data/desk.ply");
 			// PointStore.load("data/flower.ply");
-			// PointStore.load("data/lewis_hall.ply");
-			PointStore
-					.load("/Users/ktuite/Code/sketchymodeler/texviewer/cse/kidder.bundle");
+			PointStore.load("data/lewis_hall.ply");
+			//PointStore.load("/Users/ktuite/Code/sketchymodeler/texviewer/cse/kidder.bundle");
 			// PointStore.load("data/uris.ply");
 			// PointStore.load("data/red_square.ply");
 			// PointStore.load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");

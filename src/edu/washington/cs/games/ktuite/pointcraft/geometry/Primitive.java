@@ -48,6 +48,9 @@ public class Primitive implements org.json.JSONString {
 	private static int unique_id = 0;
 
 	private float[] drawColor = {.9f, 0f, .9f, 1f};
+	// for point filtering
+	public Vector3f normal = new Vector3f(0.0f, 1.0f, 0.0f);
+	public Vector3f centroid = new Vector3f(0.0f, 0.0f, 0.0f);
 	
 	private void readObject(ObjectInputStream ois)
 			throws ClassNotFoundException, IOException {
@@ -351,8 +354,8 @@ public class Primitive implements org.json.JSONString {
 
 		if (Main.server.texture_server == null) {
 			// TODO shit this only works for the first quad in a thing right now
-			System.out.println("making local texture");
-			TextureMaker.makeTexture(this);
+			// System.out.println("making local texture");
+			//TextureMaker.makeTexture(this);
 		} else {
 
 			for (int i = 0; i < num_textures; i++) {
