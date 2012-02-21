@@ -1,9 +1,11 @@
 package edu.washington.cs.games.ktuite.pointcraft.gui;
 
+import de.matthiasmann.twl.Button;
 import de.matthiasmann.twl.Label;
 import de.matthiasmann.twl.ResizableFrame;
 import de.matthiasmann.twl.Widget;
 import edu.washington.cs.games.ktuite.pointcraft.Main;
+import edu.washington.cs.games.ktuite.pointcraft.Main.ActivityMode;
 import edu.washington.cs.games.ktuite.pointcraft.Main.GunMode;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Scoring;
 
@@ -12,60 +14,87 @@ public class OnscreenOverlay extends Widget {
 	public Label label_current_mode;
 	public Label label_last_action;
 	public Label label_score;
-	public InventoryPanel inventory_panel;
-	final ResizableFrame frame;
+	public FullInventoryPanel full_inventory_panel;
+	public OnscreenInventoryPanel onscreen_inventory_panel;
+	final ResizableFrame full_frame;
+	final ResizableFrame onscreen_frame;
+	private Button instructions_button;
 
 	public OnscreenOverlay() {
 		label_current_mode = new Label("Current mode: ??");
 		add(label_current_mode);
-		
+
 		label_last_action = new Label("Last action: no actions yet");
 		label_last_action.setTheme("sublabel");
 		add(label_last_action);
-		
+
 		label_score = new Label("Score: 0");
 		add(label_score);
+
+		onscreen_inventory_panel = new OnscreenInventoryPanel(10, 1);
+		full_inventory_panel = new FullInventoryPanel(onscreen_inventory_panel);
+		instructions_button = new Button("Instructions");
+		instructions_button.addCallback(new Runnable() {
+			public void run() {
+				Main.setActivityMode(ActivityMode.INSTRUCTIONS);
+			}
+		});
+
+		full_frame = new ResizableFrame();
+		full_frame.setTitle("Drag and drop tools into your tool palette:");
+		full_frame.setResizableAxis(ResizableFrame.ResizableAxis.NONE);
 		
-		inventory_panel = new InventoryPanel(10, 1);
+		full_inventory_panel.add(instructions_button);
+		full_frame.add(full_inventory_panel);
 		
-		frame = new ResizableFrame();
-		frame.setTitle("Current tool:");
-		frame.setResizableAxis(ResizableFrame.ResizableAxis.NONE);
-        frame.add(inventory_panel);
-		add(frame);
+		add(full_frame);
+
 		
-		
+
+		onscreen_frame = new ResizableFrame();
+		onscreen_frame.setTitle("Current tool:");
+		onscreen_frame.setResizableAxis(ResizableFrame.ResizableAxis.NONE);
+		onscreen_frame.add(onscreen_inventory_panel);
+		add(onscreen_frame);
 	}
 
 	@Override
 	protected void layout() {
 		super.layout();
-		
+
 		label_current_mode.adjustSize();
 		label_current_mode.setPosition(10, 10);
-		
+
 		label_last_action.adjustSize();
 		label_last_action.setPosition(10, 30);
-		
+
 		label_score.adjustSize();
-		label_score.setPosition(getInnerWidth() - label_score.getWidth() - 10, 10);
-		
+		label_score.setPosition(getInnerWidth() - label_score.getWidth() - 10,
+				10);
+
 		positionFrame();
 	}
-	
+
 	void positionFrame() {
-        frame.adjustSize();
-        frame.setPosition(
-                getInnerX() + (getInnerWidth() - frame.getWidth())/2,
-                getInnerHeight() - frame.getHeight() - 10);
-    }
+		
+		full_frame.adjustSize();
+		full_frame.setPosition(getInnerX() + (getInnerWidth() - full_frame.getWidth())
+				/ 2, getInnerY() + (getInnerHeight() - full_frame.getHeight())/2);
+		
+		instructions_button.adjustSize();
+		instructions_button.setPosition(full_frame.getInnerX() + full_frame.getInnerWidth() - instructions_button.getWidth(), full_frame.getInnerY());
+		
+		onscreen_frame.adjustSize();
+		onscreen_frame.setPosition(getInnerX() + (getInnerWidth() - onscreen_frame.getWidth())
+				/ 2, getInnerHeight() - onscreen_frame.getHeight() - 10);
+	}
 
 	public void updateCurrentTool(GunMode which_gun) {
-		label_current_mode.setText("Current Gun: "
-				+ Main.which_gun);
+		label_current_mode.setText("Current Gun: " + Main.which_gun);
 		label_score.setText("Score: " + Scoring.points_explained);
-		frame.setTitle("Current Tool: " + which_gun);
-		inventory_panel.setSlotFromMode(which_gun);
-		
+		onscreen_frame.setTitle("Current Tool: " + which_gun);
+		onscreen_inventory_panel.setSlotFromMode(which_gun);
 	}
+	
+
 }

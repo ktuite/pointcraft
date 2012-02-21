@@ -74,7 +74,7 @@ public class Main {
 	private double max_speed = 1 * world_scale;
 	private Texture skybox = null;
 
-	public GuiManager gui_manager = null;
+	public static GuiManager gui_manager = null;
 
 	public static boolean minecraft_flight = false;
 
@@ -120,7 +120,12 @@ public class Main {
 		PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM, TRIANGULATION
 	}
 
+	public enum ActivityMode {
+		INSTRUCTIONS, MODELING, TOOL_PICKING
+	}
+
 	public static GunMode which_gun;
+	public static ActivityMode which_activity;
 
 	// SIGGRAPH stuff
 	public static boolean animatingToSavedView = false;
@@ -162,7 +167,6 @@ public class Main {
 			Display.setVSyncEnabled(true);
 			Display.create();
 			Display.setTitle("PointCraft FPS-3D-Modeler");
-			Mouse.setGrabbed(!IS_RELEASE);
 		} catch (LWJGLException e) {
 			e.printStackTrace();
 			System.out.println("ERROR running InitDisplay... game exiting");
@@ -172,6 +176,10 @@ public class Main {
 
 	private void initGUI() {
 		gui_manager = new GuiManager(this);
+		if (IS_RELEASE)
+			setActivityMode(ActivityMode.INSTRUCTIONS);
+		else
+			setActivityMode(ActivityMode.MODELING);
 	}
 
 	private void initGraphics() {
@@ -332,12 +340,9 @@ public class Main {
 	}
 
 	private void run() {
-		Mouse.setGrabbed(false);
-		
 		while (!Display.isCloseRequested()) {
 			Timer.tick();
-			
-	
+
 			if (!GuiManager.is_logged_in) {
 				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT
 						| GL11.GL_DEPTH_BUFFER_BIT);
@@ -345,11 +350,13 @@ public class Main {
 				gui_manager.updateLoginGui();
 				Display.update();
 			} else {
-				if (Mouse.isGrabbed()) {
+				if (which_activity == ActivityMode.MODELING) {
 					eventLoop(); // input like mouse and keyboard
 					updateGameObjects();
 					displayLoop(); // draw things on the screen
-
+				} else if (which_activity == ActivityMode.TOOL_PICKING) {
+					toolPickingEventLoop();
+					displayLoop();
 				} else {
 					gui_manager.updateInstructionalGui();
 					Display.update();
@@ -362,7 +369,6 @@ public class Main {
 					dealWithDisplayResize();
 				}
 			}
-			
 
 		}
 
@@ -413,7 +419,17 @@ public class Main {
 		while (Keyboard.next()) {
 			if (Keyboard.getEventKeyState()) {
 				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
-					Mouse.setGrabbed(!Mouse.isGrabbed());
+					setActivityMode(ActivityMode.MODELING);
+				}
+			}
+		}
+	}
+
+	private void toolPickingEventLoop() {
+		while (Keyboard.next()) {
+			if (Keyboard.getEventKeyState()) {
+				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
+					setActivityMode(ActivityMode.MODELING);
 				}
 			}
 		}
@@ -483,7 +499,7 @@ public class Main {
 				// System.out.println("Key: " + Keyboard.getEventKey());
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
-					Mouse.setGrabbed(!Mouse.isGrabbed());
+					setActivityMode(ActivityMode.TOOL_PICKING);
 				} else if (Keyboard.getEventKey() == Keyboard.KEY_L) {
 					draw_lines = !draw_lines;
 				}
@@ -506,55 +522,25 @@ public class Main {
 						draw_pellets = !draw_pellets;
 					}
 
-					if (Keyboard.getEventKey() == Keyboard.KEY_1) {
-						which_gun = GunMode.POLYGON;
-						System.out.println("regular pellet gun selected");
+					if (Keyboard.getEventKey() >= Keyboard.KEY_1
+							&& Keyboard.getEventKey() <= Keyboard.KEY_9) {
+						int key = Keyboard.getEventKey() - Keyboard.KEY_1;
+						GunMode new_mode = gui_manager.getGunModeFromOnscreenToolPalette(key);
+						if (new_mode != null)
+							which_gun = new_mode;
 					}
-					if (Keyboard.getEventKey() == Keyboard.KEY_2) {
-						which_gun = GunMode.PELLET;
-						System.out.println("regular pellet gun selected");
+					if (Keyboard.getEventKey() == Keyboard.KEY_0) {
+						GunMode new_mode = gui_manager.getGunModeFromOnscreenToolPalette(9);
+						if (new_mode != null)
+							which_gun = new_mode;
 					}
-					if (Keyboard.getEventKey() == Keyboard.KEY_3) {
-						which_gun = GunMode.LINE;
-						System.out.println("line fitting pellet gun selected");
-					}
-					if (Keyboard.getEventKey() == Keyboard.KEY_4) {
-						which_gun = GunMode.PLANE;
-						System.out.println("plane fitting pellet gun selected");
-					}
-					if (Keyboard.getEventKey() == Keyboard.KEY_5) {
-						which_gun = GunMode.VERTICAL_LINE;
-						System.out.println("vertical line pellet gun selected");
-					}
-					if (Keyboard.getEventKey() == Keyboard.KEY_6) {
-						which_gun = GunMode.COMBINE;
-						System.out.println("hover edit gun");
-					}
-					if (Keyboard.getEventKey() == Keyboard.KEY_7) {
-						which_gun = GunMode.DRAG_TO_EDIT;
-						System.out.println("drag edit gun");
-					}
-
-					if (Keyboard.getEventKey() == Keyboard.KEY_8) {
-						which_gun = GunMode.TRIANGULATION;
-						// which_gun = GunMode.LASER_BEAM;
-						// System.out.println("laser beam gun");
-					}
-
-					if (Keyboard.getEventKey() == Keyboard.KEY_9) {
-						which_gun = GunMode.DIRECTION_PICKER;
-						System.out
-								.println("shoot at a line to use that line's orientation");
-					}
+					
 					if (Keyboard.getEventKey() == Keyboard.KEY_DELETE
 							|| Keyboard.getEventKey() == Keyboard.KEY_BACK) {
 						which_gun = GunMode.DESTRUCTOR;
 						System.out.println("the gun that deletes things");
 					}
-					if (Keyboard.getEventKey() == Keyboard.KEY_0) {
-						which_gun = GunMode.CAMERA;
-						System.out.println("capture a screenshot");
-					}
+					
 
 					if (Keyboard.getEventKey() == Keyboard.KEY_T) {
 						draw_textures = !draw_textures;
@@ -928,7 +914,7 @@ public class Main {
 	private void drawCameraFrusta() {
 		glColor4f(.3f, .3f, .3f, .6f);
 		glLineWidth(1);
-		
+
 		glEnableClientState(GL_VERTEX_ARRAY);
 
 		GL11.glVertexPointer(3, 0, PointStore.camera_frusta_lines);
@@ -1374,6 +1360,19 @@ public class Main {
 		} catch (LWJGLException e) {
 			System.out.println("Unable to setup mode " + width + "x" + height
 					+ " fullscreen=" + fullscreen + e);
+		}
+	}
+
+	public static void setActivityMode(ActivityMode mode) {
+		which_activity = mode;
+		if (which_activity == ActivityMode.MODELING) {
+			Mouse.setGrabbed(true);
+			gui_manager.showOnscreenTools();
+		} else if (which_activity == ActivityMode.TOOL_PICKING) {
+			Mouse.setGrabbed(false);
+			gui_manager.showFullscreenTools();
+		} else if (which_activity == ActivityMode.INSTRUCTIONS) {
+			Mouse.setGrabbed(false);
 		}
 	}
 }

@@ -114,7 +114,11 @@
         <param name="autocompletion-height"><int>150</int></param>
     </theme>
     
-    <theme name="inventorypanel" ref="-defaults" allowWildcard="true">
+    <theme name="fullinventorypanel" ref="-defaults" allowWildcard="true">
+        <param name="slotSpacing"><int>5</int></param>
+    </theme>
+    
+    <theme name="onscreeninventorypanel" ref="-defaults" allowWildcard="true">
         <param name="slotSpacing"><int>5</int></param>
     </theme>
     

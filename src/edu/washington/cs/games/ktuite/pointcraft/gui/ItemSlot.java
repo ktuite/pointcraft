@@ -37,123 +37,140 @@ import de.matthiasmann.twl.ThemeInfo;
 import de.matthiasmann.twl.Widget;
 import de.matthiasmann.twl.renderer.AnimationState.StateKey;
 import de.matthiasmann.twl.renderer.Image;
+import edu.washington.cs.games.ktuite.pointcraft.Main.GunMode;
 
 /**
- *
+ * 
  * @author Matthias Mann
  */
 public class ItemSlot extends Widget {
-    
-    public static final StateKey STATE_DRAG_ACTIVE = StateKey.get("dragActive");
-    public static final StateKey STATE_DROP_OK = StateKey.get("dropOk");
-    public static final StateKey STATE_DROP_BLOCKED = StateKey.get("dropBlocked");
-    
-    public interface DragListener {
-        public void dragStarted(ItemSlot slot, Event evt);
-        public void dragging(ItemSlot slot, Event evt);
-        public void dragStopped(ItemSlot slot, Event evt);
-    }
-    
-    private String item;
-    private Image icon;
-    private DragListener listener;
-    private boolean dragActive;
-    private ParameterMap icons;
 
-    public ItemSlot() {
-    }
+	public static final StateKey STATE_DRAG_ACTIVE = StateKey.get("dragActive");
+	public static final StateKey STATE_DROP_OK = StateKey.get("dropOk");
+	public static final StateKey STATE_DROP_BLOCKED = StateKey
+			.get("dropBlocked");
 
-    public String getItem() {
-        return item;
-    }
+	public interface DragListener {
+		public void dragStarted(ItemSlot slot, Event evt);
 
-    public void setItem(String item) {
-        this.item = item;
-        findIcon();
-    }
+		public void dragging(ItemSlot slot, Event evt);
 
-    public boolean canDrop() {
-        return item == null;
-    }
-    
-    public Image getIcon() {
-        return icon;
-    }
-    
-    public DragListener getListener() {
-        return listener;
-    }
+		public void dragStopped(ItemSlot slot, Event evt);
+	}
 
-    public void setListener(DragListener listener) {
-        this.listener = listener;
-    }
-    
-    public void setDropState(boolean drop, boolean ok) {
-        AnimationState as = getAnimationState();
-        as.setAnimationState(STATE_DROP_OK, drop && ok);
-        as.setAnimationState(STATE_DROP_BLOCKED, drop && !ok);
-    }
-    
-    @Override
-    protected boolean handleEvent(Event evt) {
-        if(evt.isMouseEventNoWheel()) {
-            if(dragActive) {
-                if(evt.isMouseDragEnd()) {
-                    if(listener != null) {
-                        listener.dragStopped(this, evt);
-                    }
-                    dragActive = false;
-                    getAnimationState().setAnimationState(STATE_DRAG_ACTIVE, false);
-                } else if(listener != null) {
-                    listener.dragging(this, evt);
-                }
-            } else if(evt.isMouseDragEvent()) {
-                dragActive = true;
-                getAnimationState().setAnimationState(STATE_DRAG_ACTIVE, true);
-                if(listener != null) {
-                    listener.dragStarted(this, evt);
-                }
-            }
-            return true;
-        }
-        
-        
-        return super.handleEvent(evt);
-    }
+	private String item;
+	private Image icon;
+	private DragListener listener;
+	private boolean dragActive;
+	private ParameterMap icons;
+	private GunMode gun_mode;
 
-    @Override
-    protected void paintWidget(GUI gui) {
-        if(!dragActive && icon != null) {
-            icon.draw(getAnimationState(), getInnerX(), getInnerY(), getInnerWidth(), getInnerHeight());
-        }
-    }
+	public ItemSlot() {
+	}
 
-    @Override
-    protected void paintDragOverlay(GUI gui, int mouseX, int mouseY, int modifier) {
-        if(icon != null) {
-            final int innerWidth = getInnerWidth();
-            final int innerHeight = getInnerHeight();
-            icon.draw(getAnimationState(),
-                    mouseX - innerWidth/2,
-                    mouseY - innerHeight/2,
-                    innerWidth, innerHeight);
-        }
-    }
+	public String getItem() {
+		return item;
+	}
 
-    @Override
-    protected void applyTheme(ThemeInfo themeInfo) {
-        super.applyTheme(themeInfo);
-        icons = themeInfo.getParameterMap("icons");
-        findIcon();
-    }
-    
-    private void findIcon() {
-        if(item == null || icons == null) {
-            icon = null;
-        } else {
-            icon = icons.getImage(item);
-        }
-    }
-    
-   
+	public void setItem(String item) {
+		this.item = item;
+		findIcon();
+	}
+
+	public void setItemAndGunMode(String item, GunMode mode) {
+		this.item = item;
+		this.gun_mode = mode;
+		findIcon();
+	}
+
+	public GunMode getGunMode() {
+		return gun_mode;
+	}
+
+	public boolean canDrop() {
+		return item == null;
+	}
+
+	public Image getIcon() {
+		return icon;
+	}
+
+	public DragListener getListener() {
+		return listener;
+	}
+
+	public void setListener(DragListener listener) {
+		this.listener = listener;
+	}
+
+	public void setDropState(boolean drop, boolean ok) {
+		AnimationState as = getAnimationState();
+		as.setAnimationState(STATE_DROP_OK, drop && ok);
+		as.setAnimationState(STATE_DROP_BLOCKED, drop && !ok);
+	}
+
+	@Override
+	protected boolean handleEvent(Event evt) {
+		if (evt.isMouseEventNoWheel()) {
+			if (dragActive) {
+				if (evt.isMouseDragEnd()) {
+					if (listener != null) {
+						listener.dragStopped(this, evt);
+					}
+					dragActive = false;
+					getAnimationState().setAnimationState(STATE_DRAG_ACTIVE,
+							false);
+				} else if (listener != null) {
+					listener.dragging(this, evt);
+				}
+			} else if (evt.isMouseDragEvent()) {
+				dragActive = true;
+				getAnimationState().setAnimationState(STATE_DRAG_ACTIVE, true);
+				if (listener != null) {
+					listener.dragStarted(this, evt);
+				}
+			}
+			return true;
+		}
+
+		return super.handleEvent(evt);
+	}
+
+	@Override
+	protected void paintWidget(GUI gui) {
+		if (!dragActive && icon != null) {
+			icon.draw(getAnimationState(), getInnerX(), getInnerY(),
+					getInnerWidth(), getInnerHeight());
+		}
+	}
+
+	@Override
+	protected void paintDragOverlay(GUI gui, int mouseX, int mouseY,
+			int modifier) {
+		if (icon != null) {
+			final int innerWidth = getInnerWidth();
+			final int innerHeight = getInnerHeight();
+			icon.draw(getAnimationState(), mouseX - innerWidth / 2, mouseY
+					- innerHeight / 2, innerWidth, innerHeight);
+		}
+	}
+
+	@Override
+	protected void applyTheme(ThemeInfo themeInfo) {
+		super.applyTheme(themeInfo);
+		icons = themeInfo.getParameterMap("icons");
+		findIcon();
+	}
+
+	private void findIcon() {
+		if (item == null || icons == null) {
+			icon = null;
+		} else {
+			icon = icons.getImage(item);
+		}
+	}
+
+	public String toString() {
+		return "Item slot: " + item + ", " + gun_mode;
+	}
 }

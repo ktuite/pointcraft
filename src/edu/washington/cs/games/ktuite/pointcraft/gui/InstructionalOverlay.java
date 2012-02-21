@@ -10,6 +10,7 @@ import de.matthiasmann.twl.Widget;
 import de.matthiasmann.twl.ToggleButton;
 import de.matthiasmann.twl.model.SimpleBooleanModel;
 import edu.washington.cs.games.ktuite.pointcraft.Main;
+import edu.washington.cs.games.ktuite.pointcraft.Main.ActivityMode;
 import edu.washington.cs.games.ktuite.pointcraft.Save;
 
 public class InstructionalOverlay extends Widget {
@@ -90,6 +91,7 @@ public class InstructionalOverlay extends Widget {
 
 		start_button.addCallback(new Runnable() {
 			public void run() {
+				Main.which_activity = ActivityMode.MODELING;
 				Mouse.setGrabbed(true);
 			}
 		});
