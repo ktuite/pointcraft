@@ -98,8 +98,6 @@ public class InventoryPanel extends Widget {
         tool_map.put(GunMode.TRIANGULATION, 7);
         tool_map.put(GunMode.DIRECTION_PICKER, 8);
         tool_map.put(GunMode.CAMERA, 9);
-        
-        slot[0].setDropState(true, true);
     }
     
     public void setSlotFromMode(GunMode mode){

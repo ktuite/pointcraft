@@ -74,8 +74,6 @@ public class GuiManager {
 	public void updateOnscreenGui() {
 		if (onscreen_gui != null) {
 			onscreen_overlay.updateCurrentTool(Main.which_gun);
-			
-			
 			onscreen_overlay.label_last_action.setText("Last Action: "
 					+ ActionTracker.showLatestAction());
 			onscreen_gui.update();

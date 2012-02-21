@@ -332,9 +332,12 @@ public class Main {
 	}
 
 	private void run() {
+		Mouse.setGrabbed(false);
+		
 		while (!Display.isCloseRequested()) {
 			Timer.tick();
-
+			
+	
 			if (!GuiManager.is_logged_in) {
 				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT
 						| GL11.GL_DEPTH_BUFFER_BIT);
@@ -359,6 +362,7 @@ public class Main {
 					dealWithDisplayResize();
 				}
 			}
+			
 
 		}
 
