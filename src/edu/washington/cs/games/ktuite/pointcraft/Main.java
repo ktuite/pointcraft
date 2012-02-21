@@ -47,8 +47,8 @@ import edu.washington.cs.games.ktuite.pointcraft.tools.UpPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.VerticalLinePellet;
 
 public class Main {
-	public static boolean IS_RELEASE = false;
-	public static float VERSION_NUMBER = 0.8f;
+	public static boolean IS_RELEASE = true;
+	public static float VERSION_NUMBER = 0.9f;
 
 	public static boolean IS_SIGGRAPH_DEMO = false; // true & !IS_RELEASE;
 	public static boolean cinematics_mode = false & IS_SIGGRAPH_DEMO;
@@ -296,8 +296,8 @@ public class Main {
 
 	private void loadData() {
 		if (IS_RELEASE)
-			PointStore.load("data/lewis_hall.ply");
-		// PointStore.loadCube();
+			//PointStore.load("data/lewis_hall.ply");
+			PointStore.loadCube();
 		else {
 			// PointStore.load("/Users/ktuite/Code/photocity/plys/fountain-downsample-bin.ply");
 			// PointStore.load("/Users/ktuite/Desktop/things/scan1/reoriented.ply");

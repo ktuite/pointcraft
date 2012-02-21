@@ -91,7 +91,7 @@ public class InstructionalOverlay extends Widget {
 
 		start_button.addCallback(new Runnable() {
 			public void run() {
-				Main.which_activity = ActivityMode.MODELING;
+				Main.setActivityMode(ActivityMode.MODELING);
 				Mouse.setGrabbed(true);
 			}
 		});
