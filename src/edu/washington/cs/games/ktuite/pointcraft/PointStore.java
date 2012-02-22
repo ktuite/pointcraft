@@ -28,6 +28,9 @@ public class PointStore {
 	public static int num_points, num_cameras;
 	public static FloatBuffer point_positions;
 	public static ByteBuffer point_colors;
+	// VBO state tracking
+	private static boolean point_vbo_dirty = false;
+	
 	public static ByteBuffer point_properties;
 	private static PointOctree tree;
 	public static float min_corner[] = { Float.MAX_VALUE, Float.MAX_VALUE,
@@ -61,6 +64,7 @@ public class PointStore {
 
 	private static void initBuffers() {
 		point_colors = BufferUtils.createByteBuffer(num_points * 3);
+		markPointVBODirty();
 		point_positions = BufferUtils.createFloatBuffer(num_points * 3);
 		point_properties = BufferUtils.createByteBuffer(num_points * 3);
 		camera_frusta_lines = BufferUtils
@@ -74,6 +78,18 @@ public class PointStore {
 		}
 	}
 
+	public static void markPointVBODirty() {
+		point_vbo_dirty = true;
+	}
+	
+	public static void markPointVBOClean() {
+		point_vbo_dirty = false;
+	}
+
+	public static boolean isPointVBODirty() {
+		return point_vbo_dirty;
+	}
+	
 	public static void loadRandom() {
 		num_points = 2000;
 		initBuffers();
@@ -634,5 +650,6 @@ public class PointStore {
 		point_colors.put(i * 3 + 0, (byte) 255);
 		point_colors.put(i * 3 + 1, (byte) 0);
 		point_colors.put(i * 3 + 2, (byte) 0);
+		markPointVBODirty();
 	}
 }
