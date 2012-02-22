@@ -1,6 +1,7 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.util.glu.GLU.gluPerspective;
 
 import java.io.File;
@@ -19,6 +20,7 @@ import org.lwjgl.openal.AL;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
 import org.lwjgl.util.Timer;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
@@ -82,6 +84,10 @@ public class Main {
 	private int num_points;
 	private FloatBuffer point_positions;
 	private ByteBuffer point_colors;
+
+	// stuff for fast rendering of the point cloud
+	private int points_vbo = 0;
+	private int colors_vbo = 0;
 
 	// stuff about general guns and general list of pellets/things shot
 	public static Vector3f gun_direction;
@@ -336,6 +342,9 @@ public class Main {
 		num_points = PointStore.num_points;
 		point_positions = PointStore.point_positions;
 		point_colors = PointStore.point_colors;
+
+		// push data to vidmem
+		setupVBOStuff();
 	}
 
 	private void run() {
@@ -796,8 +805,10 @@ public class Main {
 		// gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
 
 		glEnable(GL_FOG);
-		if (draw_points)
-			drawPoints(); // draw the actual 3d things
+		if (draw_points) {
+			drawVBOStuff();
+			//drawPoints(); // draw the actual 3d things
+		}
 
 		if (draw_pellets) {
 			drawPellets();
@@ -839,8 +850,10 @@ public class Main {
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
 
 		glEnable(GL_FOG);
-		if (draw_points)
-			drawPoints(); // draw the actual 3d things
+		if (draw_points) {
+			//drawPoints(); // draw the actual 3d things
+			drawVBOStuff();
+		}
 
 		if (draw_cameras)
 			drawCameraFrusta();
@@ -908,6 +921,45 @@ public class Main {
 
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_COLOR_ARRAY);
+	}
+
+	private void setupVBOStuff() {
+		if (points_vbo > 0) {
+			GL15.glDeleteBuffers(points_vbo);
+		}
+		points_vbo = GL15.glGenBuffers();
+		if (colors_vbo > 0) {
+			GL15.glDeleteBuffers(colors_vbo);
+		}
+		colors_vbo = GL15.glGenBuffers();
+		System.out.printf("points_vbo: %d\n", points_vbo);
+		System.out.printf("colors_vbo: %d\n", colors_vbo);
+		FloatBuffer vb = point_positions;
+		ByteBuffer cb = point_colors;
+		GL15.glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
+		GL15.glBufferData(GL_ARRAY_BUFFER, vb, GL_STATIC_DRAW);
+		GL15.glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
+		GL15.glBufferData(GL_ARRAY_BUFFER, cb, GL_STATIC_DRAW);
+	}
+
+	private void drawVBOStuff() {
+        GL15.glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
+		GL11.glEnableClientState(GL_COLOR_ARRAY);
+        GL11.glColorPointer(3, GL_UNSIGNED_BYTE, 0, 0);
+
+        GL15.glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
+		GL11.glEnableClientState(GL_VERTEX_ARRAY);
+        GL11.glVertexPointer(3, GL_FLOAT, 0, 0);
+
+        glPointSize(point_size);
+        GL11.glDrawArrays(GL_POINTS, 0, num_points);
+        GL11.glDisableClientState(GL_VERTEX_ARRAY);
+        GL15.glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+	private void teardownVBOStuff() {
+		GL15.glDeleteQueries(points_vbo);
+		GL15.glDeleteQueries(colors_vbo);
 	}
 
 	private void drawCameraFrusta() {
