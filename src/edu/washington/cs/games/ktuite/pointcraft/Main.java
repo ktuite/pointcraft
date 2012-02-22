@@ -49,8 +49,9 @@ import edu.washington.cs.games.ktuite.pointcraft.tools.UpPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.VerticalLinePellet;
 
 public class Main {
-	public static boolean IS_RELEASE = true;
+	public static boolean IS_RELEASE = false;
 	public static float VERSION_NUMBER = 0.9f;
+	public static boolean USE_VBO = false;
 
 	public static boolean IS_SIGGRAPH_DEMO = false; // true & !IS_RELEASE;
 	public static boolean cinematics_mode = false & IS_SIGGRAPH_DEMO;
@@ -302,7 +303,7 @@ public class Main {
 
 	private void loadData() {
 		if (IS_RELEASE)
-			//PointStore.load("data/lewis_hall.ply");
+			// PointStore.load("data/lewis_hall.ply");
 			PointStore.loadCube();
 		else {
 			// PointStore.load("/Users/ktuite/Code/photocity/plys/fountain-downsample-bin.ply");
@@ -532,12 +533,14 @@ public class Main {
 					if (Keyboard.getEventKey() >= Keyboard.KEY_1
 							&& Keyboard.getEventKey() <= Keyboard.KEY_9) {
 						int key = Keyboard.getEventKey() - Keyboard.KEY_1;
-						GunMode new_mode = gui_manager.getGunModeFromOnscreenToolPalette(key);
+						GunMode new_mode = gui_manager
+								.getGunModeFromOnscreenToolPalette(key);
 						if (new_mode != null)
 							which_gun = new_mode;
 					}
 					if (Keyboard.getEventKey() == Keyboard.KEY_0) {
-						GunMode new_mode = gui_manager.getGunModeFromOnscreenToolPalette(9);
+						GunMode new_mode = gui_manager
+								.getGunModeFromOnscreenToolPalette(9);
 						if (new_mode != null)
 							which_gun = new_mode;
 					}
@@ -796,16 +799,12 @@ public class Main {
 		glScalef(overhead_scale, overhead_scale, overhead_scale);
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
 
-		// TODO: figure out up vec stuff
-		// this goes here to make the points appear as they should
-		// with new up vector
-		// but gun direction and gun origin is wrong
-		// gluLookAt(0, 0, 0, 0, 0, -1, up_vec.x, up_vec.y, up_vec.z);
-
 		glEnable(GL_FOG);
 		if (draw_points) {
-			drawVBOStuff();
-			// drawPoints(); // draw the actual 3d things
+			if (USE_VBO)
+				drawVBOStuff();
+			else
+				drawPoints(); // draw the actual 3d things
 		}
 
 		if (draw_pellets) {
@@ -849,8 +848,10 @@ public class Main {
 
 		glEnable(GL_FOG);
 		if (draw_points) {
-			// drawPoints(); // draw the actual 3d things
-			drawVBOStuff();
+			if (USE_VBO)
+				drawVBOStuff();
+			else
+				drawPoints(); // draw the actual 3d things
 		}
 
 		if (draw_cameras)
@@ -931,7 +932,7 @@ public class Main {
 		}
 		points_vbo = GL15.glGenBuffers();
 		colors_vbo = GL15.glGenBuffers();
-		
+
 		GL15.glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
 		GL15.glBufferData(GL_ARRAY_BUFFER, point_positions, GL_STATIC_DRAW);
 		GL15.glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
