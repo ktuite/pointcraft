@@ -22,7 +22,6 @@ import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 
 import edu.washington.cs.games.ktuite.pointcraft.Main;
-import edu.washington.cs.games.ktuite.pointcraft.TextureMaker;
 import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Scoring;
 
@@ -47,11 +46,11 @@ public class Primitive implements org.json.JSONString {
 	private PlaneScaffold plane = null;
 	private static int unique_id = 0;
 
-	private float[] drawColor = {.9f, 0f, .9f, 1f};
+	private float[] drawColor = { .9f, 0f, .9f, 1f };
 	// for point filtering
 	public Vector3f normal = new Vector3f(0.0f, 1.0f, 0.0f);
 	public Vector3f centroid = new Vector3f(0.0f, 0.0f, 0.0f);
-	
+
 	private void readObject(ObjectInputStream ois)
 			throws ClassNotFoundException, IOException {
 		ois.defaultReadObject();
@@ -105,8 +104,9 @@ public class Primitive implements org.json.JSONString {
 		player_viewing_direction.normalise();
 		if (vertices.size() >= 4) {
 			// scoring
-			double dummy = Scoring.computeTextureScore(this);
-			drawColor[0] = drawColor[1] = drawColor[2] = (float)dummy;
+			Scoring.computeTextureScore(this);
+			// drawColor[0] = drawColor[1] = drawColor[2] =
+			// (float)Scoring.computeTextureScore(this);
 			startDownloadingTexture();
 		}
 	}
@@ -355,7 +355,7 @@ public class Primitive implements org.json.JSONString {
 		if (Main.server.texture_server == null) {
 			// TODO shit this only works for the first quad in a thing right now
 			// System.out.println("making local texture");
-			//TextureMaker.makeTexture(this);
+			// TextureMaker.makeTexture(this);
 		} else {
 
 			for (int i = 0; i < num_textures; i++) {

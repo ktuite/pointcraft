@@ -1,9 +1,11 @@
 package edu.washington.cs.games.ktuite.pointcraft.gui;
 
 import de.matthiasmann.twl.Button;
+import de.matthiasmann.twl.Color;
 import de.matthiasmann.twl.Label;
 import de.matthiasmann.twl.ResizableFrame;
 import de.matthiasmann.twl.Widget;
+import de.matthiasmann.twl.utils.TintAnimator;
 import edu.washington.cs.games.ktuite.pointcraft.Main;
 import edu.washington.cs.games.ktuite.pointcraft.Main.ActivityMode;
 import edu.washington.cs.games.ktuite.pointcraft.Main.GunMode;
@@ -19,6 +21,9 @@ public class OnscreenOverlay extends Widget {
 	final ResizableFrame full_frame;
 	final ResizableFrame onscreen_frame;
 	private Button instructions_button;
+	
+	private Label animated_label;
+	private final TintAnimator tintAnimator;
 
 	public OnscreenOverlay() {
 		label_current_mode = new Label("Current mode: ??");
@@ -46,16 +51,20 @@ public class OnscreenOverlay extends Widget {
 		
 		full_inventory_panel.add(instructions_button);
 		full_frame.add(full_inventory_panel);
-		
 		add(full_frame);
-
 		
-
 		onscreen_frame = new ResizableFrame();
 		onscreen_frame.setTitle("Current tool:");
 		onscreen_frame.setResizableAxis(ResizableFrame.ResizableAxis.NONE);
 		onscreen_frame.add(onscreen_inventory_panel);
 		add(onscreen_frame);
+		
+		animated_label = new Label("+5000");
+		animated_label.setTheme("biglabel");
+		tintAnimator = new TintAnimator(new TintAnimator.GUITimeSource(this));
+		animated_label.setTintAnimator(tintAnimator);  
+		animated_label.setPosition(-100, -100);
+		add(animated_label);
 	}
 
 	@Override
@@ -94,6 +103,19 @@ public class OnscreenOverlay extends Widget {
 		label_score.setText("Score: " + Scoring.points_explained);
 		onscreen_frame.setTitle("Current Tool: " + which_gun);
 		onscreen_inventory_panel.setSlotFromMode(which_gun);
+	}
+	
+	public void moveLabelAround(){
+		if (animated_label.getY() > 0)
+			animated_label.setPosition(animated_label.getX(), animated_label.getY() - 3);
+	}
+	
+	public void animateScore(int score){
+		animated_label.setText("+" + score);
+		animated_label.adjustSize();
+		animated_label.setPosition(getWidth()/2, getHeight()/2);
+		tintAnimator.setColor(new Color(0xffffffff));
+		tintAnimator.fadeTo(new Color(0x00ffffff), 1500);
 	}
 	
 

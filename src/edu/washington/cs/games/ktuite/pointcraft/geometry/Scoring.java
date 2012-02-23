@@ -4,6 +4,7 @@ import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
 
+import edu.washington.cs.games.ktuite.pointcraft.Main;
 import edu.washington.cs.games.ktuite.pointcraft.PointStore;
 
 public class Scoring {
@@ -51,11 +52,13 @@ public class Scoring {
 		return (dx*dx + dy*dy + dz*dz);
 	}
 
+	@SuppressWarnings("unused")
 	private static double distance(Vector3f a, Vector3f b)
 	{
 		return Math.sqrt(distanceSq(a.x, a.y, a.z, b.x, b.y, b.z));
 	}
 
+	@SuppressWarnings("unused")
 	private static double distanceToPoly(Vector3f a, Vector3f c, Vector3f n)
 	{
 		Vector3f d = new Vector3f(a.x - c.x, a.y - c.y, a.z - c.z);
@@ -119,6 +122,7 @@ public class Scoring {
 	    return ((bc.x > -epsilon) && (bc.y > -epsilon) && (bc.x + bc.y < 1 + (2*epsilon)));
 	}
 	
+	@SuppressWarnings("unused")
 	public static double computeTextureScore(Primitive p)
 	{
 		double epsilon1 = 0.01, epsilon2 = 0.1;
@@ -137,12 +141,13 @@ public class Scoring {
 					if ((Math.abs(distanceToPolyPlane(pl, v)) < epsilon2) && pointInTri(v, a, b, c, epsilon1)) {
 						count++;
 						PointStore.point_properties.put(i, (byte) 1);
-						PointStore.changePointColorToRed(i);
+						PointStore.makePointTransparent(i);
 					}
 				}
 			}
 		}
 		points_explained += count;
+		Main.gui_manager.onscreen_overlay.animateScore(count);
 		return ((double) count) / 100.0;
 	}
 }

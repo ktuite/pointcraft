@@ -308,22 +308,20 @@ public class Main {
 		else {
 			// PointStore.load("/Users/ktuite/Code/photocity/plys/fountain-downsample-bin.ply");
 			// PointStore.load("/Users/ktuite/Desktop/things/scan1/reoriented.ply");
-			// PointStore.loadCube();
+			// PointStore.loadRandom();
 			// PointStore.load("data/culdesac2.ply");
 			// PointStore.load("data/brown_house_dense.ply");
 			// PointStore.load("data/desk.ply");
 			// PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
-			// PointStore.loadCube();
+			PointStore.loadCube();
 			// PointStore.load("data/desk.ply");
 			// PointStore.load("data/flower.ply");
-			PointStore.load("data/lewis_hall.ply");
+			// PointStore.load("data/lewis_hall.ply");
 			// PointStore.load("/Users/ktuite/Code/sketchymodeler/texviewer/cse/kidder.bundle");
 			// PointStore.load("data/uris.ply");
 			// PointStore.load("data/red_square.ply");
 			// PointStore.load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
 		}
-		// .load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
-
 	}
 
 	public void initData() {
@@ -909,17 +907,19 @@ public class Main {
 	}
 
 	private void drawPoints() {
+		glEnable(GL_DEPTH_TEST);
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_COLOR_ARRAY);
 
 		GL11.glVertexPointer(3, 0, point_positions);
-		GL11.glColorPointer(3, true, 0, point_colors);
+		GL11.glColorPointer(4, true, 0, point_colors);
 
 		glPointSize(point_size);
 		glDrawArrays(GL_POINTS, 0, num_points);
 
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_COLOR_ARRAY);
+		glDisable(GL_DEPTH_TEST);
 	}
 
 	public void transferVBOStuff() {
@@ -961,6 +961,7 @@ public class Main {
 		GL15.glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
+	@SuppressWarnings("unused")
 	private void teardownVBOStuff() {
 		GL15.glDeleteQueries(points_vbo);
 		GL15.glDeleteQueries(colors_vbo);

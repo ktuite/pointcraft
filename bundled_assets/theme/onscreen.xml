@@ -50,6 +50,12 @@
     
     <fontDef name="black" filename="font.fnt" color="black"/>
 
+    <fontDef name="big" filename="bigfont.fnt" color="#ff008833">
+        <fontParam if="error" color="red"/>
+        <fontParam if="disabled" color="gray"/>
+        <fontParam if="textSelection" color="blue"/>
+    </fontDef>
+
     <fontDef name="button" filename="font.fnt" color="white">
         <fontParam if="disabled" color="gray"/>
         <fontParam if="hover" color="yellow"/>
@@ -85,6 +91,10 @@
     
     <theme name="sublabel" ref="-defaults" allowWildcard="true">
     	<param name="font"><font>black</font></param>
+    </theme>
+ 	
+ 	<theme name="biglabel" ref="-defaults" allowWildcard="true">
+    	<param name="font"><font>big</font></param>
     </theme>
     
     <theme name="button" ref="-defaults" allowWildcard="true">

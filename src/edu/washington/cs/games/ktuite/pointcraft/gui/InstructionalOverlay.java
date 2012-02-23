@@ -31,7 +31,7 @@ public class InstructionalOverlay extends Widget {
 	private SimpleBooleanModel toggle_minecraft;
 	private Label toggle_minecraft_label;
 	private ToggleButton toggle_minecraft_checkbox;
-	
+
 	// cinematics mode
 	private SimpleBooleanModel toggle_cinematics;
 	private Label toggle_cinematics_label;
@@ -76,7 +76,7 @@ public class InstructionalOverlay extends Widget {
 				Main.minecraft_flight = toggle_minecraft.getValue();
 			}
 		});
-		
+
 		// cinematics mode setup
 		toggle_cinematics = new SimpleBooleanModel();
 		toggle_cinematics.setValue(Main.cinematics_mode);
@@ -135,7 +135,7 @@ public class InstructionalOverlay extends Widget {
 					Save.loadCinematics();
 				}
 			});
-			
+
 			add(toggle_cinematics_label);
 			add(toggle_cinematics_checkbox);
 			add(save_cinematics_button);
@@ -148,11 +148,8 @@ public class InstructionalOverlay extends Widget {
 		add(export_button);
 		add(load_ply_button);
 
-		
 		add(toggle_minecraft_label);
 		add(toggle_minecraft_checkbox);
-		
-
 
 	}
 
@@ -188,23 +185,23 @@ public class InstructionalOverlay extends Widget {
 		load_cinematics_button.setPosition(save_cinematics_button.getX()
 				+ save_cinematics_button.getWidth() + 10,
 				save_cinematics_button.getY());
-		
+
 		toggle_minecraft_checkbox.adjustSize();
-		toggle_minecraft_checkbox.setPosition(
-				save_button.getInnerX(),
+		toggle_minecraft_checkbox.setPosition(save_button.getInnerX(),
 				getInnerY() + 100);
-		
+
 		toggle_minecraft_label.adjustSize();
 		toggle_minecraft_label.setPosition(
-				toggle_minecraft_checkbox.getInnerX() + 30, toggle_minecraft_checkbox.getInnerY());
-		
+				toggle_minecraft_checkbox.getInnerX() + 30,
+				toggle_minecraft_checkbox.getInnerY());
+
 		toggle_cinematics_checkbox.adjustSize();
-		toggle_cinematics_checkbox.setPosition(
-				save_button.getInnerX(),
+		toggle_cinematics_checkbox.setPosition(save_button.getInnerX(),
 				getInnerY() + 130);
-		
+
 		toggle_cinematics_label.adjustSize();
 		toggle_cinematics_label.setPosition(
-				toggle_cinematics_checkbox.getInnerX() + 30, toggle_cinematics_checkbox.getInnerY());
+				toggle_cinematics_checkbox.getInnerX() + 30,
+				toggle_cinematics_checkbox.getInnerY());
 	}
 }

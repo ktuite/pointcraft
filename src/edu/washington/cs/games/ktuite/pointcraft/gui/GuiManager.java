@@ -76,6 +76,7 @@ public class GuiManager {
 			onscreen_overlay.updateCurrentTool(Main.which_gun);
 			onscreen_overlay.label_last_action.setText("Last Action: "
 					+ ActionTracker.showLatestAction());
+			onscreen_overlay.moveLabelAround();
 			onscreen_gui.update();
 		}
 	}
@@ -98,12 +99,13 @@ public class GuiManager {
 	}
 
 	public GunMode getGunModeFromOnscreenToolPalette(int i) {
-		GunMode mode = onscreen_overlay.onscreen_inventory_panel.slot[i].getGunMode();
-		String item = onscreen_overlay.onscreen_inventory_panel.slot[i].getItem();
-		if (mode != null && item != null){
+		GunMode mode = onscreen_overlay.onscreen_inventory_panel.slot[i]
+				.getGunMode();
+		String item = onscreen_overlay.onscreen_inventory_panel.slot[i]
+				.getItem();
+		if (mode != null && item != null) {
 			return mode;
-		}
-		else {
+		} else {
 			return null;
 		}
 	}

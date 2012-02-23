@@ -30,7 +30,7 @@ public class PointStore {
 	public static ByteBuffer point_colors;
 	// VBO state tracking
 	private static boolean point_vbo_dirty = false;
-	
+
 	public static ByteBuffer point_properties;
 	private static PointOctree tree;
 	public static float min_corner[] = { Float.MAX_VALUE, Float.MAX_VALUE,
@@ -63,7 +63,7 @@ public class PointStore {
 	}
 
 	private static void initBuffers() {
-		point_colors = BufferUtils.createByteBuffer(num_points * 3);
+		point_colors = BufferUtils.createByteBuffer(num_points * 4);
 		markPointVBODirty();
 		point_positions = BufferUtils.createFloatBuffer(num_points * 3);
 		point_properties = BufferUtils.createByteBuffer(num_points * 3);
@@ -81,7 +81,7 @@ public class PointStore {
 	public static void markPointVBODirty() {
 		point_vbo_dirty = true;
 	}
-	
+
 	public static void markPointVBOClean() {
 		point_vbo_dirty = false;
 	}
@@ -89,17 +89,18 @@ public class PointStore {
 	public static boolean isPointVBODirty() {
 		return point_vbo_dirty;
 	}
-	
+
 	public static void loadRandom() {
 		num_points = 2000;
 		initBuffers();
 
 		for (int i = 0; i < num_points; i++) {
 			for (int k = 0; k < 3; k++) {
-				point_colors.put(i * 3 + k, (byte) (Math.random() * 255));
+				point_colors.put(i * 4 + k, (byte) (Math.random() * 255));
 				point_positions.put(i * 3 + k,
 						(float) (Math.random() * 0.01 - 0.005));
 			}
+			point_colors.put(i * 4 + 3, (byte) 255);
 		}
 		point_colors.rewind();
 		point_positions.rewind();
@@ -125,6 +126,7 @@ public class PointStore {
 			for (int k = 0; k < 3; k++) {
 				float b = (float) (pos[k] * 2 * s - s);
 				point_positions.put(i * 3 + k, b);
+				point_colors.put(i * 4 + 3, (byte) 255);
 			}
 
 		}
@@ -133,35 +135,35 @@ public class PointStore {
 			point_positions.put(i * 3 + 0, -s);
 			byte[] color = { (byte) 153, 84, (byte) 153 };
 			for (int k = 0; k < 3; k++) {
-				point_colors.put(i * 3 + k, color[k]);
+				point_colors.put(i * 4 + k, color[k]);
 			}
 		}
 		for (int i = n * 1; i < n * 2; i++) {
 			point_positions.put(i * 3 + 0, s);
 			byte[] color = { -1, -1, -1 };
 			for (int k = 0; k < 3; k++) {
-				point_colors.put(i * 3 + k, color[k]);
+				point_colors.put(i * 4 + k, color[k]);
 			}
 		}
 		for (int i = n * 2; i < n * 3; i++) {
 			point_positions.put(i * 3 + 1, -s);
 			byte[] color = { 120, 84, (byte) 136 };
 			for (int k = 0; k < 3; k++) {
-				point_colors.put(i * 3 + k, color[k]);
+				point_colors.put(i * 4 + k, color[k]);
 			}
 		}
 		for (int i = n * 3; i < n * 4; i++) {
 			point_positions.put(i * 3 + 1, s);
 			byte[] color = { 51, 25, 51 };
 			for (int k = 0; k < 3; k++) {
-				point_colors.put(i * 3 + k, color[k]);
+				point_colors.put(i * 4 + k, color[k]);
 			}
 		}
 		for (int i = n * 4; i < n * 5; i++) {
 			point_positions.put(i * 3 + 2, -s);
 			byte[] color = { 120, 100, (byte) 153 };
 			for (int k = 0; k < 3; k++) {
-				point_colors.put(i * 3 + k, color[k]);
+				point_colors.put(i * 4 + k, color[k]);
 			}
 		}
 		for (int i = n * 5; i < n * 6; i++) {
@@ -356,6 +358,7 @@ public class PointStore {
 							.put((byte) Integer.parseInt(split_line[g_idx]));
 					point_colors
 							.put((byte) Integer.parseInt(split_line[b_idx]));
+					point_colors.put((byte) 255); // alpha
 
 					point_positions.put(Float.parseFloat(split_line[x_idx]));
 					point_positions.put(Float.parseFloat(split_line[y_idx]));
@@ -427,6 +430,7 @@ public class PointStore {
 					point_colors.put(r);
 					point_colors.put(g);
 					point_colors.put(b);
+					point_colors.put((byte) 255);
 
 					point_positions.put(x);
 					point_positions.put(y);
@@ -569,10 +573,10 @@ public class PointStore {
 				}
 			}
 		}
-		
+
 		Main.world_scale = (float) ((float) ((PointStore.max_corner[1] - PointStore.min_corner[1])) / 0.071716);
 		// lewis hall height for scale ref...
-		
+
 		buildCameraFrustaWithWorldScale();
 
 	}
@@ -581,30 +585,27 @@ public class PointStore {
 		for (int i = 0; i < cameras.size(); i++) {
 			Camera c = cameras.get(i);
 			float scale = Main.world_scale / 2000f;
-			float ref_length = (float) (2.0e-3 * Math.min(8000f, c.focal_length));
+			float ref_length = (float) (2.0e-3 * Math
+					.min(8000f, c.focal_length));
 			float xExt = 0.5f * c.w * ref_length * scale / c.focal_length;
 			float yExt = 0.5f * c.h * ref_length * scale / c.focal_length;
 			Vector3f pos = c.pos;
 
 			Vector3f pt0 = new Vector3f(-xExt, -yExt, -ref_length * scale);
-			pt0 = Vector3f.add(
-					Matrix3f.transform(Matrix3f.transpose(c.r, null), pt0, null),
-					pos, null);
+			pt0 = Vector3f.add(Matrix3f.transform(
+					Matrix3f.transpose(c.r, null), pt0, null), pos, null);
 
 			Vector3f pt1 = new Vector3f(-xExt, yExt, -ref_length * scale);
-			pt1 = Vector3f.add(
-					Matrix3f.transform(Matrix3f.transpose(c.r, null), pt1, null),
-					pos, null);
+			pt1 = Vector3f.add(Matrix3f.transform(
+					Matrix3f.transpose(c.r, null), pt1, null), pos, null);
 
 			Vector3f pt2 = new Vector3f(xExt, yExt, -ref_length * scale);
-			pt2 = Vector3f.add(
-					Matrix3f.transform(Matrix3f.transpose(c.r, null), pt2, null),
-					pos, null);
+			pt2 = Vector3f.add(Matrix3f.transform(
+					Matrix3f.transpose(c.r, null), pt2, null), pos, null);
 
 			Vector3f pt3 = new Vector3f(xExt, -yExt, -ref_length * scale);
-			pt3 = Vector3f.add(
-					Matrix3f.transform(Matrix3f.transpose(c.r, null), pt3, null),
-					pos, null);
+			pt3 = Vector3f.add(Matrix3f.transform(
+					Matrix3f.transpose(c.r, null), pt3, null), pos, null);
 
 			// center of plane
 			Vector3f pt4 = new Vector3f(0, 0, -ref_length * scale);
@@ -650,6 +651,11 @@ public class PointStore {
 		point_colors.put(i * 3 + 0, (byte) 255);
 		point_colors.put(i * 3 + 1, (byte) 0);
 		point_colors.put(i * 3 + 2, (byte) 0);
+		markPointVBODirty();
+	}
+
+	public static void makePointTransparent(int i) {
+		point_colors.put(i * 4 + 3, (byte) 0);
 		markPointVBODirty();
 	}
 }
