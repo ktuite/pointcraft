@@ -8,11 +8,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.util.Stack;
 
-import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -49,13 +47,26 @@ import edu.washington.cs.games.ktuite.pointcraft.tools.UpPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.VerticalLinePellet;
 
 public class Main {
+	/*
+	 * Organization of PointCraft (2/17/2012)
+	 * 
+	 * Everything is pretty centralized. Some examples of what MAIN controls:
+	 * motion control (WASD keys, etc), OpenGL display, pellets and geometry,
+	 * Point Store container for point cloud, and GUI
+	 */
+
+	// used for managing release/experimental builds
+	// release version requires user to log in and select a particular point
+	// cloud to load
 	public static boolean IS_RELEASE = false;
 	public static float VERSION_NUMBER = 0.9f;
-	public static boolean USE_VBO = false;
 
+	// more experimental things added for SIGGRAPH including different screen
+	// resolution (1280x720 for HD video) and cinematics mode to ease recording
+	// of video
 	public static boolean IS_SIGGRAPH_DEMO = false; // true & !IS_RELEASE;
 	public static boolean cinematics_mode = false & IS_SIGGRAPH_DEMO;
-	public static boolean draw_lines = true;
+	public static boolean animatingToSavedView = false;
 
 	// stuff about the atmosphere
 	private float FOG_COLOR[] = new float[] { .89f, .89f, .89f, 1.0f };
@@ -76,17 +87,10 @@ public class Main {
 	private static float walkforce = 1 / 4000f * world_scale;
 	private double max_speed = 1 * world_scale;
 	private Texture skybox = null;
-
-	public static GuiManager gui_manager = null;
-
 	public static boolean minecraft_flight = false;
 
-	// stuff about the point cloud
-	private int num_points;
-	private FloatBuffer point_positions;
-	private ByteBuffer point_colors;
-
 	// stuff for fast rendering of the point cloud
+	public static boolean USE_VBO = false;
 	private int points_vbo = 0;
 	private int colors_vbo = 0;
 
@@ -99,9 +103,12 @@ public class Main {
 	public static Stack<Pellet> all_dead_pellets_in_world;
 	public static Stack<Pellet> new_pellets_to_add_to_world;
 
+	// stuff about the geometry being built, both polygons and scaffolding
 	public static Stack<Primitive> geometry;
 	public static Stack<Scaffold> geometry_v;
 
+	// more graphics settings - what is displayed on the screen
+	public static boolean draw_lines = true;
 	public static boolean draw_points = true;
 	public static boolean draw_scaffolding = true;
 	public static boolean draw_pellets = true;
@@ -110,18 +117,9 @@ public class Main {
 	public static boolean draw_cameras = false;
 	public static boolean rotate_world = false;
 
-	public static int picked_polygon = -1;
-
+	// central classes for managing the GUI and the interaction with the server
+	public static GuiManager gui_manager = null;
 	public static ServerCommunicator server;
-
-	// overhead view stuff
-	public static float last_tilt = 0;
-	public static boolean tilt_locked = false;
-	public static int tilt_animation = 0;
-	public static DoubleBuffer proj_ortho;
-	public static DoubleBuffer proj_persp;
-	public static DoubleBuffer proj_intermediate;
-	public float overhead_scale = 1;
 
 	public enum GunMode {
 		PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM, TRIANGULATION
@@ -133,9 +131,6 @@ public class Main {
 
 	public static GunMode which_gun;
 	public static ActivityMode which_activity;
-
-	// SIGGRAPH stuff
-	public static boolean animatingToSavedView = false;
 
 	public static void main(String[] args) {
 		try {
@@ -155,10 +150,13 @@ public class Main {
 			main.run();
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.out
+					.println("PointCraft has crashed, look for a file called 'pointcraft_crash_model'");
 			File file = new File("pointcraft_crash_model");
 			Save.writeZipOfModelAndTextures(file);
 		} finally {
-
+			File file = new File("pointcraft_quit_model");
+			Save.writeZipOfModelAndTextures(file);
 			System.exit(0);
 		}
 	}
@@ -195,21 +193,8 @@ public class Main {
 		System.out.println("init graphics: " + width + "," + height);
 		// view matrix
 		glMatrixMode(GL_PROJECTION);
-
-		glLoadIdentity();
-		glOrtho(-1 * width / height, width / height, -1f, 1f, 0.001f, 50000.0f);
-		// glScalef(40, 40, 40);
-
-		proj_ortho = BufferUtils.createDoubleBuffer(16);
-		glGetDouble(GL_PROJECTION_MATRIX, proj_ortho);
-		proj_ortho.put(0, proj_ortho.get(0) * 40f);
-		proj_ortho.put(5, proj_ortho.get(5) * 40f);
-
 		glLoadIdentity();
 		gluPerspective(60, width / height, .001f, 100000.0f);
-		proj_persp = BufferUtils.createDoubleBuffer(16);
-		glGetDouble(GL_PROJECTION_MATRIX, proj_persp);
-		proj_intermediate = BufferUtils.createDoubleBuffer(16);
 
 		// glOrtho(-800.0f / 600.0f, 800.0f / 600.0f, -1f, 1f, 0.001f, 1000.0f);
 		// gluLookAt(0, 0, 0, 0, 0, -1, 0.05343333f, 0.9966372f, -0.062121693f);
@@ -253,7 +238,6 @@ public class Main {
 		}
 
 		Pellet.initSphereDisplayList();
-
 	}
 
 	private void initGameVariables() {
@@ -274,8 +258,6 @@ public class Main {
 		LaserBeamPellet.laser_beam_pellet = new LaserBeamPellet(
 				all_pellets_in_world);
 
-		// TODO: Move this crap elsewhere... init the different geometry
-		// containers individually
 		geometry = new Stack<Primitive>();
 		geometry_v = new Stack<Scaffold>();
 		geometry_v.push(LinePellet.current_line);
@@ -313,11 +295,12 @@ public class Main {
 			// PointStore.load("data/brown_house_dense.ply");
 			// PointStore.load("data/desk.ply");
 			// PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
-			PointStore.loadCube();
+			// PointStore.loadCube();
 			// PointStore.load("data/desk.ply");
 			// PointStore.load("data/flower.ply");
 			// PointStore.load("data/lewis_hall.ply");
-			// PointStore.load("/Users/ktuite/Code/sketchymodeler/texviewer/cse/kidder.bundle");
+			PointStore
+					.load("/Users/ktuite/Code/sketchymodeler/texviewer/cse/kidder.bundle");
 			// PointStore.load("data/uris.ply");
 			// PointStore.load("data/red_square.ply");
 			// PointStore.load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
@@ -338,10 +321,6 @@ public class Main {
 		// fog_density /= world_scale;
 		glFogf(GL_FOG_DENSITY, fog_density);
 
-		num_points = PointStore.num_points;
-		point_positions = PointStore.point_positions;
-		point_colors = PointStore.point_colors;
-
 		PointStore.markPointVBODirty();
 	}
 
@@ -357,16 +336,15 @@ public class Main {
 				Display.update();
 			} else {
 				if (which_activity == ActivityMode.MODELING) {
-					eventLoop(); // input like mouse and keyboard
+					handleKeyboardMouseAndMotion(); // input like mouse and keyboard
 					updateGameObjects();
-					displayLoop(); // draw things on the screen
+					drawSceneAndGUI(); // draw things on the screen
 				} else if (which_activity == ActivityMode.TOOL_PICKING) {
 					toolPickingEventLoop();
-					displayLoop();
+					drawSceneAndGUI();
 				} else {
-					gui_manager.updateInstructionalGui();
-					Display.update();
 					instructionalEventLoop();
+					gui_manager.updateInstructionalGui();
 				}
 
 				if ((Display.getWidth() != Display.getDisplayMode().getWidth() || Display
@@ -395,12 +373,12 @@ public class Main {
 
 		initGUI();
 		initGraphics();
-
 	}
 
 	private void updateGameObjects() {
 		if (which_gun == GunMode.DRAG_TO_EDIT)
 			computeGunDirection();
+		
 		HoverPellet.handleDrag();
 
 		for (Pellet pellet : all_pellets_in_world) {
@@ -441,7 +419,7 @@ public class Main {
 		}
 	}
 
-	private void eventLoop() {
+	private void handleKeyboardMouseAndMotion() {
 		// WASD key motion, with a little bit of gliding
 		if (Keyboard.isKeyDown(Keyboard.KEY_W)
 				|| Keyboard.isKeyDown(Keyboard.KEY_UP)) {
@@ -471,34 +449,23 @@ public class Main {
 			vel.z += Math.sin(pan_angle * 3.14159 / 180f) * walkforce / 2
 					* pellet_scale;
 		}
-		if (!tilt_locked) {
-			if (minecraft_flight) {
-				if (Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
-					vel.y += walkforce / 2 * pellet_scale;
-				}
-				if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
-					vel.y -= walkforce / 2 * pellet_scale;
-				}
-			} else {
-				if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
-					vel.y += walkforce / 2 * pellet_scale;
-				}
-				if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
-					vel.y -= walkforce / 2 * pellet_scale;
-				}
+
+		if (minecraft_flight) {
+			if (Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
+				vel.y += walkforce / 2 * pellet_scale;
+			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
+				vel.y -= walkforce / 2 * pellet_scale;
 			}
 		} else {
 			if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
-				overhead_scale /= 1.05f;
+				vel.y += walkforce / 2 * pellet_scale;
 			}
 			if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
-				overhead_scale *= 1.05f;
+				vel.y -= walkforce / 2 * pellet_scale;
 			}
 		}
 
-		// this is like putting on or taking off some stilts
-		// (numerous pairs of stilts)
-		// basically it increases or decreases your vertical world height
 		while (Keyboard.next()) {
 			if (Keyboard.getEventKeyState()) {
 				// PRINT KEY SO I CAN SEE THE KEY CODE
@@ -527,6 +494,12 @@ public class Main {
 					if (Keyboard.getEventKey() == Keyboard.KEY_I) {
 						draw_pellets = !draw_pellets;
 					}
+					if (Keyboard.getEventKey() == Keyboard.KEY_T) {
+						draw_textures = !draw_textures;
+					}
+					if (Keyboard.getEventKey() == Keyboard.KEY_U) {
+						draw_polygons = !draw_polygons;
+					}
 
 					if (Keyboard.getEventKey() >= Keyboard.KEY_1
 							&& Keyboard.getEventKey() <= Keyboard.KEY_9) {
@@ -547,13 +520,6 @@ public class Main {
 							|| Keyboard.getEventKey() == Keyboard.KEY_BACK) {
 						which_gun = GunMode.DESTRUCTOR;
 						System.out.println("the gun that deletes things");
-					}
-
-					if (Keyboard.getEventKey() == Keyboard.KEY_T) {
-						draw_textures = !draw_textures;
-					}
-					if (Keyboard.getEventKey() == Keyboard.KEY_U) {
-						draw_polygons = !draw_polygons;
 					}
 
 					if (Keyboard.getEventKey() == Keyboard.KEY_X) {
@@ -656,11 +622,6 @@ public class Main {
 		if (!minecraft_flight && Keyboard.isKeyDown(Keyboard.KEY_SPACE))
 			vel.scale(.3f);
 
-		if (tilt_locked)
-			vel.scale(.5f);
-
-		// pos += vel
-		// System.out.println("velocity : " + vel);
 		if (Main.animatingToSavedView) {
 			Cinematics.interpSteps++;
 			Cinematics.interpPanTiltPos();
@@ -668,16 +629,15 @@ public class Main {
 				animatingToSavedView = false;
 			}
 		} else {
+			// pos += vel
+			// System.out.println("velocity : " + vel);
 			Vector3f.add(pos, vel, pos);
 
 			// friction (let player glide to a stop)
 			vel.scale(veldecay);
 
 			// use mouse to control where player is looking
-			if (!tilt_locked)
-				tilt_angle -= Mouse.getDY() / 10f;
-			if (tilt_animation != 0)
-				animateTilt();
+			tilt_angle -= Mouse.getDY() / 10f;
 
 			pan_angle += Mouse.getDX() / 10f;
 
@@ -747,148 +707,59 @@ public class Main {
 		}
 	}
 
-	private void animateTilt() {
-		glGetDouble(GL_PROJECTION_MATRIX, proj_intermediate);
+	public void render() {
+		glClearColor(FOG_COLOR[0], FOG_COLOR[1], FOG_COLOR[2], 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glPushMatrix();
 
-		if (tilt_animation > 0) {
-			// animate down
-			tilt_angle += (90f - tilt_angle) / tilt_animation;
-			tilt_animation--;
+		glRotatef(tilt_angle, 1.0f, 0.0f, 0.0f); // rotate our camera up/down
+		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
 
-			int indices[] = { 0, 5, 11, 15 };
-			for (int i : indices) {
-				double k = proj_intermediate.get(i);
-				k = proj_persp.get(i) + (proj_ortho.get(i) - proj_persp.get(i))
-						* (1.0 - (float) tilt_animation / 30.0);
-				proj_intermediate.put(i, k);
-			}
-		} else if (tilt_animation < 0) {
-			// animate up
-			tilt_angle -= (last_tilt - tilt_angle) / tilt_animation;
-			tilt_animation++;
-			if (tilt_animation == 0) {
-				tilt_locked = false;
-				Mouse.getDY();
-			}
-			int indices[] = { 0, 5, 11, 15 };
-			for (int i : indices) {
-				double k = proj_intermediate.get(i);
-				k = proj_ortho.get(i) + (proj_persp.get(i) - proj_ortho.get(i))
-						* (1.0 + (float) tilt_animation / 30.0);
-				proj_intermediate.put(i, k);
-			}
+		drawSkybox(); // draw skybox before translate
+
+		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
+
+		glEnable(GL_FOG);
+		if (draw_points) {
+			if (USE_VBO)
+				drawVBOStuff();
+			else
+				drawPoints(); // draw the actual 3d things
 		}
 
-		glMatrixMode(GL_PROJECTION);
-		glLoadMatrix(proj_intermediate);
-		glMatrixMode(GL_MODELVIEW);
+		if (draw_pellets) {
+			drawPellets();
+			if (which_gun == GunMode.ORB)
+				OrbPellet.drawOrbPellet();
+			else if (which_gun == GunMode.LASER_BEAM)
+				LaserBeamPellet.drawLaserBeamPellet();
+		}
+
+		if (draw_cameras) {
+			drawCameraFrusta();
+		}
+
+		for (Primitive geom : geometry) {
+			geom.draw();
+		}
+
+		if (draw_scaffolding) {
+			for (Scaffold geom : geometry_v) {
+				geom.draw();
+			}
+		}
+		glDisable(GL_FOG);
+
+		glPopMatrix();
 	}
 
 	public void renderForCamera() {
-		glClearColor(FOG_COLOR[0], FOG_COLOR[1], FOG_COLOR[2], 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glPushMatrix();
-
-		glRotatef(tilt_angle, 1.0f, 0.0f, 0.0f); // rotate our camera up/down
-		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
-
-		drawSkybox(); // draw skybox before translate
-
-		glScalef(overhead_scale, overhead_scale, overhead_scale);
-		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
-
-		glEnable(GL_FOG);
-		if (draw_points) {
-			if (USE_VBO)
-				drawVBOStuff();
-			else
-				drawPoints(); // draw the actual 3d things
-		}
-
-		if (draw_pellets) {
-			drawPellets();
-			if (which_gun == GunMode.ORB)
-				OrbPellet.drawOrbPellet();
-			else if (which_gun == GunMode.LASER_BEAM)
-				LaserBeamPellet.drawLaserBeamPellet();
-		}
-
-		for (Primitive geom : geometry) {
-			geom.draw();
-		}
-
-		if (draw_scaffolding) {
-			for (Scaffold geom : geometry_v) {
-				geom.draw();
-			}
-		}
-		glDisable(GL_FOG);
-
-		glPopMatrix();
-
+		render();
 		Display.update();
 	}
 
-	private void displayLoop() {
-		glMatrixMode(GL_MODELVIEW);
-		glClearColor(FOG_COLOR[0], FOG_COLOR[1], FOG_COLOR[2], 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glPushMatrix();
-
-		glScalef(1 / world_scale, 1 / world_scale, 1 / world_scale);
-		glRotatef(tilt_angle, 1.0f, 0.0f, 0.0f); // rotate our camera up/down
-		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
-
-		drawSkybox(); // draw skybox before translate
-
-		glScalef(overhead_scale, overhead_scale, overhead_scale);
-		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
-
-		glEnable(GL_FOG);
-		if (draw_points) {
-			if (USE_VBO)
-				drawVBOStuff();
-			else
-				drawPoints(); // draw the actual 3d things
-		}
-
-		if (draw_cameras)
-			drawCameraFrusta();
-
-		if (draw_pellets) {
-			drawPellets();
-			if (which_gun == GunMode.ORB)
-				OrbPellet.drawOrbPellet();
-			else if (which_gun == GunMode.LASER_BEAM)
-				LaserBeamPellet.drawLaserBeamPellet();
-		}
-
-		glClearColor(.3f, .3f, .3f, 1.0f);
-
-		for (Primitive geom : geometry) {
-			geom.drawSolid();
-		}
-
-		for (Primitive geom : geometry) {
-			geom.drawWireframe();
-		}
-
-		for (Primitive geom : TriangulationPellet.edges_to_display) {
-			geom.draw();
-		}
-
-		for (Primitive geom : PolygonPellet.edges_to_display) {
-			geom.draw();
-		}
-
-		if (draw_scaffolding) {
-			for (Scaffold geom : geometry_v) {
-				geom.draw();
-			}
-		}
-		glDisable(GL_FOG);
-
-		glPopMatrix();
+	private void drawSceneAndGUI() {
+		render();
 
 		PickerHelper.pickPolygon();
 
@@ -911,11 +782,11 @@ public class Main {
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_COLOR_ARRAY);
 
-		GL11.glVertexPointer(3, 0, point_positions);
-		GL11.glColorPointer(4, true, 0, point_colors);
+		GL11.glVertexPointer(3, 0, PointStore.point_positions);
+		GL11.glColorPointer(4, true, 0, PointStore.point_colors);
 
 		glPointSize(point_size);
-		glDrawArrays(GL_POINTS, 0, num_points);
+		glDrawArrays(GL_POINTS, 0, PointStore.num_points);
 
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_COLOR_ARRAY);
@@ -934,9 +805,11 @@ public class Main {
 		colors_vbo = GL15.glGenBuffers();
 
 		GL15.glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-		GL15.glBufferData(GL_ARRAY_BUFFER, point_positions, GL_STATIC_DRAW);
+		GL15.glBufferData(GL_ARRAY_BUFFER, PointStore.point_positions,
+				GL_STATIC_DRAW);
 		GL15.glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
-		GL15.glBufferData(GL_ARRAY_BUFFER, point_colors, GL_STATIC_DRAW);
+		GL15.glBufferData(GL_ARRAY_BUFFER, PointStore.point_colors,
+				GL_STATIC_DRAW);
 	}
 
 	private void drawVBOStuff() {
@@ -955,7 +828,7 @@ public class Main {
 		GL11.glVertexPointer(3, GL_FLOAT, 0, 0);
 
 		glPointSize(point_size);
-		GL11.glDrawArrays(GL_POINTS, 0, num_points);
+		GL11.glDrawArrays(GL_POINTS, 0, PointStore.num_points);
 		GL11.glDisableClientState(GL_VERTEX_ARRAY);
 		GL11.glDisableClientState(GL_COLOR_ARRAY);
 		GL15.glBindBuffer(GL_ARRAY_BUFFER, 0);

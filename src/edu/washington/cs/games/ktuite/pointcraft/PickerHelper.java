@@ -32,6 +32,8 @@ import edu.washington.cs.games.ktuite.pointcraft.tools.HoverPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
 
 public class PickerHelper {
+	
+	public static int picked_polygon = -1;
 
 	static int processHits(int hits, int buffer[]) {
 		int names, ptr = 0;
@@ -114,7 +116,7 @@ public class PickerHelper {
 	
 		hits = glRenderMode(GL_RENDER);
 		selectBuffer.get(selectBuf);
-		Main.picked_polygon = processHits(hits, selectBuf); // which polygon actually
+		picked_polygon = processHits(hits, selectBuf); // which polygon actually
 														// selected
 	}
 

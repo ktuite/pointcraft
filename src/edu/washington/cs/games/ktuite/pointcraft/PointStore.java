@@ -559,6 +559,7 @@ public class PointStore {
 			point_colors.put((byte) Integer.parseInt(color[0]));
 			point_colors.put((byte) Integer.parseInt(color[1]));
 			point_colors.put((byte) Integer.parseInt(color[2]));
+			point_colors.put((byte) 255);
 
 			point_positions.put(Float.parseFloat(point[0]));
 			point_positions.put(Float.parseFloat(point[1]));

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.lwjgl.LWJGLException;
+import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.util.ResourceLoader;
 
@@ -86,6 +87,7 @@ public class GuiManager {
 		if (instructional_gui != null) {
 			instructional_gui.update();
 		}
+		Display.update();
 	}
 
 	public void showOnscreenTools() {

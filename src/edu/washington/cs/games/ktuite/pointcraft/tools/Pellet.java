@@ -12,6 +12,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import edu.washington.cs.games.ktuite.pointcraft.ActionTracker;
 import edu.washington.cs.games.ktuite.pointcraft.Main;
+import edu.washington.cs.games.ktuite.pointcraft.PickerHelper;
 import edu.washington.cs.games.ktuite.pointcraft.PointStore;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.LineScaffold;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.PlaneScaffold;
@@ -168,7 +169,7 @@ public class Pellet implements org.json.JSONString {
 			Primitive geom = Main.geometry.get(i);
 			if (geom.isPolygon()) {
 				if (radius > geom.distanceToPolygonPlane(pos)) {
-					if (i == Main.picked_polygon)
+					if (i == PickerHelper.picked_polygon)
 						return geom;
 				}
 			}

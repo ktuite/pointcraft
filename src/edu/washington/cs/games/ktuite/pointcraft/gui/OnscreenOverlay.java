@@ -38,7 +38,7 @@ public class OnscreenOverlay extends Widget {
 
 		onscreen_inventory_panel = new OnscreenInventoryPanel(10, 1);
 		full_inventory_panel = new FullInventoryPanel(onscreen_inventory_panel);
-		instructions_button = new Button("Instructions");
+		instructions_button = new Button("Main Menu");
 		instructions_button.addCallback(new Runnable() {
 			public void run() {
 				Main.setActivityMode(ActivityMode.INSTRUCTIONS);
