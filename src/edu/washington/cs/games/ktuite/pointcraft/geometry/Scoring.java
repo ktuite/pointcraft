@@ -9,6 +9,7 @@ import edu.washington.cs.games.ktuite.pointcraft.PointStore;
 
 public class Scoring {
 	public static int points_explained = 0;
+	public static int score_delta = 0;
 
 	private static Vector3f calcCrossProd(Vector3f va, Vector3f vb)
 	{
@@ -147,6 +148,7 @@ public class Scoring {
 			}
 		}
 		points_explained += count;
+		score_delta = count;
 		Main.gui_manager.onscreen_overlay.animateScore(count);
 		return ((double) count) / 100.0;
 	}

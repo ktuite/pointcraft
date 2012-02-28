@@ -46,7 +46,7 @@ public class Primitive implements org.json.JSONString {
 	private PlaneScaffold plane = null;
 	private static int unique_id = 0;
 
-	private float[] drawColor = { .9f, 0f, .9f, 1f };
+	private float[] drawColor = { .9f, .9f, .9f, 1f };
 	// for point filtering
 	public Vector3f normal = new Vector3f(0.0f, 1.0f, 0.0f);
 	public Vector3f centroid = new Vector3f(0.0f, 0.0f, 0.0f);

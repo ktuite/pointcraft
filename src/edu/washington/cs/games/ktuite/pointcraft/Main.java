@@ -11,6 +11,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.Stack;
 
+
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -32,6 +33,8 @@ import org.newdawn.slick.util.ResourceLoader;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Primitive;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Scaffold;
 import edu.washington.cs.games.ktuite.pointcraft.gui.GuiManager;
+import edu.washington.cs.games.ktuite.pointcraft.levels.*;
+import edu.washington.cs.games.ktuite.pointcraft.levels.CustomLevelFromFile;
 import edu.washington.cs.games.ktuite.pointcraft.tools.CameraGun;
 import edu.washington.cs.games.ktuite.pointcraft.tools.DestructorPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.HoverPellet;
@@ -120,6 +123,9 @@ public class Main {
 	// central classes for managing the GUI and the interaction with the server
 	public static GuiManager gui_manager = null;
 	public static ServerCommunicator server;
+	
+	// level, kind of like state
+	public BaseLevel current_level = null;
 
 	public enum GunMode {
 		PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM, TRIANGULATION
@@ -142,10 +148,9 @@ public class Main {
 			main.initDisplay();
 			main.initGUI();
 			main.initGraphics();
-
-			main.loadData();
-			main.initData();
 			main.initGameVariables();
+			
+			main.current_level = new CustomLevelFromFile(main, "data/lewis_hall.ply");
 
 			main.run();
 		} catch (Exception e) {
@@ -283,6 +288,7 @@ public class Main {
 		initData();
 	}
 
+	@SuppressWarnings("unused")
 	private void loadData() {
 		if (IS_RELEASE)
 			// PointStore.load("data/lewis_hall.ply");
@@ -338,6 +344,7 @@ public class Main {
 				if (which_activity == ActivityMode.MODELING) {
 					handleKeyboardMouseAndMotion(); // input like mouse and keyboard
 					updateGameObjects();
+					current_level.checkLevelState();
 					drawSceneAndGUI(); // draw things on the screen
 				} else if (which_activity == ActivityMode.TOOL_PICKING) {
 					toolPickingEventLoop();
@@ -707,7 +714,7 @@ public class Main {
 		}
 	}
 
-	public void render() {
+	private void render() {
 		glClearColor(FOG_COLOR[0], FOG_COLOR[1], FOG_COLOR[2], 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glPushMatrix();
@@ -739,15 +746,30 @@ public class Main {
 			drawCameraFrusta();
 		}
 
-		for (Primitive geom : geometry) {
-			geom.draw();
-		}
+        glClearColor(.3f, .3f, .3f, 1.0f);
 
-		if (draw_scaffolding) {
-			for (Scaffold geom : geometry_v) {
-				geom.draw();
-			}
-		}
+        for (Primitive geom : geometry) {
+                geom.drawSolid();
+        }
+
+        for (Primitive geom : geometry) {
+                geom.drawWireframe();
+        }
+
+        for (Primitive geom : TriangulationPellet.edges_to_display) {
+                geom.draw();
+        }
+
+        for (Primitive geom : PolygonPellet.edges_to_display) {
+                geom.draw();
+        }
+
+        if (draw_scaffolding) {
+                for (Scaffold geom : geometry_v) {
+                        geom.draw();
+                }
+        }
+
 		glDisable(GL_FOG);
 
 		glPopMatrix();
