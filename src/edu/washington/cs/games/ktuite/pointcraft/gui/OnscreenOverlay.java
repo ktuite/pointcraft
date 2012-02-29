@@ -21,6 +21,7 @@ public class OnscreenOverlay extends Widget {
 	final ResizableFrame full_frame;
 	final ResizableFrame onscreen_frame;
 	private Button instructions_button;
+	private Button level_selection_button;
 	
 	private Label animated_label;
 	private final TintAnimator tintAnimator;
@@ -44,11 +45,20 @@ public class OnscreenOverlay extends Widget {
 				Main.setActivityMode(ActivityMode.INSTRUCTIONS);
 			}
 		});
+		
+		
+		level_selection_button = new Button("Choose Level");
+		level_selection_button.addCallback(new Runnable() {
+			public void run() {
+				Main.setActivityMode(ActivityMode.LEVEL_SELECTION);
+			}
+		});
 
 		full_frame = new ResizableFrame();
 		full_frame.setTitle("Drag and drop tools into your tool palette:");
 		full_frame.setResizableAxis(ResizableFrame.ResizableAxis.NONE);
 		
+		full_inventory_panel.add(level_selection_button);
 		full_inventory_panel.add(instructions_button);
 		full_frame.add(full_inventory_panel);
 		add(full_frame);
@@ -93,6 +103,9 @@ public class OnscreenOverlay extends Widget {
 		instructions_button.adjustSize();
 		instructions_button.setPosition(full_frame.getInnerX() + full_frame.getInnerWidth() - instructions_button.getWidth(), full_frame.getInnerY());
 		
+		level_selection_button.adjustSize();
+		level_selection_button.setPosition(instructions_button.getInnerX() - level_selection_button.getWidth() - 5, full_frame.getInnerY());
+
 		onscreen_frame.adjustSize();
 		onscreen_frame.setPosition(getInnerX() + (getInnerWidth() - onscreen_frame.getWidth())
 				/ 2, getInnerHeight() - onscreen_frame.getHeight() - 10);

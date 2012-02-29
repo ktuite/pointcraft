@@ -5,11 +5,9 @@ import edu.washington.cs.games.ktuite.pointcraft.PointStore;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Scoring;
 
 public class CubeLevel extends BaseLevel {
-
-	protected String level_name = "Cube Level";
 	
 	public CubeLevel(Main main) {
-		super(main);
+		super();
 		PointStore.loadCube();
 		main.initData();
 	}

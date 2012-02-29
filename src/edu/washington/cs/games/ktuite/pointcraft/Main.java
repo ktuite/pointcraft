@@ -11,7 +11,6 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.Stack;
 
-
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -34,7 +33,6 @@ import edu.washington.cs.games.ktuite.pointcraft.geometry.Primitive;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Scaffold;
 import edu.washington.cs.games.ktuite.pointcraft.gui.GuiManager;
 import edu.washington.cs.games.ktuite.pointcraft.levels.*;
-import edu.washington.cs.games.ktuite.pointcraft.levels.CustomLevelFromFile;
 import edu.washington.cs.games.ktuite.pointcraft.tools.CameraGun;
 import edu.washington.cs.games.ktuite.pointcraft.tools.DestructorPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.HoverPellet;
@@ -123,7 +121,7 @@ public class Main {
 	// central classes for managing the GUI and the interaction with the server
 	public static GuiManager gui_manager = null;
 	public static ServerCommunicator server;
-	
+
 	// level, kind of like state
 	public BaseLevel current_level = null;
 
@@ -132,7 +130,7 @@ public class Main {
 	}
 
 	public enum ActivityMode {
-		INSTRUCTIONS, MODELING, TOOL_PICKING
+		INSTRUCTIONS, MODELING, TOOL_PICKING, LEVEL_SELECTION
 	}
 
 	public static GunMode which_gun;
@@ -149,8 +147,8 @@ public class Main {
 			main.initGUI();
 			main.initGraphics();
 			main.initGameVariables();
-			
-			main.current_level = new CustomLevelFromFile(main, "data/lewis_hall.ply");
+
+			main.current_level = new CubeLevel(main);
 
 			main.run();
 		} catch (Exception e) {
@@ -341,8 +339,15 @@ public class Main {
 				gui_manager.updateLoginGui();
 				Display.update();
 			} else {
-				if (which_activity == ActivityMode.MODELING) {
-					handleKeyboardMouseAndMotion(); // input like mouse and keyboard
+				if (which_activity == ActivityMode.LEVEL_SELECTION) {
+					GL11.glClear(GL11.GL_COLOR_BUFFER_BIT
+							| GL11.GL_DEPTH_BUFFER_BIT);
+					glClearColor(1, 1, 1, 1);
+					gui_manager.updateLevelSelectionGui();
+					Display.update();
+				} else if (which_activity == ActivityMode.MODELING) {
+					handleKeyboardMouseAndMotion(); // input like mouse and
+													// keyboard
 					updateGameObjects();
 					current_level.checkLevelState();
 					drawSceneAndGUI(); // draw things on the screen
@@ -385,7 +390,7 @@ public class Main {
 	private void updateGameObjects() {
 		if (which_gun == GunMode.DRAG_TO_EDIT)
 			computeGunDirection();
-		
+
 		HoverPellet.handleDrag();
 
 		for (Pellet pellet : all_pellets_in_world) {
@@ -746,29 +751,29 @@ public class Main {
 			drawCameraFrusta();
 		}
 
-        glClearColor(.3f, .3f, .3f, 1.0f);
+		glClearColor(.3f, .3f, .3f, 1.0f);
 
-        for (Primitive geom : geometry) {
-                geom.drawSolid();
-        }
+		for (Primitive geom : geometry) {
+			geom.drawSolid();
+		}
 
-        for (Primitive geom : geometry) {
-                geom.drawWireframe();
-        }
+		for (Primitive geom : geometry) {
+			geom.drawWireframe();
+		}
 
-        for (Primitive geom : TriangulationPellet.edges_to_display) {
-                geom.draw();
-        }
+		for (Primitive geom : TriangulationPellet.edges_to_display) {
+			geom.draw();
+		}
 
-        for (Primitive geom : PolygonPellet.edges_to_display) {
-                geom.draw();
-        }
+		for (Primitive geom : PolygonPellet.edges_to_display) {
+			geom.draw();
+		}
 
-        if (draw_scaffolding) {
-                for (Scaffold geom : geometry_v) {
-                        geom.draw();
-                }
-        }
+		if (draw_scaffolding) {
+			for (Scaffold geom : geometry_v) {
+				geom.draw();
+			}
+		}
 
 		glDisable(GL_FOG);
 

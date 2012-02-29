@@ -19,12 +19,13 @@ public class GuiManager {
 
 	private Main main_program;
 
+	private GUI login_gui;
 	public GUI onscreen_gui;
 	public GUI instructional_gui;
+	public GUI level_selection_gui;
+
 	public OnscreenOverlay onscreen_overlay;
 	public InstructionalOverlay instruction_overlay;
-
-	private GUI login_gui;
 
 	public static boolean is_logged_in = !Main.IS_RELEASE;
 
@@ -57,6 +58,9 @@ public class GuiManager {
 			ThemeManager themeManager3 = ThemeManager.createThemeManager(url3,
 					renderer);
 			login_gui.applyTheme(themeManager3);
+
+			level_selection_gui = new GUI(new LevelSelectionOverlay(main_program), renderer);
+			level_selection_gui.applyTheme(themeManager);
 
 		} catch (LWJGLException e) {
 			// TODO Auto-generated catch block
@@ -109,6 +113,12 @@ public class GuiManager {
 			return mode;
 		} else {
 			return null;
+		}
+	}
+
+	public void updateLevelSelectionGui() {
+		if (level_selection_gui != null) {
+			level_selection_gui.update();
 		}
 	}
 }

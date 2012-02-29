@@ -9,7 +9,7 @@ public class CustomLevelFromFile extends BaseLevel {
 	protected String level_name = "Custom Level";
 	
 	public CustomLevelFromFile(Main main, String filename) {
-		super(main);
+		super();
 		PointStore.load(filename);
 		main.initData();
 	}
