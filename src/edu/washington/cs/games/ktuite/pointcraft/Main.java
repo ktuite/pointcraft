@@ -148,7 +148,8 @@ public class Main {
 			main.initGraphics();
 			main.initGameVariables();
 
-			main.current_level = new CubeLevel(main);
+			//main.current_level = new CubeLevel(main);
+			main.current_level = new CustomLevelFromFile(main, "/projects/grail/sketchymodeler/texviewer/sampler/box_with_chunk/box_with_chunk.ply");
 
 			main.run();
 		} catch (Exception e) {

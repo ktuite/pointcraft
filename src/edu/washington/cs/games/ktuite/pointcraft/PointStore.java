@@ -248,6 +248,9 @@ public class PointStore {
 	private static void buildLookupTree() {
 		point_positions.rewind();
 		point_colors.rewind();
+		
+		Main.world_scale = (float) ((float) ((PointStore.max_corner[1] - PointStore.min_corner[1])) / 0.071716);
+		// lewis hall height for scale ref...
 
 		System.out.println("starting to build lookup tree");
 		Vec3D center = new Vec3D(min_corner[0], min_corner[1], min_corner[2]);
@@ -575,8 +578,7 @@ public class PointStore {
 			}
 		}
 
-		Main.world_scale = (float) ((float) ((PointStore.max_corner[1] - PointStore.min_corner[1])) / 0.071716);
-		// lewis hall height for scale ref...
+
 
 		buildCameraFrustaWithWorldScale();
 
