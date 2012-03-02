@@ -113,7 +113,6 @@ public class OnscreenOverlay extends Widget {
 
 	public void updateCurrentTool(GunMode which_gun) {
 		label_current_mode.setText("Current Gun: " + Main.which_gun);
-		label_score.setText("Score: " + Scoring.points_explained);
 		onscreen_frame.setTitle("Current Tool: " + which_gun);
 		onscreen_inventory_panel.setSlotFromMode(which_gun);
 	}

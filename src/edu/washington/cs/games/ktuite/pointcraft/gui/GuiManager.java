@@ -13,7 +13,9 @@ import de.matthiasmann.twl.renderer.lwjgl.LWJGLRenderer;
 import de.matthiasmann.twl.theme.ThemeManager;
 import edu.washington.cs.games.ktuite.pointcraft.ActionTracker;
 import edu.washington.cs.games.ktuite.pointcraft.Main;
+import edu.washington.cs.games.ktuite.pointcraft.PointStore;
 import edu.washington.cs.games.ktuite.pointcraft.Main.GunMode;
+import edu.washington.cs.games.ktuite.pointcraft.geometry.Scoring;
 
 public class GuiManager {
 
@@ -120,5 +122,9 @@ public class GuiManager {
 		if (level_selection_gui != null) {
 			level_selection_gui.update();
 		}
+	}
+	
+	public void updateScorePercentage(){
+		onscreen_overlay.label_score.setText("Score: " + Math.round((float)(Scoring.points_explained)/PointStore.num_points*100f) + "%");
 	}
 }

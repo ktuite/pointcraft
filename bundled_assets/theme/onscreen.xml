@@ -2,8 +2,11 @@
 <!DOCTYPE themes PUBLIC "-//www.matthiasmann.de//TWL-Theme//EN" "http://hg.l33tlabs.org/twl/raw-file/tip/src/de/matthiasmann/twl/theme/theme.dtd">
 <themes>
 
-    <images file="font00.png">
-        <area name="font00.png" xywh="*"/>
+    <images file="level1.png">
+        <area name="level1.png" xywh="*"/>
+    </images>
+    <images file="level2.png">
+        <area name="level2.png" xywh="*"/>
     </images>
     
     <images file="login-background.png" format="RGBA" filter="linear">
@@ -254,8 +257,8 @@
             <param name="default"><font>normal</font></param>
         </map></param>
         <param name="images"><map>
-                        <param name="image"><image>font00.png</image></param>
-        
+                        <param name="level1"><image>level1.png</image></param>
+        				<param name="level2"><image>level2.png</image></param>
         </map></param>
     </theme>
 

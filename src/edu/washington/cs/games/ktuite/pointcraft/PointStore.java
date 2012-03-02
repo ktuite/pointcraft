@@ -656,7 +656,14 @@ public class PointStore {
 	}
 
 	public static void makePointTransparent(int i) {
-		point_colors.put(i * 4 + 3, (byte) 0);
+		point_colors.put(i * 4 + 3, (byte) 100);
+		markPointVBODirty();
+	}
+
+	public static void changePointColorToGray(int i) {
+		point_colors.put(i * 3 + 0, (byte) 130);
+		point_colors.put(i * 3 + 1, (byte) 130);
+		point_colors.put(i * 3 + 2, (byte) 130);
 		markPointVBODirty();
 	}
 }

@@ -24,9 +24,9 @@ public class LevelSelectionOverlay extends Widget {
 		frame.setResizableAxis(ResizableAxis.NONE);
 
 		
-		String level_description_html = "<a href='random'><p>Level 1: random</p><img src='image' /></a>" +
+		String level_description_html = "<a href='random'><p>Level 1: random</p><img src='level1' /></a>" +
 				"<br />" +
-				"<a href='cube'><p>Level 2: cube</p><img src='image' /></a>";
+				"<a href='cube'><p>Level 2: cube</p><img src='level2' /></a>";
 		
 		
 		final HTMLTextAreaModel textAreaModel = new HTMLTextAreaModel(level_description_html);

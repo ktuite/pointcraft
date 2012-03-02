@@ -150,6 +150,7 @@ public class Scoring {
 		points_explained += count;
 		score_delta = count;
 		Main.gui_manager.onscreen_overlay.animateScore(count);
+		Main.gui_manager.updateScorePercentage();
 		return ((double) count) / 100.0;
 	}
 }
