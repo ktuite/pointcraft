@@ -9,7 +9,6 @@ import de.matthiasmann.twl.utils.TintAnimator;
 import edu.washington.cs.games.ktuite.pointcraft.Main;
 import edu.washington.cs.games.ktuite.pointcraft.Main.ActivityMode;
 import edu.washington.cs.games.ktuite.pointcraft.Main.GunMode;
-import edu.washington.cs.games.ktuite.pointcraft.geometry.Scoring;
 
 public class OnscreenOverlay extends Widget {
 
