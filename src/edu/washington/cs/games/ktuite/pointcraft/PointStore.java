@@ -59,7 +59,6 @@ public class PointStore {
 			w = w2;
 			h = h2;
 		}
-
 	}
 
 	private static void initBuffers() {
@@ -179,6 +178,67 @@ public class PointStore {
 		buildLookupTree();
 	}
 
+	public static void loadCubes(List<Vector3f> cube_positions,
+			float cube_extent, int points_per_cube, float world_extent) {
+		num_points = cube_positions.size() * points_per_cube;
+		initBuffers();
+
+		for (int c = 0; c < cube_positions.size(); c++) {
+			float[] cube_center = new float[3];
+			cube_center[0] = cube_positions.get(c).getX();
+			cube_center[1] = cube_positions.get(c).getY();
+			cube_center[2] = cube_positions.get(c).getZ();
+
+			for (int i = 0; i < points_per_cube; i++) {
+				double pos[] = new double[3];
+				for (int k = 0; k < 3; k++) {
+					pos[k] = cube_extent * (Math.random() * 2 - 1)
+							+ cube_center[k];
+				}
+
+				int side = (int) Math.floor(Math.random() * 6f);
+				switch (side) {
+				case 0:
+					pos[0] = cube_center[0] + cube_extent;
+					break;
+				case 1:
+					pos[0] = cube_center[0] - cube_extent;
+					break;
+				case 2:
+					pos[1] = cube_center[1] + cube_extent;
+					break;
+				case 3:
+					pos[1] = cube_center[1] - cube_extent;
+					break;
+				case 4:
+					pos[2] = cube_center[2] + cube_extent;
+					break;
+				case 5:
+					pos[2] = cube_center[2] - cube_extent;
+					break;
+				}
+
+				for (int k = 0; k < 3; k++) {
+					point_positions.put((float) pos[k]);
+				}
+				point_colors.put((byte) 200);
+				point_colors.put((byte) 0);
+				point_colors.put((byte) 20);
+				point_colors.put((byte) 255);
+			}
+		}
+
+		point_colors.rewind();
+		point_positions.rewind();
+
+		for (int k = 0; k < 3; k++) {
+			min_corner[k] = -1f * world_extent;
+			max_corner[k] = world_extent;
+		}
+
+		buildLookupTree();
+	}
+
 	public static void load(String filename) {
 		try {
 			BufferedReader buf = new BufferedReader(new FileReader(filename));
@@ -248,7 +308,7 @@ public class PointStore {
 	private static void buildLookupTree() {
 		point_positions.rewind();
 		point_colors.rewind();
-		
+
 		Main.world_scale = (float) ((float) ((PointStore.max_corner[1] - PointStore.min_corner[1])) / 0.071716);
 		// lewis hall height for scale ref...
 
@@ -578,8 +638,6 @@ public class PointStore {
 			}
 		}
 
-
-
 		buildCameraFrustaWithWorldScale();
 
 	}
@@ -651,9 +709,9 @@ public class PointStore {
 	}
 
 	public static void changePointColorToRed(int i) {
-		point_colors.put(i * 3 + 0, (byte) 255);
-		point_colors.put(i * 3 + 1, (byte) 0);
-		point_colors.put(i * 3 + 2, (byte) 0);
+		point_colors.put(i * 4 + 0, (byte) 255);
+		point_colors.put(i * 4 + 1, (byte) 0);
+		point_colors.put(i * 4 + 2, (byte) 0);
 		markPointVBODirty();
 	}
 
@@ -663,9 +721,20 @@ public class PointStore {
 	}
 
 	public static void changePointColorToGray(int i) {
-		point_colors.put(i * 3 + 0, (byte) 130);
-		point_colors.put(i * 3 + 1, (byte) 130);
-		point_colors.put(i * 3 + 2, (byte) 130);
+		point_colors.put(i * 4 + 0, (byte) 130);
+		point_colors.put(i * 4 + 1, (byte) 130);
+		point_colors.put(i * 4 + 2, (byte) 130);
 		markPointVBODirty();
 	}
+
+	public static void changeColorOfPointSubsetToGreen(int start, int finish) {
+		for (int i = start; i < finish; i++) {
+			point_colors.put(i * 4 + 0, (byte) 10);
+			point_colors.put(i * 4 + 1, (byte) 200);
+			point_colors.put(i * 4 + 2, (byte) 50);
+			markPointVBODirty();
+		}
+
+	}
+
 }

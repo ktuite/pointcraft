@@ -127,4 +127,8 @@ public class GuiManager {
 	public void updateScorePercentage(){
 		onscreen_overlay.label_score.setText("Score: " + Math.round((float)(Scoring.points_explained)/PointStore.num_points*100f) + "%");
 	}
+	
+	public void setScoreText(String text){
+		onscreen_overlay.label_score.setText(text);
+	}
 }

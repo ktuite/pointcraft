@@ -29,6 +29,7 @@ import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
 
+import edu.washington.cs.games.ktuite.pointcraft.geometry.Ground;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Primitive;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Scaffold;
 import edu.washington.cs.games.ktuite.pointcraft.gui.GuiManager;
@@ -148,8 +149,9 @@ public class Main {
 			main.initGraphics();
 			main.initGameVariables();
 
-			main.current_level = new CubeLevel(main);
-			//main.current_level = new CustomLevelFromFile(main, "/Users/ktuite/Desktop/colorboxsmall.ply");
+			main.current_level = new NavigationThreeCubes(main);
+			// main.current_level = new CustomLevelFromFile(main,
+			// "/Users/ktuite/Desktop/colorboxsmall.ply");
 
 			main.run();
 		} catch (Exception e) {
@@ -221,8 +223,9 @@ public class Main {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+		glEnable(GL_SMOOTH);
 		glEnable(GL_LINE_SMOOTH);
-		glEnable(GL11.GL_POLYGON_SMOOTH);
+		glEnable(GL_POLYGON_SMOOTH);
 
 		// skybox texture loaded
 		try {
@@ -646,6 +649,13 @@ public class Main {
 			// System.out.println("velocity : " + vel);
 			Vector3f.add(pos, vel, pos);
 
+			if (Ground.impenetrable) {
+				if (pos.y < Ground.height) {
+					pos.y = Ground.height;
+					vel.y = 0;
+				}
+			}
+
 			// friction (let player glide to a stop)
 			vel.scale(veldecay);
 
@@ -733,6 +743,10 @@ public class Main {
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
 
 		glEnable(GL_FOG);
+		if (Ground.enabled) {
+			Ground.draw();
+		}
+
 		if (draw_points) {
 			if (USE_VBO)
 				drawVBOStuff();
