@@ -730,8 +730,8 @@ public class PointStore {
 	public static void changeColorOfPointSubsetToGreen(int start, int finish) {
 		for (int i = start; i < finish; i++) {
 			point_colors.put(i * 4 + 0, (byte) 10);
-			point_colors.put(i * 4 + 1, (byte) 200);
-			point_colors.put(i * 4 + 2, (byte) 50);
+			point_colors.put(i * 4 + 1, (byte) 180);
+			point_colors.put(i * 4 + 2, (byte) 40);
 			markPointVBODirty();
 		}
 

@@ -149,7 +149,7 @@ public class Main {
 			main.initGraphics();
 			main.initGameVariables();
 
-			main.current_level = new NavigationThreeCubes(main);
+			main.current_level = new ShootingEightCubes(main);
 			// main.current_level = new
 			// CustomLevelFromFile(main,"/Users/ktuite/Desktop/rome2-2.ply");
 
