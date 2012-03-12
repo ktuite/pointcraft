@@ -17,6 +17,7 @@ public class OnscreenOverlay extends Widget {
 	public Label label_score;
 	public Label label_instructions;
 	public Label label_objective;
+	public Label label_lower_center;
 	public FullInventoryPanel full_inventory_panel;
 	public OnscreenInventoryPanel onscreen_inventory_panel;
 	final ResizableFrame full_frame;
@@ -38,13 +39,17 @@ public class OnscreenOverlay extends Widget {
 		label_score = new Label("Score: 0");
 		add(label_score);
 
-		label_instructions = new Label("Instructions");
+		label_instructions = new Label();
 		label_instructions.setVisible(false);
 		add(label_instructions);
 
-		label_objective = new Label("Instructions");
+		label_objective = new Label();
 		label_objective.setVisible(false);
 		add(label_objective);
+
+		label_lower_center = new Label();
+		label_lower_center.setVisible(false);
+		add(label_lower_center);
 
 		onscreen_inventory_panel = new OnscreenInventoryPanel(10, 1);
 		full_inventory_panel = new FullInventoryPanel(onscreen_inventory_panel);
@@ -108,12 +113,16 @@ public class OnscreenOverlay extends Widget {
 			label_score.adjustSize();
 			label_score.setPosition(getInnerWidth() - label_score.getWidth()
 					- 10, 30);
-		}
-		else {
+		} else {
 			label_score.adjustSize();
 			label_score.setPosition(getInnerWidth() - label_score.getWidth()
 					- 10, 10);
 		}
+
+		label_lower_center.adjustSize();
+		label_lower_center.setPosition(
+				getInnerWidth() / 2 - label_lower_center.getWidth() / 2,
+				getInnerHeight() - 200);
 
 		positionFrame();
 	}
@@ -167,5 +176,7 @@ public class OnscreenOverlay extends Widget {
 	public void animateScore(int score) {
 		animateRisingText("+" + score);
 	}
+
+
 
 }

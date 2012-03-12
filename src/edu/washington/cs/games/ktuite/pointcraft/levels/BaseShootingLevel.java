@@ -3,6 +3,7 @@ package edu.washington.cs.games.ktuite.pointcraft.levels;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector3f;
 
 import edu.washington.cs.games.ktuite.pointcraft.Main;
@@ -19,7 +20,8 @@ public class BaseShootingLevel extends BaseLevel {
 	protected List<Vector3f> cube_positions;
 	protected boolean[] cube_touched;
 	protected boolean level_won = false;
-	protected int num_pellets = 0;
+	protected int num_pellets;
+	protected boolean instructions_moved_up_top = false;
 
 	public BaseShootingLevel(Main main) {
 		super();
@@ -29,20 +31,32 @@ public class BaseShootingLevel extends BaseLevel {
 		Ground.enabled = true;
 		Ground.impenetrable = true;
 
+		Main.draw_pellets = true;
+		Main.pos.set(0, 0, 0);
+		Main.pan_angle = 0;
+		Main.vel.set(0, 0, 0);
+
+		Main.all_pellets_in_world.clear();
+		num_pellets = Main.all_pellets_in_world.size();
+
 		Main.gui_manager.showNoTools();
 		Main.gui_manager.showNoLastActivity();
 		Main.gui_manager.setObjectiveText("Shoot each of the cubes");
 
 		Main.which_gun = GunMode.PELLET;
 
+		Main.pellet_scale = .5f;
 	}
 
 	public void checkLevelState() {
-		for (Pellet p: Main.all_pellets_in_world){
-			if (p.constructing && Main.all_pellets_in_world.indexOf(p) >= num_pellets){
+
+		for (Pellet p : Main.all_pellets_in_world) {
+			if (p.constructing
+					&& Main.all_pellets_in_world.indexOf(p) >= num_pellets) {
 				num_pellets++;
 				System.out.println("new pellet");
-				int i = PointStore.getNearestPoint(p.pos.x, p.pos.y, p.pos.z, p.radius) / points_per_cube;
+				int i = PointStore.getNearestPoint(p.pos.x, p.pos.y, p.pos.z,
+						p.radius) / points_per_cube;
 				if (cube_touched[i] == false) {
 					cube_touched[i] = true;
 					PointStore.changeColorOfPointSubsetToGreen(i
@@ -52,15 +66,27 @@ public class BaseShootingLevel extends BaseLevel {
 				}
 			}
 		}
-		
+
 		if (!level_won && numCubesTouched() == cube_positions.size()) {
 			levelWon();
 		} else if (level_won) {
 			playWinAnimation();
+		} else {
+			if (!instructions_moved_up_top
+					&& !(Main.pos.x == 0 && Main.pos.y == 0 && Main.pos.z == 0)) {
+				Main.gui_manager.moveCenterInstructionsToTop();
+				instructions_moved_up_top = true;
+			}
 		}
+
 	}
 
 	private void playWinAnimation() {
+		if (Mouse.isButtonDown(0)) {
+			Main.gui_manager.level_selection_overlay.advanceLevel();
+			return;
+		}
+
 		float rand = 0.0001f;
 		float[] c = new float[3];
 		for (int i = 0; i < PointStore.num_points; i++) {
@@ -68,7 +94,7 @@ public class BaseShootingLevel extends BaseLevel {
 			c[0] = center.getX();
 			c[1] = center.getY();
 			c[2] = center.getZ();
-			
+
 			float p = PointStore.point_positions.get(i * 3 + 1);
 			if (p < Ground.height + rand) {
 				PointStore.point_positions.put(i * 3 + 1, Ground.height + rand);
@@ -85,7 +111,7 @@ public class BaseShootingLevel extends BaseLevel {
 	}
 
 	private void setScoreText() {
-		Main.gui_manager.setScoreText("Score: " + numCubesTouched() + " / "
+		Main.gui_manager.setScoreText(numCubesTouched() + " / "
 				+ cube_positions.size() + " cubes");
 	}
 
@@ -102,6 +128,7 @@ public class BaseShootingLevel extends BaseLevel {
 		level_won = true;
 		Main.gui_manager.animateRisingText("Level Complete!");
 		Main.draw_pellets = false;
+		Main.gui_manager.clickToAdvanceText();
 	}
 
 	protected void initCubesTouched() {
@@ -109,6 +136,7 @@ public class BaseShootingLevel extends BaseLevel {
 		for (int i = 0; i < cube_touched.length; i++) {
 			cube_touched[i] = false;
 		}
+		setScoreText();
 	}
 
 }

@@ -21,7 +21,7 @@ public class NavigationThreeCubes extends BaseNavigationLevel {
 
 		main.initData();
 		
-		Main.gui_manager.setInstructionText("Press WASD keys or arrow keys to move around");
+		Main.gui_manager.setCenterInstructionText("Press WASD keys or arrow keys to move around");
 	}
 
 

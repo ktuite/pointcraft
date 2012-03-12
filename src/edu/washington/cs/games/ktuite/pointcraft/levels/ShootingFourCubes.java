@@ -22,7 +22,7 @@ public class ShootingFourCubes extends BaseShootingLevel {
 
 		main.initData();
 
-		Main.gui_manager.setInstructionText("Click to shoot");
+		Main.gui_manager.setCenterInstructionText("Click to shoot");
 	}
 
 }

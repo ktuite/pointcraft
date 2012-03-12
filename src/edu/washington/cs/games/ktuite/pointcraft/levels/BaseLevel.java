@@ -21,4 +21,8 @@ public class BaseLevel {
 	public void checkLevelState() {
 		score++;
 	}
+	
+	public static String getCats(){
+		return "cats";
+	}
 }

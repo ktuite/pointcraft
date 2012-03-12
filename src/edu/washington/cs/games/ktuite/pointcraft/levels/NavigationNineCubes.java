@@ -6,30 +6,33 @@ import edu.washington.cs.games.ktuite.pointcraft.Main;
 import edu.washington.cs.games.ktuite.pointcraft.PointStore;
 
 public class NavigationNineCubes extends BaseNavigationLevel {
-	
+
 	public NavigationNineCubes(Main main) {
 		super(main);
-		
+
+		// Ground.height = -0.1f;
+
 		cube_positions.add(new Vector3f(0f, 0f, -0.05f));
 		cube_positions.add(new Vector3f(0.015f, 0f, -0.05f));
 		cube_positions.add(new Vector3f(-0.015f, 0f, -0.05f));
-		
+
 		cube_positions.add(new Vector3f(0f, 0.015f, -0.05f));
 		cube_positions.add(new Vector3f(0.015f, 0.015f, -0.05f));
 		cube_positions.add(new Vector3f(-0.015f, 0.015f, -0.05f));
-		
-		cube_positions.add(new Vector3f(0f, -0.015f, -0.05f));
-		cube_positions.add(new Vector3f(0.015f, -0.015f, -0.05f));
-		cube_positions.add(new Vector3f(-0.015f, -0.015f, -0.05f));
-		
-		initCubesTouched();
-		
-		PointStore.loadCubes(cube_positions, cube_extent, points_per_cube, world_extent);
-		
-		main.initData();
-		
-		Main.gui_manager.setInstructionText("Press WASD keys or arrow keys to move around \nPress Q and E keys to move up and down");
-	}
 
+		cube_positions.add(new Vector3f(0f, 0.03f, -0.05f));
+		cube_positions.add(new Vector3f(0.015f, 0.03f, -0.05f));
+		cube_positions.add(new Vector3f(-0.015f, 0.030f, -0.05f));
+
+		initCubesTouched();
+
+		PointStore.loadCubes(cube_positions, cube_extent, points_per_cube,
+				world_extent);
+
+		main.initData();
+
+		Main.gui_manager
+				.setCenterInstructionText("Press WASD keys or arrow keys to move around \nPress Q and E keys to move up and down");
+	}
 
 }

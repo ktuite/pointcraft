@@ -28,6 +28,7 @@ public class GuiManager {
 
 	public OnscreenOverlay onscreen_overlay;
 	public InstructionalOverlay instruction_overlay;
+	public LevelSelectionOverlay level_selection_overlay;
 
 	public static boolean is_logged_in = !Main.IS_RELEASE;
 
@@ -61,8 +62,8 @@ public class GuiManager {
 					renderer);
 			login_gui.applyTheme(themeManager3);
 
-			level_selection_gui = new GUI(new LevelSelectionOverlay(
-					main_program), renderer);
+			level_selection_overlay = new LevelSelectionOverlay(main_program);
+			level_selection_gui = new GUI(level_selection_overlay, renderer);
 			level_selection_gui.applyTheme(themeManager);
 
 		} catch (LWJGLException e) {
@@ -158,11 +159,34 @@ public class GuiManager {
 		onscreen_overlay.animateRisingText(text);
 	}
 	
-	public void setInstructionText(String text){
-		onscreen_overlay.label_instructions.setText(text);
+	public void setCenterInstructionText(String text){
+		onscreen_overlay.label_lower_center.setText(text);
+		onscreen_overlay.label_lower_center.setVisible(true);
+		onscreen_overlay.label_instructions.setVisible(false);
+	}
+	
+	public void clickToAdvanceText() {
+		onscreen_overlay.label_lower_center.setText("Click to advance to the next level");
+		onscreen_overlay.label_lower_center.setVisible(true);
 	}
 	
 	public void setObjectiveText(String text){
 		onscreen_overlay.label_objective.setText(text);
 	}
+
+	public void hideLowerCenterText() {
+		onscreen_overlay.label_lower_center.setVisible(false);
+	}
+
+	public void setUpperInstructionText(String string) {
+		onscreen_overlay.label_instructions.setText(string);
+	}
+	
+	public void moveCenterInstructionsToTop(){
+		onscreen_overlay.label_instructions.setText(onscreen_overlay.label_lower_center.getText());
+		onscreen_overlay.label_lower_center.setVisible(false);
+		onscreen_overlay.label_instructions.setVisible(true);
+	}
+	
+	
 }

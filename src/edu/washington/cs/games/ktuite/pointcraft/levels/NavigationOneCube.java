@@ -19,7 +19,8 @@ public class NavigationOneCube extends BaseNavigationLevel {
 
 		main.initData();
 		
-		Main.gui_manager.setInstructionText("Press W or up arrow to move forward");
+		Main.gui_manager.setCenterInstructionText("Press W or up arrow to move forward");
+	
 	}
 
 }

@@ -3,6 +3,7 @@ package edu.washington.cs.games.ktuite.pointcraft.levels;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.lwjgl.input.Mouse;
 import org.lwjgl.util.vector.Vector3f;
 
 import edu.washington.cs.games.ktuite.pointcraft.Main;
@@ -18,6 +19,7 @@ public class BaseNavigationLevel extends BaseLevel {
 	protected List<Vector3f> cube_positions;
 	protected boolean[] cube_touched;
 	protected boolean level_won = false;
+	protected boolean instructions_moved_up_top = false;
 
 	public BaseNavigationLevel(Main main) {
 		super();
@@ -27,14 +29,20 @@ public class BaseNavigationLevel extends BaseLevel {
 		Ground.enabled = true;
 		Ground.impenetrable = true;
 
+		Main.pos.set(0, 0, 0);
+		Main.pan_angle = 0;
+		Main.vel.set(0, 0, 0);
+
 		Main.gui_manager.showNoTools();
 		Main.gui_manager.showNoLastActivity();
 		Main.gui_manager.setObjectiveText("Navigate through each of the cubes");
 
 		Main.which_gun = GunMode.DISABLED;
 
+		// slow things down in this world
+		Main.pellet_scale = .5f;
 	}
-
+	
 	public void checkLevelState() {
 		for (Vector3f cube_center : cube_positions) {
 			Vector3f diff = Vector3f.sub(Main.pos, cube_center, null);
@@ -55,10 +63,21 @@ public class BaseNavigationLevel extends BaseLevel {
 			levelWon();
 		} else if (level_won) {
 			playWinAnimation();
+		} else {
+			if (!instructions_moved_up_top
+					&& !(Main.pos.x == 0 && Main.pos.y == 0 && Main.pos.z == 0)) {
+				Main.gui_manager.moveCenterInstructionsToTop();
+				instructions_moved_up_top = true;
+			}
 		}
 	}
 
 	private void playWinAnimation() {
+		if (Mouse.isButtonDown(0)) {
+			Main.gui_manager.level_selection_overlay.advanceLevel();
+			return;
+		}
+
 		float rand = 0.0001f;
 		float[] c = new float[3];
 		for (int i = 0; i < PointStore.num_points; i++) {
@@ -66,7 +85,7 @@ public class BaseNavigationLevel extends BaseLevel {
 			c[0] = center.getX();
 			c[1] = center.getY();
 			c[2] = center.getZ();
-			
+
 			float p = PointStore.point_positions.get(i * 3 + 1);
 			if (p < Ground.height + rand) {
 				PointStore.point_positions.put(i * 3 + 1, Ground.height + rand);
@@ -82,8 +101,8 @@ public class BaseNavigationLevel extends BaseLevel {
 		}
 	}
 
-	private void setScoreText() {
-		Main.gui_manager.setScoreText("Score: " + numCubesTouched() + " / "
+	protected void setScoreText() {
+		Main.gui_manager.setScoreText(numCubesTouched() + " / "
 				+ cube_positions.size() + " cubes");
 	}
 
@@ -99,6 +118,7 @@ public class BaseNavigationLevel extends BaseLevel {
 	private void levelWon() {
 		level_won = true;
 		Main.gui_manager.animateRisingText("Level Complete!");
+		Main.gui_manager.clickToAdvanceText();
 	}
 
 	protected void initCubesTouched() {
@@ -106,6 +126,7 @@ public class BaseNavigationLevel extends BaseLevel {
 		for (int i = 0; i < cube_touched.length; i++) {
 			cube_touched[i] = false;
 		}
+		setScoreText();
 	}
 
 }

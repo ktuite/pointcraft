@@ -82,7 +82,7 @@ public class Main {
 	// stuff about the world and how you move around
 	public static float world_scale = 1f;
 	public static Vector3f pos;
-	private Vector3f vel;
+	public static Vector3f vel;
 	public static float tilt_angle;
 	public static float pan_angle;
 	private float veldecay = .90f;
@@ -131,7 +131,7 @@ public class Main {
 	}
 
 	public enum ActivityMode {
-		INSTRUCTIONS, MODELING, TOOL_PICKING, LEVEL_SELECTION
+		INSTRUCTIONS, MODELING, TOOL_PICKING, LEVEL_SELECTION, TUTORIAL
 	}
 
 	public static GunMode which_gun;
@@ -149,7 +149,7 @@ public class Main {
 			main.initGraphics();
 			main.initGameVariables();
 
-			main.current_level = new ShootingEightCubes(main);
+			main.current_level = new NavigationOneCube(main);
 			// main.current_level = new
 			// CustomLevelFromFile(main,"/Users/ktuite/Desktop/rome2-2.ply");
 
@@ -190,7 +190,7 @@ public class Main {
 		if (IS_RELEASE)
 			setActivityMode(ActivityMode.INSTRUCTIONS);
 		else
-			setActivityMode(ActivityMode.MODELING);
+			setActivityMode(ActivityMode.TUTORIAL);
 	}
 
 	private void initGraphics() {
@@ -319,12 +319,15 @@ public class Main {
 				Display.update();
 			} else {
 				if (which_activity == ActivityMode.LEVEL_SELECTION) {
+					handleKeyboardMotion();
 					GL11.glClear(GL11.GL_COLOR_BUFFER_BIT
 							| GL11.GL_DEPTH_BUFFER_BIT);
 					glClearColor(1, 1, 1, 1);
 					gui_manager.updateLevelSelectionGui();
+
 					Display.update();
-				} else if (which_activity == ActivityMode.MODELING) {
+				} else if (which_activity == ActivityMode.MODELING
+						|| which_activity == ActivityMode.TUTORIAL) {
 					handleKeyboardMouseAndMotion(); // input like mouse and
 													// keyboard
 					updateGameObjects();
@@ -457,13 +460,105 @@ public class Main {
 			}
 		}
 
+		handleKeyboardMotion();
+
+		// normalize the speed
+		double speed = Math.sqrt(vel.length());
+		if (speed > 0.000001) {
+			float ratio = (float) (Math.min(speed, max_speed) / speed);
+			vel.scale(ratio);
+		}
+
+		// sneak / go slowly
+		if (!minecraft_flight && Keyboard.isKeyDown(Keyboard.KEY_SPACE))
+			vel.scale(.3f);
+
+		if (Main.animatingToSavedView) {
+			Cinematics.interpSteps++;
+			Cinematics.interpPanTiltPos();
+			if (Cinematics.interpSteps > 100) {
+				animatingToSavedView = false;
+			}
+		} else {
+			// pos += vel
+			// System.out.println("velocity : " + vel);
+			Vector3f.add(pos, vel, pos);
+
+			if (Ground.impenetrable) {
+				if (pos.y < Ground.height) {
+					pos.y = Ground.height;
+					vel.y = 0;
+				}
+			}
+
+			// friction (let player glide to a stop)
+			vel.scale(veldecay);
+
+			// use mouse to control where player is looking
+			tilt_angle -= Mouse.getDY() / 10f;
+
+			pan_angle += Mouse.getDX() / 10f;
+
+			if (tilt_angle > 90)
+				tilt_angle = 90;
+			if (tilt_angle < -90)
+				tilt_angle = -90;
+
+			if (pan_angle > 360)
+				pan_angle -= 360;
+			if (pan_angle < 0)
+				pan_angle += 360;
+		}
+
+		while (Mouse.next()) {
+			if (!cinematics_mode) {
+				if (Mouse.getEventButtonState()) {
+					handleMouseDown();
+				} else {
+					handleMouseUp();
+				}
+			}
+		}
+
+		// use scroll wheel to change orb gun distance
+		// so far the only gun mode that uses extra stuff to determine its state
+		int wheel = Mouse.getDWheel();
+		if (which_gun == GunMode.ORB) {
+			if (wheel < 0) {
+				OrbPellet.orb_pellet.decreaseDistance();
+			} else if (wheel > 0) {
+				OrbPellet.orb_pellet.increaseDistance();
+			}
+		} else {
+			if (wheel < 0) {
+				pellet_scale -= .05f;
+				if (pellet_scale <= 0)
+					pellet_scale = 0.05f;
+			} else if (wheel > 0) {
+				pellet_scale += .05f;
+				if (pellet_scale > 5)
+					pellet_scale = 5f;
+			}
+		}
+
+	}
+
+	private void handleKeyboardMotion() {
 		while (Keyboard.next()) {
 			if (Keyboard.getEventKeyState()) {
 				// PRINT KEY SO I CAN SEE THE KEY CODE
 				// System.out.println("Key: " + Keyboard.getEventKey());
 
 				if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
-					setActivityMode(ActivityMode.TOOL_PICKING);
+					if (which_activity == ActivityMode.MODELING) {
+						setActivityMode(ActivityMode.TOOL_PICKING);
+					} else if (which_activity == ActivityMode.TUTORIAL) {
+						setActivityMode(ActivityMode.LEVEL_SELECTION);
+					} else if (which_activity == ActivityMode.LEVEL_SELECTION) {
+						System.out
+								.println("trying to switch from level selection to tutorial");
+						setActivityMode(ActivityMode.TUTORIAL);
+					}
 				} else if (Keyboard.getEventKey() == Keyboard.KEY_L) {
 					draw_lines = !draw_lines;
 				}
@@ -497,7 +592,7 @@ public class Main {
 						int key = Keyboard.getEventKey() - Keyboard.KEY_1;
 						GunMode new_mode = gui_manager
 								.getGunModeFromOnscreenToolPalette(key);
-						if (new_mode != null)
+						if (new_mode != null && which_gun != GunMode.DISABLED)
 							which_gun = new_mode;
 					}
 					if (Keyboard.getEventKey() == Keyboard.KEY_0) {
@@ -601,86 +696,6 @@ public class Main {
 
 			}
 		}
-
-		// normalize the speed
-		double speed = Math.sqrt(vel.length());
-		if (speed > 0.000001) {
-			float ratio = (float) (Math.min(speed, max_speed) / speed);
-			vel.scale(ratio);
-		}
-
-		// sneak / go slowly
-		if (!minecraft_flight && Keyboard.isKeyDown(Keyboard.KEY_SPACE))
-			vel.scale(.3f);
-
-		if (Main.animatingToSavedView) {
-			Cinematics.interpSteps++;
-			Cinematics.interpPanTiltPos();
-			if (Cinematics.interpSteps > 100) {
-				animatingToSavedView = false;
-			}
-		} else {
-			// pos += vel
-			// System.out.println("velocity : " + vel);
-			Vector3f.add(pos, vel, pos);
-
-			if (Ground.impenetrable) {
-				if (pos.y < Ground.height) {
-					pos.y = Ground.height;
-					vel.y = 0;
-				}
-			}
-
-			// friction (let player glide to a stop)
-			vel.scale(veldecay);
-
-			// use mouse to control where player is looking
-			tilt_angle -= Mouse.getDY() / 10f;
-
-			pan_angle += Mouse.getDX() / 10f;
-
-			if (tilt_angle > 90)
-				tilt_angle = 90;
-			if (tilt_angle < -90)
-				tilt_angle = -90;
-
-			if (pan_angle > 360)
-				pan_angle -= 360;
-			if (pan_angle < 0)
-				pan_angle += 360;
-		}
-
-		while (Mouse.next()) {
-			if (!cinematics_mode) {
-				if (Mouse.getEventButtonState()) {
-					handleMouseDown();
-				} else {
-					handleMouseUp();
-				}
-			}
-		}
-
-		// use scroll wheel to change orb gun distance
-		// so far the only gun mode that uses extra stuff to determine its state
-		int wheel = Mouse.getDWheel();
-		if (which_gun == GunMode.ORB) {
-			if (wheel < 0) {
-				OrbPellet.orb_pellet.decreaseDistance();
-			} else if (wheel > 0) {
-				OrbPellet.orb_pellet.increaseDistance();
-			}
-		} else {
-			if (wheel < 0) {
-				pellet_scale -= .05f;
-				if (pellet_scale <= 0)
-					pellet_scale = 0.05f;
-			} else if (wheel > 0) {
-				pellet_scale += .05f;
-				if (pellet_scale > 5)
-					pellet_scale = 5f;
-			}
-		}
-
 	}
 
 	private void handleMouseDown() {
@@ -1316,10 +1331,14 @@ public class Main {
 		if (which_activity == ActivityMode.MODELING) {
 			Mouse.setGrabbed(true);
 			gui_manager.showOnscreenTools();
+		} else if (which_activity == ActivityMode.TUTORIAL) {
+			Mouse.setGrabbed(true);
 		} else if (which_activity == ActivityMode.TOOL_PICKING) {
 			Mouse.setGrabbed(false);
 			gui_manager.showFullscreenTools();
 		} else if (which_activity == ActivityMode.INSTRUCTIONS) {
+			Mouse.setGrabbed(false);
+		} else if (which_activity == ActivityMode.LEVEL_SELECTION) {
 			Mouse.setGrabbed(false);
 		}
 	}
