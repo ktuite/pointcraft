@@ -127,7 +127,7 @@ public class Main {
 	public BaseLevel current_level = null;
 
 	public enum GunMode {
-		PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM, TRIANGULATION
+		DISABLED, PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM, TRIANGULATION
 	}
 
 	public enum ActivityMode {
@@ -150,8 +150,8 @@ public class Main {
 			main.initGameVariables();
 
 			main.current_level = new NavigationThreeCubes(main);
-			// main.current_level = new CustomLevelFromFile(main,
-			// "/Users/ktuite/Desktop/colorboxsmall.ply");
+			// main.current_level = new
+			// CustomLevelFromFile(main,"/Users/ktuite/Desktop/rome2-2.ply");
 
 			main.run();
 		} catch (Exception e) {
@@ -290,31 +290,6 @@ public class Main {
 		initData();
 	}
 
-	@SuppressWarnings("unused")
-	private void loadData() {
-		if (IS_RELEASE)
-			// PointStore.load("data/lewis_hall.ply");
-			PointStore.loadCube();
-		else {
-			// PointStore.load("/Users/ktuite/Code/photocity/plys/fountain-downsample-bin.ply");
-			// PointStore.load("/Users/ktuite/Desktop/things/scan1/reoriented.ply");
-			// PointStore.loadRandom();
-			// PointStore.load("data/culdesac2.ply");
-			// PointStore.load("data/brown_house_dense.ply");
-			// PointStore.load("data/desk.ply");
-			// PointStore.load("/Users/ktuite/Desktop/things/scan1/mesh.ply");
-			// PointStore.loadCube();
-			// PointStore.load("data/desk.ply");
-			// PointStore.load("data/flower.ply");
-			// PointStore.load("data/lewis_hall.ply");
-			PointStore
-					.load("/Users/ktuite/Code/sketchymodeler/texviewer/cse/kidder.bundle");
-			// PointStore.load("data/uris.ply");
-			// PointStore.load("data/red_square.ply");
-			// PointStore.load("/Users/ktuite/Downloads/final_cloud-1300484491-518929104.ply");
-		}
-	}
-
 	public void initData() {
 		// world scale set up by point store
 
@@ -326,7 +301,7 @@ public class Main {
 
 		glFogf(GL_FOG_END, 3.0f * world_scale);
 		glFogf(GL_FOG_START, .25f * world_scale);
-		// fog_density /= world_scale;
+		fog_density /= world_scale;
 		glFogf(GL_FOG_DENSITY, fog_density);
 
 		PointStore.markPointVBODirty();
@@ -1177,7 +1152,9 @@ public class Main {
 		if (!draw_pellets)
 			return;
 
-		if (which_gun == GunMode.ORB) {
+		if (which_gun == GunMode.DISABLED) {
+			return;
+		} else if (which_gun == GunMode.ORB) {
 			OrbPellet new_pellet = new OrbPellet(all_pellets_in_world);
 			new_pellet.pos.set(OrbPellet.orb_pellet.pos);
 			new_pellet.constructing = true;

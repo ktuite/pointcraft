@@ -1,24 +1,15 @@
 package edu.washington.cs.games.ktuite.pointcraft.levels;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.lwjgl.util.vector.Vector3f;
 
 import edu.washington.cs.games.ktuite.pointcraft.Main;
 import edu.washington.cs.games.ktuite.pointcraft.PointStore;
 
-public class NavigationNineCubes extends BaseLevel {
-	
-	private float world_extent = 0.1f;
-	private float cube_extent = 0.005f;
-	private int points_per_cube = 10000;
-	private List<Vector3f> cube_positions;
+public class NavigationNineCubes extends BaseNavigationLevel {
 	
 	public NavigationNineCubes(Main main) {
-		super();
+		super(main);
 		
-		cube_positions = new LinkedList<Vector3f>();
 		cube_positions.add(new Vector3f(0f, 0f, -0.05f));
 		cube_positions.add(new Vector3f(0.015f, 0f, -0.05f));
 		cube_positions.add(new Vector3f(-0.015f, 0f, -0.05f));
@@ -30,13 +21,15 @@ public class NavigationNineCubes extends BaseLevel {
 		cube_positions.add(new Vector3f(0f, -0.015f, -0.05f));
 		cube_positions.add(new Vector3f(0.015f, -0.015f, -0.05f));
 		cube_positions.add(new Vector3f(-0.015f, -0.015f, -0.05f));
+		
+		initCubesTouched();
+		
 		PointStore.loadCubes(cube_positions, cube_extent, points_per_cube, world_extent);
 		
 		main.initData();
+		
+		Main.gui_manager.setInstructionText("Press WASD keys or arrow keys to move around \nPress Q and E keys to move up and down");
 	}
 
-	public void checkLevelState() {
-		// check if player is inside the cube 
-	}
 
 }

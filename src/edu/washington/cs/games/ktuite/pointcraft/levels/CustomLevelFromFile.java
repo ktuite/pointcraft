@@ -2,6 +2,7 @@ package edu.washington.cs.games.ktuite.pointcraft.levels;
 
 import edu.washington.cs.games.ktuite.pointcraft.Main;
 import edu.washington.cs.games.ktuite.pointcraft.PointStore;
+import edu.washington.cs.games.ktuite.pointcraft.geometry.Ground;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Scoring;
 
 public class CustomLevelFromFile extends BaseLevel {
@@ -12,6 +13,7 @@ public class CustomLevelFromFile extends BaseLevel {
 		super();
 		PointStore.load(filename);
 		main.initData();
+		Ground.enabled = false;
 	}
 
 	public void checkLevelState() {

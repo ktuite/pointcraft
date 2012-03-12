@@ -61,7 +61,8 @@ public class GuiManager {
 					renderer);
 			login_gui.applyTheme(themeManager3);
 
-			level_selection_gui = new GUI(new LevelSelectionOverlay(main_program), renderer);
+			level_selection_gui = new GUI(new LevelSelectionOverlay(
+					main_program), renderer);
 			level_selection_gui.applyTheme(themeManager);
 
 		} catch (LWJGLException e) {
@@ -106,6 +107,25 @@ public class GuiManager {
 		onscreen_overlay.onscreen_frame.setVisible(false);
 	}
 
+	public void showNoTools() {
+		onscreen_overlay.full_frame.setVisible(false);
+		onscreen_overlay.onscreen_frame.setVisible(false);
+	}
+
+	public void showNoLastActivity() {
+		onscreen_overlay.label_current_mode.setVisible(false);
+		onscreen_overlay.label_last_action.setVisible(false);
+		onscreen_overlay.label_instructions.setVisible(true);
+		onscreen_overlay.label_objective.setVisible(true);
+	}
+
+	public void showLastActivity() {
+		onscreen_overlay.label_current_mode.setVisible(true);
+		onscreen_overlay.label_last_action.setVisible(true);
+		onscreen_overlay.label_instructions.setVisible(false);
+		onscreen_overlay.label_objective.setVisible(false);
+	}
+
 	public GunMode getGunModeFromOnscreenToolPalette(int i) {
 		GunMode mode = onscreen_overlay.onscreen_inventory_panel.slot[i]
 				.getGunMode();
@@ -123,12 +143,26 @@ public class GuiManager {
 			level_selection_gui.update();
 		}
 	}
-	
-	public void updateScorePercentage(){
-		onscreen_overlay.label_score.setText("Score: " + Math.round((float)(Scoring.points_explained)/PointStore.num_points*100f) + "%");
+
+	public void updateScorePercentage() {
+		onscreen_overlay.label_score.setText("Score: "
+				+ Math.round((float) (Scoring.points_explained)
+						/ PointStore.num_points * 100f) + "%");
+	}
+
+	public void setScoreText(String text) {
+		onscreen_overlay.label_score.setText(text);
+	}
+
+	public void animateRisingText(String text) {
+		onscreen_overlay.animateRisingText(text);
 	}
 	
-	public void setScoreText(String text){
-		onscreen_overlay.label_score.setText(text);
+	public void setInstructionText(String text){
+		onscreen_overlay.label_instructions.setText(text);
+	}
+	
+	public void setObjectiveText(String text){
+		onscreen_overlay.label_objective.setText(text);
 	}
 }
