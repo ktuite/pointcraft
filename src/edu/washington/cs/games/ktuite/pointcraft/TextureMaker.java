@@ -116,9 +116,9 @@ public class TextureMaker implements Runnable {
 								PointStore.point_positions.get(idx * 3 + 2));
 						Vector3f.sub(otherPt, interp, otherPt);
 						float w = 1/otherPt.length();
-						r += w*(short)(PointStore.point_colors.get(idx * 3 + 0)& 0xFF);
-						g += w*(short)(PointStore.point_colors.get(idx * 3 + 1)& 0xFF);
-						b += w*(short)(PointStore.point_colors.get(idx * 3 + 2)& 0xFF);
+						r += w*(short)(PointStore.point_colors.get(idx * 4 + 0)& 0xFF);
+						g += w*(short)(PointStore.point_colors.get(idx * 4 + 1)& 0xFF);
+						b += w*(short)(PointStore.point_colors.get(idx * 4 + 2)& 0xFF);
 						tot_weight += w;
 					}
 

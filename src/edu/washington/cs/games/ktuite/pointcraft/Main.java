@@ -45,6 +45,7 @@ import edu.washington.cs.games.ktuite.pointcraft.tools.PlanePellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.PolygonPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.ScaffoldPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.TriangulationPellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.TutorialPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.UpPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.VerticalLinePellet;
 
@@ -90,6 +91,7 @@ public class Main {
 	private double max_speed = 1 * world_scale;
 	private Texture skybox = null;
 	public static boolean minecraft_flight = false;
+	public static boolean use_local_textures = true;
 
 	// stuff for fast rendering of the point cloud
 	public static boolean USE_VBO = false;
@@ -127,7 +129,7 @@ public class Main {
 	public BaseLevel current_level = null;
 
 	public enum GunMode {
-		DISABLED, PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM, TRIANGULATION
+		DISABLED, PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM, TRIANGULATION, TUTORIAL
 	}
 
 	public enum ActivityMode {
@@ -150,9 +152,8 @@ public class Main {
 			main.initGameVariables();
 
 			main.current_level = new NavigationOneCube(main);
-			// main.current_level = new
-			// CustomLevelFromFile(main,"/Users/ktuite/Desktop/rome2-2.ply");
-
+			//main.current_level = new CustomLevelFromFile(main,"/Users/ktuite/Desktop/sketchup-pointcraft/twoshapes.ply", .25f);
+			
 			main.run();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -172,7 +173,7 @@ public class Main {
 			if (IS_SIGGRAPH_DEMO) {
 				Display.setDisplayMode(new DisplayMode(1280, 720));
 			} else {
-				Display.setDisplayMode(new DisplayMode(800, 600));
+				Display.setDisplayMode(new DisplayMode(1400,900)); //800x600
 			}
 			Display.setResizable(true);
 			Display.setVSyncEnabled(true);
@@ -1007,6 +1008,7 @@ public class Main {
 			}
 			glEnd();
 			break;
+		case TUTORIAL:
 		case PELLET:
 			glBegin(GL_LINES);
 			glVertex2f(0, f);
@@ -1163,6 +1165,7 @@ public class Main {
 	}
 
 	private void shootGun() {
+		System.out.println("which gun: " + which_gun);
 		// don't shoot when no pellets are there to draw
 		if (!draw_pellets)
 			return;
@@ -1205,6 +1208,8 @@ public class Main {
 				pellet = new UpPellet();
 			} else if (which_gun == GunMode.TRIANGULATION) {
 				pellet = new TriangulationPellet();
+			} else if (which_gun == GunMode.TUTORIAL) {
+				pellet = new TutorialPellet();
 			} else {
 				pellet = new PolygonPellet();
 			}

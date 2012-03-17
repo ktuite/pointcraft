@@ -1,5 +1,6 @@
 package edu.washington.cs.games.ktuite.pointcraft.tools;
 
+import java.util.LinkedList;
 
 import org.lwjgl.util.vector.Vector3f;
 
@@ -7,7 +8,10 @@ import edu.washington.cs.games.ktuite.pointcraft.ActionTracker;
 import edu.washington.cs.games.ktuite.pointcraft.Main;
 import static org.lwjgl.opengl.GL11.*;
 
-public class ScaffoldPellet extends Pellet {
+public class TutorialPellet extends Pellet {
+
+	public static LinkedList<TutorialPellet> tutorial_pellets = new LinkedList<TutorialPellet>();
+	public boolean hit = false;
 
 	/*
 	 * A Pellet is a magical thing that you can shoot out of a gun that will
@@ -15,16 +19,15 @@ public class ScaffoldPellet extends Pellet {
 	 * 
 	 * Soon it will even stick to other pellets.
 	 */
-	public ScaffoldPellet() {
+	public TutorialPellet() {
 		super();
 		pellet_type = Main.GunMode.PELLET;
-		color[0] = .2f;
-		color[1] = .7f;
-		color[2] = .7f;
+		color[0] = 1f;
+		color[1] = .01f;
+		color[2] = .15f;
 	}
 
-	// these constructors are for making plane/line intersection points
-	public ScaffoldPellet(LinePellet p) {
+	public TutorialPellet(TutorialPellet p) {
 		super();
 		alive = true;
 		constructing = true;
@@ -32,29 +35,11 @@ public class ScaffoldPellet extends Pellet {
 		radius = p.radius;
 		max_radius = p.max_radius;
 		pellet_type = p.pellet_type;
+		for (int k = 0; k < 3; k++){
+			color[k] = p.color[k];
+		}
 	}
 
-	public ScaffoldPellet(PlanePellet p) {
-		super();
-		alive = true;
-		constructing = true;
-		pos.set(p.pos);
-		radius = p.radius;
-		max_radius = p.max_radius;
-		pellet_type = p.pellet_type;
-	}
-
-	public ScaffoldPellet(ScaffoldPellet p) {
-		super();
-		alive = true;
-		constructing = true;
-		pos.set(p.pos);
-		radius = p.radius;
-		max_radius = p.max_radius;
-		pellet_type = p.pellet_type;
-		color = p.color;
-	}
-	
 	@Override
 	public void update() {
 		// constructing means the pellet has triggered something to be built at
@@ -82,6 +67,7 @@ public class ScaffoldPellet extends Pellet {
 					System.out.println("pellet stuck to another pellet");
 					pos.set(neighbor_pellet.pos);
 					alive = false;
+					((TutorialPellet) neighbor_pellet).setHit();
 				} else if (closest_point != null) {
 					System.out.println("pellet stuck to some geometry");
 					constructing = true;
@@ -98,8 +84,8 @@ public class ScaffoldPellet extends Pellet {
 						setInPlace();
 					}
 				}
-				
-				if (constructing == true){
+
+				if (constructing == true) {
 					ActionTracker.newScaffoldPellet(this);
 				}
 			}
@@ -112,6 +98,14 @@ public class ScaffoldPellet extends Pellet {
 		}
 	}
 
+	private void setHit() {
+		hit = true;
+		System.out.println("tutorial pellet hit");
+		color[0] = 0.1f;
+		color[1] = 0.9f;
+		color[2] = 0.2f;
+	}
+
 	public void coloredDraw() {
 		if (constructing) {
 			float alpha = 1 - radius / max_radius * .2f;
@@ -121,5 +115,21 @@ public class ScaffoldPellet extends Pellet {
 			glColor4f(color[0], color[1], color[2], 1f);
 			drawSphere(radius);
 		}
+	}
+
+	public static void addTutorialPellet(TutorialPellet p) {
+		Main.all_pellets_in_world.add(p);
+		tutorial_pellets.add(p);
+		
+	}
+
+	public static int numHitPellets() {
+		int n = 0;
+		for (TutorialPellet p : tutorial_pellets) {
+			if (p.hit) {
+				n++;
+			}
+		}
+		return n;
 	}
 }

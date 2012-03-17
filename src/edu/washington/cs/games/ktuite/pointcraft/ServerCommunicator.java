@@ -40,7 +40,8 @@ public class ServerCommunicator {
 		}
 		
 		if (is_connected && GuiManager.is_logged_in){
-			getKathleenSession();
+			//getKathleenSession();
+			getDemoSession();
 		}
 
 		/*
@@ -80,6 +81,7 @@ public class ServerCommunicator {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void getKathleenSession(){
 		URL url;
 		try {
@@ -92,6 +94,26 @@ public class ServerCommunicator {
 
 			if (split.length == 2) {
 				player_id = Integer.decode(split[0]);
+				session_id = Integer.decode(split[1]);
+				return;
+			} 
+		} catch (Exception e) {
+			System.out.println("no server available");
+		}
+	}
+	
+	private void getDemoSession(){
+		URL url;
+		try {
+			url = new URL(server_url + "newsession.php");
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					url.openStream()));
+
+			String page_contents = in.readLine();
+			String[] split = page_contents.split(",");
+
+			if (split.length == 2) {
+				player_id = 73;
 				session_id = Integer.decode(split[1]);
 				return;
 			} 

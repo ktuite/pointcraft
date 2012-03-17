@@ -239,6 +239,73 @@ public class PointStore {
 		buildLookupTree();
 	}
 
+	public static void loadCubesOfDifferentSizes(List<Vector3f> cube_positions,
+			float[] cube_extent, int[] points_per_cube, float world_extent) {
+		
+		int num_cubes = cube_positions.size();
+		for (int i = 0; i < num_cubes; i++) {
+			num_points += points_per_cube[i];
+		}
+		
+		initBuffers();
+
+		for (int c = 0; c < num_cubes; c++) {
+			float[] cube_center = new float[3];
+			cube_center[0] = cube_positions.get(c).getX();
+			cube_center[1] = cube_positions.get(c).getY();
+			cube_center[2] = cube_positions.get(c).getZ();
+
+			for (int h = 0; h < points_per_cube[c]; h++) {
+				
+				double pos[] = new double[3];
+				for (int k = 0; k < 3; k++) {
+					pos[k] = cube_extent[c] * (Math.random() * 2 - 1)
+							+ cube_center[k];
+				}
+
+				int side = (int) Math.floor(Math.random() * 6f);
+				switch (side) {
+				case 0:
+					pos[0] = cube_center[0] + cube_extent[c];
+					break;
+				case 1:
+					pos[0] = cube_center[0] - cube_extent[c];
+					break;
+				case 2:
+					pos[1] = cube_center[1] + cube_extent[c];
+					break;
+				case 3:
+					pos[1] = cube_center[1] - cube_extent[c];
+					break;
+				case 4:
+					pos[2] = cube_center[2] + cube_extent[c];
+					break;
+				case 5:
+					pos[2] = cube_center[2] - cube_extent[c];
+					break;
+				}
+
+				for (int k = 0; k < 3; k++) {
+					point_positions.put((float) pos[k]);
+				}
+				point_colors.put((byte) 200);
+				point_colors.put((byte) 0);
+				point_colors.put((byte) 20);
+				point_colors.put((byte) 255);
+			}
+		}
+
+		point_colors.rewind();
+		point_positions.rewind();
+
+		for (int k = 0; k < 3; k++) {
+			min_corner[k] = -1f * world_extent;
+			max_corner[k] = world_extent;
+		}
+
+		buildLookupTree();
+	}
+
 	public static void load(String filename) {
 		try {
 			BufferedReader buf = new BufferedReader(new FileReader(filename));
@@ -310,10 +377,12 @@ public class PointStore {
 		point_colors.rewind();
 
 		Main.world_scale = (float) ((float) ((PointStore.max_corner[1] - PointStore.min_corner[1])) / 0.071716);
+		if (Main.world_scale == 0)
+			Main.world_scale = 1;
 		// lewis hall height for scale ref...
 
 		System.out.println("starting to build lookup tree");
-		Vec3D center = new Vec3D(min_corner[0], min_corner[1], min_corner[2]);
+		Vec3D center = new Vec3D(min_corner[0] - 0.001f, min_corner[1]- 0.001f, min_corner[2]- 0.001f);
 		float max_span = max_corner[0] - min_corner[0];
 		if (max_corner[1] - min_corner[1] > max_span)
 			max_span = max_corner[1] - min_corner[1];
@@ -735,6 +804,16 @@ public class PointStore {
 			markPointVBODirty();
 		}
 
+	}
+
+	public static void changeColorOfPointSubsetToGray(int start, int finish,
+			int gray) {
+		for (int i = start; i < finish; i++) {
+			point_colors.put(i * 4 + 0, (byte) gray);
+			point_colors.put(i * 4 + 1, (byte) gray);
+			point_colors.put(i * 4 + 2, (byte) gray);
+			markPointVBODirty();
+		}
 	}
 
 }

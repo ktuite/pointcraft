@@ -31,11 +31,6 @@ public class BaseShootingLevel extends BaseLevel {
 		Ground.enabled = true;
 		Ground.impenetrable = true;
 
-		Main.draw_pellets = true;
-		Main.pos.set(0, 0, 0);
-		Main.pan_angle = 0;
-		Main.vel.set(0, 0, 0);
-
 		Main.all_pellets_in_world.clear();
 		num_pellets = Main.all_pellets_in_world.size();
 

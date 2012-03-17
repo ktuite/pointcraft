@@ -31,7 +31,13 @@ public class InstructionalOverlay extends Widget {
 	private SimpleBooleanModel toggle_minecraft;
 	private Label toggle_minecraft_label;
 	private ToggleButton toggle_minecraft_checkbox;
+	
+	
+	private SimpleBooleanModel toggle_textures;
+	private Label toggle_textures_label;
+	private ToggleButton toggle_textures_checkbox;
 
+	
 	// cinematics mode
 	private SimpleBooleanModel toggle_cinematics;
 	private Label toggle_cinematics_label;
@@ -74,6 +80,18 @@ public class InstructionalOverlay extends Widget {
 		toggle_minecraft.addCallback(new Runnable() {
 			public void run() {
 				Main.minecraft_flight = toggle_minecraft.getValue();
+			}
+		});
+		
+		// textures toggle setup
+		toggle_textures = new SimpleBooleanModel();
+		toggle_textures.setValue(Main.use_local_textures);
+		toggle_textures_checkbox = new ToggleButton(toggle_textures);
+		toggle_textures_checkbox.setTheme("checkbox");
+		toggle_textures_label = new Label("Generate texture locally");
+		toggle_textures.addCallback(new Runnable() {
+			public void run() {
+				Main.use_local_textures = toggle_textures.getValue();
 			}
 		});
 
@@ -150,6 +168,9 @@ public class InstructionalOverlay extends Widget {
 
 		add(toggle_minecraft_label);
 		add(toggle_minecraft_checkbox);
+		
+		add(toggle_textures_label);
+		add(toggle_textures_checkbox);
 
 	}
 
@@ -194,6 +215,16 @@ public class InstructionalOverlay extends Widget {
 		toggle_minecraft_label.setPosition(
 				toggle_minecraft_checkbox.getInnerX() + 30,
 				toggle_minecraft_checkbox.getInnerY());
+		
+		
+		toggle_textures_checkbox.adjustSize();
+		toggle_textures_checkbox.setPosition(save_button.getInnerX(),
+				getInnerY() + 130);
+		
+		toggle_textures_label.adjustSize();
+		toggle_textures_label.setPosition(
+				toggle_textures_checkbox.getInnerX() + 30,
+				toggle_textures_checkbox.getInnerY());
 
 		toggle_cinematics_checkbox.adjustSize();
 		toggle_cinematics_checkbox.setPosition(save_button.getInnerX(),

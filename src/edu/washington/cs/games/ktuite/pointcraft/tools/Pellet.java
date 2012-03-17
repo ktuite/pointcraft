@@ -30,7 +30,7 @@ public class Pellet implements org.json.JSONString {
 	public boolean alive;
 	public boolean visible;
 	public boolean hover;
-	public int[] color = new int[3];
+	public float[] color = new float[3];
 	public boolean constructing;
 	public float birthday;
 	public int id;

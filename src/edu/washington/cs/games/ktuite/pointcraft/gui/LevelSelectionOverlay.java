@@ -19,6 +19,8 @@ public class LevelSelectionOverlay extends Widget {
 	private Main main;
 	public LinkedList<Class<? extends BaseLevel>> levels;
 	private String level_description_html = "";
+	private LinkedList<String> level_file;
+	private LinkedList<Float> level_world_scale;
 
 	public LevelSelectionOverlay(Main main_program) {
 		main = main_program;
@@ -26,16 +28,38 @@ public class LevelSelectionOverlay extends Widget {
 		frame.setTitle("Choose a level");
 		frame.setResizableAxis(ResizableAxis.NONE);
 		levels = new LinkedList<Class<? extends BaseLevel>>();
+		level_file = new LinkedList<String>();
+		level_world_scale = new LinkedList<Float>();
 
 		addLevelGroup("Navigation");
-		addLevel(NavigationOneCube.class, "Level 1.1");
-		addLevel(NavigationThreeCubes.class, "Level 1.2");
-		addLevel(NavigationNineCubes.class, "Level 1.3");
+		addLevel(NavigationOneCube.class, "Straight Ahead");
+		addLevel(NavigationThreeCubes.class, "Left and Right");
+		addLevel(NavigationNineCubes.class, "Up and Down");
 
 		addLevelGroup("Shooting");
-		addLevel(ShootingOneCube.class, "Level 2.1");
-		addLevel(ShootingFourCubes.class, "Level 2.2");
-		addLevel(ShootingEightCubes.class, "Level 2.3");
+		addLevel(ShootingOneCube.class, "Shooting Straight");
+		addLevel(ShootingFourCubes.class, "Multiple Targets");
+		addLevel(ShootingEightCubes.class, "Hit it From Behind");
+
+		addLevelGroup("Advanced Shooting");
+		addLevel(ShootingPelletsOneCube.class, "Shooting Pellets");
+		addLevel(ShootingPelletsNestedCubes.class,
+				"Be Careful What you Aim For");
+		addLevel(ShootingPelletsMoreNestedCubes.class, "Hide the Point Cloud");
+
+		addLevelGroup("Simple Polygons");
+		addLevel(CustomLevelFromFile.class, "Two Shapes", "data/twoshapes.ply", .25f);
+		addLevel(CubeLevel.class, "Colored Cube");
+		addLevel(CustomLevelFromFile.class, "Simple House", "data/simplehouse.ply", .25f);
+		
+		addLevelGroup("Real Models");
+		addLevel(CustomLevelFromFile.class, "Lewis Hall", "data/lewis.ply", 1);
+		addLevel(CustomLevelFromFile.class, "Red Square (UW)", "data/red_square.ply", 1);
+		addLevel(CustomLevelFromFile.class, "Observatory", "data/observatory.ply", 1);
+		addLevel(CustomLevelFromFile.class, "Johnson Hall", "data/johnson.ply", 1);
+		addLevel(CustomLevelFromFile.class, "Uris Library", "data/uris.ply", 1);
+		addLevel(CustomLevelFromFile.class, "Flower", "data/flower.ply", 1);
+		
 
 		final HTMLTextAreaModel textAreaModel = new HTMLTextAreaModel(
 				level_description_html);
@@ -54,14 +78,24 @@ public class LevelSelectionOverlay extends Widget {
 		add(frame);
 	}
 
+	private void addLevel(Class<? extends BaseLevel> c, String name,
+			String filename, float scale) {
+		addLevel(c, name);
+		level_file.removeLast();
+		level_file.add(filename);
+		level_world_scale.set(level_world_scale.size() - 1, scale);
+	}
+
 	private void addLevel(Class<? extends BaseLevel> c, String name) {
-		level_description_html += "<a href='" + levels.size() + "'><p>Level "
-				+ name + "</p></a>\n";
+		level_description_html += "<a href='" + levels.size() + "'><p>&nbsp;" + name
+				+ "</p></a>\n";
 		levels.add(c);
+		level_file.add(null);
+		level_world_scale.add((float) 1);
 	}
 
 	private void addLevelGroup(String string) {
-		level_description_html += "<h1>--" + string + "--</h1>\n";
+		level_description_html += "<h1>" + string + ":</h1>\n";
 	}
 
 	@Override
@@ -79,8 +113,18 @@ public class LevelSelectionOverlay extends Widget {
 		int chosen_level = Integer.parseInt(level_name);
 		if (chosen_level >= 0 && chosen_level < levels.size()) {
 			try {
-				main.current_level = levels.get(chosen_level)
-						.getConstructor(Main.class).newInstance(main);
+				if (level_file.get(chosen_level) == null) {
+					main.current_level = levels.get(chosen_level)
+							.getConstructor(Main.class).newInstance(main);
+					Main.setActivityMode(ActivityMode.TUTORIAL);
+				} else {
+					String filename = level_file.get(chosen_level);
+					Float scale = level_world_scale.get(chosen_level);
+					main.current_level = levels.get(chosen_level)
+							.getConstructor(Main.class, String.class, Float.class)
+							.newInstance(main, filename, scale);
+					Main.setActivityMode(ActivityMode.MODELING);
+				}
 			} catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -100,12 +144,13 @@ public class LevelSelectionOverlay extends Widget {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			Main.setActivityMode(ActivityMode.TUTORIAL);
+			//Main.setActivityMode(ActivityMode.TUTORIAL);
 		}
 
 	}
 
 	public void advanceLevel() {
+		setVisible(true);
 		int chosen_level = levels.indexOf(main.current_level.getClass()) + 1;
 		if (chosen_level < levels.size()) {
 			try {
@@ -130,6 +175,7 @@ public class LevelSelectionOverlay extends Widget {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			setVisible(false);
 			Main.setActivityMode(ActivityMode.TUTORIAL);
 		} else {
 			Main.setActivityMode(ActivityMode.LEVEL_SELECTION);
