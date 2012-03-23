@@ -91,7 +91,7 @@ public class Main {
 	private double max_speed = 1 * world_scale;
 	private Texture skybox = null;
 	public static boolean minecraft_flight = false;
-	public static boolean use_local_textures = true;
+	public static boolean use_local_textures = false;
 
 	// stuff for fast rendering of the point cloud
 	public static boolean USE_VBO = false;
@@ -151,7 +151,7 @@ public class Main {
 			main.initGraphics();
 			main.initGameVariables();
 
-			main.current_level = new NavigationOneCube(main);
+			main.current_level = new CubeLevel(main);
 			//main.current_level = new CustomLevelFromFile(main,"/Users/ktuite/Desktop/sketchup-pointcraft/twoshapes.ply", .25f);
 			
 			main.run();
@@ -191,7 +191,7 @@ public class Main {
 		if (IS_RELEASE)
 			setActivityMode(ActivityMode.INSTRUCTIONS);
 		else
-			setActivityMode(ActivityMode.TUTORIAL);
+			setActivityMode(ActivityMode.MODELING);
 	}
 
 	private void initGraphics() {

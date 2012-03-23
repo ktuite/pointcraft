@@ -41,7 +41,7 @@ public class ServerCommunicator {
 		
 		if (is_connected && GuiManager.is_logged_in){
 			//getKathleenSession();
-			getDemoSession();
+			getDemoSession(0);
 		}
 
 		/*
@@ -102,7 +102,7 @@ public class ServerCommunicator {
 		}
 	}
 	
-	private void getDemoSession(){
+	private void getDemoSession(int id){
 		URL url;
 		try {
 			url = new URL(server_url + "newsession.php");
@@ -113,7 +113,7 @@ public class ServerCommunicator {
 			String[] split = page_contents.split(",");
 
 			if (split.length == 2) {
-				player_id = 73;
+				player_id = id;
 				session_id = Integer.decode(split[1]);
 				return;
 			} 
