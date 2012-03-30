@@ -356,6 +356,8 @@ public class Primitive implements org.json.JSONString {
 		if (Main.use_local_textures) { // Main.server.texture_server == null) {
 			// System.out.println("making local texture");
 			TextureMaker.makeTexture(this);
+		} else if ( Main.server.texture_server == null ){
+			// do nothing
 		} else {
 
 			for (int i = 0; i < num_textures; i++) {

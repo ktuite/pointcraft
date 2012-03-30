@@ -29,7 +29,7 @@ public class OrbPellet extends PolygonPellet {
 		player_position = new Vector3f();
 		orb_distance = 0.03f;
 		max_radius = radius;
-		setInPlace();
+		//setInPlace();
 		pellet_type = Main.GunMode.ORB;
 	}
 

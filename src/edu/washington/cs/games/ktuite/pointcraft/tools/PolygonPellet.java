@@ -192,7 +192,7 @@ public class PolygonPellet extends Pellet {
 		}
 		Primitive polygon = new Primitive(GL_POLYGON, cycle);
 		polygon.setPlane(plane);
-		polygon.setPlayerPositionAndViewingDirection(pos, vel);
+		polygon.setPlayerPositionAndViewingDirection(Main.pos, Main.gun_direction);
 		Main.geometry.add(polygon);
 
 		ActionTracker.newPolygon(polygon,

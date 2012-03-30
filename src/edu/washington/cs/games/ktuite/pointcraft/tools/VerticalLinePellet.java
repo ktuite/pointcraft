@@ -158,6 +158,9 @@ public class VerticalLinePellet extends Pellet {
 	private void attachVerticalLine() {
 		if (bottom_pellet == null || top_pellet == null) {
 			float speed = vel.length() / 2;
+			if (speed == 0){
+				speed = Main.gun_speed / 2;
+			}
 			up_vector.normalise();
 			up_vector.scale(radius * 1.5f);
 
@@ -224,7 +227,7 @@ public class VerticalLinePellet extends Pellet {
 			cycle.add(top_pellet);
 
 			Primitive polygon = new Primitive(GL_POLYGON, cycle);
-			polygon.setPlayerPositionAndViewingDirection(pos, vel);
+			polygon.setPlayerPositionAndViewingDirection(Main.pos, Main.gun_direction);
 			Main.geometry.add(polygon);
 
 			// fit the new polygon's plane

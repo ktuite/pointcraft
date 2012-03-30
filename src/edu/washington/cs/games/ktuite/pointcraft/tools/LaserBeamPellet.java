@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.lwjgl.util.vector.Vector3f;
 
+import edu.washington.cs.games.ktuite.pointcraft.Main;
 import edu.washington.cs.games.ktuite.pointcraft.PointStore;
 import edu.washington.cs.games.ktuite.pointcraft.Main.GunMode;
 
@@ -17,6 +18,7 @@ public class LaserBeamPellet extends PolygonPellet {
 	private static Vector3f player_position;
 	private static Vector3f pt_1 = new Vector3f();
 	private static Vector3f pt_2 = new Vector3f();
+	private Pellet colored_pellet;
 
 	// having to do with orb gun only
 	public static LaserBeamPellet laser_beam_pellet;
@@ -32,8 +34,9 @@ public class LaserBeamPellet extends PolygonPellet {
 		player_position = new Vector3f();
 		orb_distance = 0.03f;
 		max_radius = radius;
-		setInPlace();
+		// setInPlace();
 		pellet_type = GunMode.LASER_BEAM;
+		colored_pellet = new Pellet();
 	}
 
 	public void setGunDirection(Vector3f _direction) {
@@ -69,37 +72,50 @@ public class LaserBeamPellet extends PolygonPellet {
 	}
 
 	public void coloredDraw() {
-		if (constructing) {
-			float alpha = 1 - radius / max_radius * .2f;
-			glColor4f(.9f, 0f, .05f, alpha);
-			drawSphere(radius);
-		} else {
-			glColor4f(1f, 0f, 0f, .6f);
-			drawSphere(radius);
-		}
+		/*
+		 * if (constructing) { float alpha = 1 - radius / max_radius * .2f;
+		 * glColor4f(.9f, 0f, .05f, alpha); drawSphere(radius); } else {
+		 * glColor4f(1f, 0f, 0f, .6f); drawSphere(radius); }
+		 */
+		colored_pellet.draw();
 	}
 
 	public static void updateLaserBeamPellet(Vector3f pos,
 			Vector3f gun_direction) {
+
+		if (laser_beam_pellet.colored_pellet.pellet_type != Main.which_gun) {
+			laser_beam_pellet.colored_pellet = ModelingGun.makeNewPellet();
+		}
+
+		laser_beam_pellet.colored_pellet.radius = Pellet.default_radius
+				* Main.pellet_scale;
+
 		laser_beam_pellet.setGunDirection(gun_direction);
 		laser_beam_pellet.setPlayerPosition(pos);
 
 		Vector3f closest_point = null;
-		float min_dist_to_player = Float.MAX_VALUE;
-		for (int i = 0; i < PointStore.num_points; i++) {
-			Vector3f pt = PointStore.getIthPoint(i);
-			float dist_to_line = distanceToPoint(pt);
-			if (dist_to_line < laser_beam_pellet.radius) {
-				float dist_to_player = distanceToPlayer(pt);
-				if (dist_to_player < min_dist_to_player) {
-					min_dist_to_player = dist_to_player;
-					closest_point = pt;
+		if (Main.draw_points) {
+			float min_dist_to_player = Float.MAX_VALUE;
+			for (int i = 0; i < PointStore.num_points; i++) {
+				Vector3f pt = PointStore.getIthPoint(i);
+				float dist_to_line = distanceToPoint(pt);
+				if (dist_to_line < laser_beam_pellet.radius) {
+					float dist_to_player = distanceToPlayer(pt);
+					if (dist_to_player < min_dist_to_player) {
+						min_dist_to_player = dist_to_player;
+						closest_point = pt;
+					}
 				}
 			}
 		}
 
-		if (closest_point != null)
+		if (closest_point != null) {
 			laser_beam_pellet.pos.set(closestPoint(closest_point));
+			laser_beam_pellet.visible = true;
+		} else {
+			laser_beam_pellet.visible = false;
+		}
+
 	}
 
 	public static float distanceToPoint(Vector3f pos) {
@@ -139,15 +155,17 @@ public class LaserBeamPellet extends PolygonPellet {
 		float dot_prod = Vector3f.dot(temp, orb_direction);
 		if (dot_prod > 0)
 			return temp.length();
-		else 
+		else
 			return 10;
 	}
 
 	public static void drawLaserBeamPellet() {
-		glPushMatrix();
-		glTranslatef(laser_beam_pellet.pos.x, laser_beam_pellet.pos.y,
-				laser_beam_pellet.pos.z);
-		laser_beam_pellet.coloredDraw();
-		glPopMatrix();
+		if (laser_beam_pellet.visible) {
+			glPushMatrix();
+			glTranslatef(laser_beam_pellet.pos.x, laser_beam_pellet.pos.y,
+					laser_beam_pellet.pos.z);
+			laser_beam_pellet.coloredDraw();
+			glPopMatrix();
+		}
 	}
 }

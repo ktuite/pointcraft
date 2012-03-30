@@ -34,19 +34,16 @@ import edu.washington.cs.games.ktuite.pointcraft.geometry.Primitive;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Scaffold;
 import edu.washington.cs.games.ktuite.pointcraft.gui.GuiManager;
 import edu.washington.cs.games.ktuite.pointcraft.levels.*;
-import edu.washington.cs.games.ktuite.pointcraft.tools.CameraGun;
-import edu.washington.cs.games.ktuite.pointcraft.tools.DestructorPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.HoverPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.LaserBeamPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.LinePellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.ModelingGun;
+import edu.washington.cs.games.ktuite.pointcraft.tools.ModelingGun.InteractionMode;
 import edu.washington.cs.games.ktuite.pointcraft.tools.OrbPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.PlanePellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.PolygonPellet;
-import edu.washington.cs.games.ktuite.pointcraft.tools.ScaffoldPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.TriangulationPellet;
-import edu.washington.cs.games.ktuite.pointcraft.tools.TutorialPellet;
-import edu.washington.cs.games.ktuite.pointcraft.tools.UpPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.VerticalLinePellet;
 
 public class Main {
@@ -100,7 +97,7 @@ public class Main {
 
 	// stuff about general guns and general list of pellets/things shot
 	public static Vector3f gun_direction;
-	private float gun_speed = 0.001f * world_scale;
+	public static float gun_speed = 0.001f * world_scale;
 	public static float pellet_scale = 1f;
 	public static Timer timer = new Timer();
 	public static Stack<Pellet> all_pellets_in_world;
@@ -152,8 +149,11 @@ public class Main {
 			main.initGameVariables();
 
 			main.current_level = new CubeLevel(main);
-			//main.current_level = new CustomLevelFromFile(main,"/Users/ktuite/Desktop/sketchup-pointcraft/twoshapes.ply", .25f);
-			
+			ModelingGun.useLaser();
+
+			// main.current_level = new
+			// CustomLevelFromFile(main,"data/desk.ply", .25f);
+
 			main.run();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -173,7 +173,7 @@ public class Main {
 			if (IS_SIGGRAPH_DEMO) {
 				Display.setDisplayMode(new DisplayMode(1280, 720));
 			} else {
-				Display.setDisplayMode(new DisplayMode(1400,900)); //800x600
+				Display.setDisplayMode(new DisplayMode(1400, 900)); // 800x600
 			}
 			Display.setResizable(true);
 			Display.setVSyncEnabled(true);
@@ -262,14 +262,10 @@ public class Main {
 		new_pellets_to_add_to_world = new Stack<Pellet>();
 
 		which_gun = GunMode.POLYGON;
-		OrbPellet.orb_pellet = new OrbPellet(all_pellets_in_world);
-		LaserBeamPellet.laser_beam_pellet = new LaserBeamPellet(
-				all_pellets_in_world);
 
 		geometry = new Stack<Primitive>();
 		geometry_v = new Stack<Scaffold>();
-		geometry_v.push(LinePellet.current_line);
-		geometry_v.push(PlanePellet.current_plane);
+		// adding these to geometry_v moved to baselevel
 
 		try {
 			launch_effect = AudioLoader.getAudio("WAV",
@@ -371,9 +367,7 @@ public class Main {
 	}
 
 	private void updateGameObjects() {
-		if (which_gun == GunMode.DRAG_TO_EDIT)
-			computeGunDirection();
-
+		computeGunDirection();
 		HoverPellet.handleDrag();
 
 		for (Pellet pellet : all_pellets_in_world) {
@@ -384,14 +378,8 @@ public class Main {
 			all_pellets_in_world.add(pellet);
 		}
 		new_pellets_to_add_to_world.clear();
-
-		if (which_gun == GunMode.ORB) {
-			OrbPellet
-					.updateOrbPellet(pos, gun_direction, pan_angle, tilt_angle);
-		} else if (which_gun == GunMode.LASER_BEAM) {
-			computeGunDirection();
-			LaserBeamPellet.updateLaserBeamPellet(pos, gun_direction);
-		}
+		
+		ModelingGun.update(pos, gun_direction, pan_angle, tilt_angle);
 	}
 
 	private void instructionalEventLoop() {
@@ -706,10 +694,10 @@ public class Main {
 			} else if (which_gun == GunMode.DRAG_TO_EDIT) {
 				HoverPellet.startDrag();
 			} else {
-				shootGun();
+				ModelingGun.shootGun();
 			}
 		} else if (Mouse.getEventButton() == 1) {
-			shootDeleteGun();
+			ModelingGun.shootDeleteGun();
 		}
 	}
 
@@ -747,9 +735,9 @@ public class Main {
 
 		if (draw_pellets) {
 			drawPellets();
-			if (which_gun == GunMode.ORB)
+			if (ModelingGun.mode == InteractionMode.ORB)
 				OrbPellet.drawOrbPellet();
-			else if (which_gun == GunMode.LASER_BEAM)
+			else if (ModelingGun.mode == InteractionMode.LASER)
 				LaserBeamPellet.drawLaserBeamPellet();
 		}
 
@@ -1164,82 +1152,9 @@ public class Main {
 		glEnable(GL_DEPTH_TEST);
 	}
 
-	private void shootGun() {
-		System.out.println("which gun: " + which_gun);
-		// don't shoot when no pellets are there to draw
-		if (!draw_pellets)
-			return;
 
-		if (which_gun == GunMode.DISABLED) {
-			return;
-		} else if (which_gun == GunMode.ORB) {
-			OrbPellet new_pellet = new OrbPellet(all_pellets_in_world);
-			new_pellet.pos.set(OrbPellet.orb_pellet.pos);
-			new_pellet.constructing = true;
-			all_pellets_in_world.add(new_pellet);
-			System.out.println(all_pellets_in_world);
-		} else if (which_gun == GunMode.LASER_BEAM) {
-			LaserBeamPellet new_pellet = new LaserBeamPellet(
-					all_pellets_in_world);
-			new_pellet.pos.set(LaserBeamPellet.laser_beam_pellet.pos);
-			new_pellet.constructing = true;
-			all_pellets_in_world.add(new_pellet);
-			System.out.println(all_pellets_in_world);
-		} else if (which_gun == GunMode.CAMERA) {
-			System.out.println("catpure and send a screenshot");
-			CameraGun.takeSnapshot(this);
-		} else if (which_gun != GunMode.ORB) {
-			System.out.println("shooting gun");
 
-			computeGunDirection();
-
-			Pellet pellet = null;
-			if (which_gun == GunMode.PELLET) {
-				pellet = new ScaffoldPellet();
-			} else if (which_gun == GunMode.PLANE) {
-				pellet = new PlanePellet();
-			} else if (which_gun == GunMode.LINE) {
-				pellet = new LinePellet();
-			} else if (which_gun == GunMode.VERTICAL_LINE) {
-				pellet = new VerticalLinePellet();
-			} else if (which_gun == GunMode.DESTRUCTOR) {
-				pellet = new DestructorPellet();
-			} else if (which_gun == GunMode.DIRECTION_PICKER) {
-				pellet = new UpPellet();
-			} else if (which_gun == GunMode.TRIANGULATION) {
-				pellet = new TriangulationPellet();
-			} else if (which_gun == GunMode.TUTORIAL) {
-				pellet = new TutorialPellet();
-			} else {
-				pellet = new PolygonPellet();
-			}
-			pellet.pos.set(pos);
-			pellet.vel.set(gun_direction);
-			pellet.vel.scale(gun_speed);
-			pellet.vel.scale(pellet_scale);
-
-			all_pellets_in_world.add(pellet);
-			server.pelletFiredActionUpdate(pellet.getType());
-		}
-	}
-
-	private void shootDeleteGun() {
-		// don't shoot when no pellets are there to draw
-		if (!draw_pellets)
-			return;
-
-		System.out.println("shooting DESTRUCTOR gun");
-		computeGunDirection();
-		Pellet pellet = new DestructorPellet();
-		pellet.vel.set(gun_direction);
-		pellet.vel.scale(gun_speed);
-		pellet.vel.scale(pellet_scale);
-		pellet.pos.set(pos);
-		all_pellets_in_world.add(pellet);
-
-	}
-
-	private void computeGunDirection() {
+	public void computeGunDirection() {
 		// do all this extra stuff with horizontal angle so that shooting up
 		// in the air makes the pellet go up in the air
 		Vector2f horiz = new Vector2f();

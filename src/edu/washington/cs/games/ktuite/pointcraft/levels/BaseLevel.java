@@ -3,6 +3,8 @@ package edu.washington.cs.games.ktuite.pointcraft.levels;
 import edu.washington.cs.games.ktuite.pointcraft.Main;
 import edu.washington.cs.games.ktuite.pointcraft.PointStore;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Ground;
+import edu.washington.cs.games.ktuite.pointcraft.tools.LinePellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.PlanePellet;
 
 public class BaseLevel {
 	// level-specific state
@@ -23,6 +25,8 @@ public class BaseLevel {
 		Main.vel.set(0, 0, 0);
 		Main.geometry_v.clear();
 		Main.geometry.clear();
+		Main.geometry_v.push(LinePellet.current_line);
+		Main.geometry_v.push(PlanePellet.current_plane);
 		Main.all_pellets_in_world.clear();
 		Ground.impenetrable = false;
 		Ground.enabled = false;
