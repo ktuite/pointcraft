@@ -28,7 +28,6 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Primitive;
-import edu.washington.cs.games.ktuite.pointcraft.tools.HoverPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
 
 public class PickerHelper {
@@ -120,7 +119,7 @@ public class PickerHelper {
 														// selected
 	}
 
-	static void pickPellet() {
+	public static int pickPellet() {
 		int x = Display.getDisplayMode().getWidth() / 2;
 		int y = Display.getDisplayMode().getHeight() / 2;
 		final int BUFSIZE = 512;
@@ -173,10 +172,7 @@ public class PickerHelper {
 	
 		hits = glRenderMode(GL_RENDER);
 		selectBuffer.get(selectBuf);
-		HoverPellet.hover_pellet = processHits(hits, selectBuf); // which
-																	// polygon
-																	// actually
-		// selected
+		return processHits(hits, selectBuf); 
 	
 	}
 

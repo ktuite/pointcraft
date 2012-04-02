@@ -786,7 +786,7 @@ public class Main {
 
 		if (which_gun == GunMode.COMBINE || which_gun == GunMode.DRAG_TO_EDIT) {
 			HoverPellet.dimAllPellets();
-			PickerHelper.pickPellet();
+			HoverPellet.hover_pellet = PickerHelper.pickPellet();
 			HoverPellet.illuminatePellet();
 		}
 

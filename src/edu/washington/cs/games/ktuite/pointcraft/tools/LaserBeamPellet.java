@@ -5,6 +5,7 @@ import java.util.List;
 import org.lwjgl.util.vector.Vector3f;
 
 import edu.washington.cs.games.ktuite.pointcraft.Main;
+import edu.washington.cs.games.ktuite.pointcraft.PickerHelper;
 import edu.washington.cs.games.ktuite.pointcraft.PointStore;
 import edu.washington.cs.games.ktuite.pointcraft.Main.GunMode;
 
@@ -93,6 +94,35 @@ public class LaserBeamPellet extends PolygonPellet {
 		laser_beam_pellet.setGunDirection(gun_direction);
 		laser_beam_pellet.setPlayerPosition(pos);
 
+		Vector3f closest_pellet = closestPelletPoint();
+		Vector3f closest_point = closestPointCloudPoint();
+
+		
+		
+		/*
+		if (closest_pellet != null && closest_point != null
+				&& firstPointIsCloserToPlayer(closest_pellet, closest_point)) {
+			System.out.println("pellet selected " + closest_pellet + "," + closest_point);
+		}
+		*/
+
+		if (closest_point != null) {
+			laser_beam_pellet.pos.set(closestPoint(closest_point));
+			laser_beam_pellet.visible = true;
+		} else {
+			laser_beam_pellet.visible = false;
+		}
+
+	}
+
+	private static boolean firstPointIsCloserToPlayer(Vector3f closest_pellet,
+			Vector3f closest_point) {
+		float d1 = Vector3f.sub(closest_pellet, Main.pos, null).length();
+		float d2 = Vector3f.sub(closest_point, Main.pos, null).length();
+		return (d1 < d2);
+	}
+
+	private static Vector3f closestPointCloudPoint() {
 		Vector3f closest_point = null;
 		if (Main.draw_points) {
 			float min_dist_to_player = Float.MAX_VALUE;
@@ -108,14 +138,15 @@ public class LaserBeamPellet extends PolygonPellet {
 				}
 			}
 		}
+		return closest_point;
+	}
 
-		if (closest_point != null) {
-			laser_beam_pellet.pos.set(closestPoint(closest_point));
-			laser_beam_pellet.visible = true;
-		} else {
-			laser_beam_pellet.visible = false;
-		}
-
+	private static Vector3f closestPelletPoint() {
+		int pellet_id = PickerHelper.pickPellet();
+		if (pellet_id >= 0 && pellet_id < Main.all_pellets_in_world.size())
+			return Main.all_pellets_in_world.get(pellet_id).pos;
+		else
+			return null;
 	}
 
 	public static float distanceToPoint(Vector3f pos) {
