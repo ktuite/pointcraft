@@ -84,7 +84,11 @@ public class LaserBeamPellet extends PolygonPellet {
 	public static void updateLaserBeamPellet(Vector3f pos,
 			Vector3f gun_direction) {
 
-		if (laser_beam_pellet.colored_pellet.pellet_type != Main.which_gun) {
+		if (Main.which_gun == GunMode.DRAG_TO_EDIT || Main.which_gun == GunMode.COMBINE){
+			laser_beam_pellet.visible = false;
+			return;
+		}
+		else if (laser_beam_pellet.colored_pellet.pellet_type != Main.which_gun) {
 			laser_beam_pellet.colored_pellet = ModelingGun.makeNewPellet();
 		}
 
@@ -94,32 +98,15 @@ public class LaserBeamPellet extends PolygonPellet {
 		laser_beam_pellet.setGunDirection(gun_direction);
 		laser_beam_pellet.setPlayerPosition(pos);
 
-		Vector3f closest_pellet = closestPelletPoint();
-		Vector3f closest_point = closestPointCloudPoint();
-
-		
-		
-		/*
-		if (closest_pellet != null && closest_point != null
-				&& firstPointIsCloserToPlayer(closest_pellet, closest_point)) {
-			System.out.println("pellet selected " + closest_pellet + "," + closest_point);
-		}
-		*/
+		Vector3f closest_point = closestPoint();
 
 		if (closest_point != null) {
-			laser_beam_pellet.pos.set(closestPoint(closest_point));
+			laser_beam_pellet.pos.set(closest_point);//closestPointInSightLine(closest_point));
 			laser_beam_pellet.visible = true;
 		} else {
 			laser_beam_pellet.visible = false;
 		}
 
-	}
-
-	private static boolean firstPointIsCloserToPlayer(Vector3f closest_pellet,
-			Vector3f closest_point) {
-		float d1 = Vector3f.sub(closest_pellet, Main.pos, null).length();
-		float d2 = Vector3f.sub(closest_point, Main.pos, null).length();
-		return (d1 < d2);
 	}
 
 	private static Vector3f closestPointCloudPoint() {
@@ -141,14 +128,48 @@ public class LaserBeamPellet extends PolygonPellet {
 		return closest_point;
 	}
 
-	private static Vector3f closestPelletPoint() {
+	private static Pellet closestPellet() {
 		int pellet_id = PickerHelper.pickPellet();
 		if (pellet_id >= 0 && pellet_id < Main.all_pellets_in_world.size())
-			return Main.all_pellets_in_world.get(pellet_id).pos;
+			return Main.all_pellets_in_world.get(pellet_id);
 		else
 			return null;
 	}
 
+	private static Vector3f closestPoint(){
+		Vector3f closest_cloud_point = closestPointCloudPoint();
+		Pellet closest_pellet = closestPellet();
+		
+		Pellet.dimAllPellets();
+		
+		if (closest_cloud_point == null){
+			if (closest_pellet == null){
+				return null;
+			}
+			else {
+				closest_pellet.hover = true;
+				return closest_pellet.pos;
+			}
+		}
+		else {
+			closest_cloud_point = closestPointInSightLine(closest_cloud_point);
+			if (closest_pellet == null){
+				return closest_cloud_point;
+			}
+			else {
+				float d_pellet = Vector3f.sub(closest_pellet.pos, Main.pos, null).length() - closest_pellet.radius;
+				float d_cloud = Vector3f.sub(closest_cloud_point, Main.pos, null).length();
+				if (d_pellet < d_cloud){
+					closest_pellet.hover = true;
+					return closest_pellet.pos;
+				}
+				else {
+					return closest_cloud_point;
+				}
+			}
+		}
+	}
+	
 	public static float distanceToPoint(Vector3f pos) {
 		float dist = Float.MAX_VALUE;
 
@@ -164,7 +185,7 @@ public class LaserBeamPellet extends PolygonPellet {
 		return Math.abs(dist);
 	}
 
-	public static Vector3f closestPoint(Vector3f pos) {
+	public static Vector3f closestPointInSightLine(Vector3f pos) {
 		Vector3f pt = new Vector3f();
 
 		Vector3f line = new Vector3f();

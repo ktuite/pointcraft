@@ -1,24 +1,6 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
-import static org.lwjgl.opengl.GL11.GL_MODELVIEW;
-import static org.lwjgl.opengl.GL11.GL_PROJECTION;
-import static org.lwjgl.opengl.GL11.GL_RENDER;
-import static org.lwjgl.opengl.GL11.GL_SELECT;
-import static org.lwjgl.opengl.GL11.GL_VIEWPORT;
-import static org.lwjgl.opengl.GL11.glFlush;
-import static org.lwjgl.opengl.GL11.glGetInteger;
-import static org.lwjgl.opengl.GL11.glInitNames;
-import static org.lwjgl.opengl.GL11.glLoadIdentity;
-import static org.lwjgl.opengl.GL11.glLoadName;
-import static org.lwjgl.opengl.GL11.glMatrixMode;
-import static org.lwjgl.opengl.GL11.glPopMatrix;
-import static org.lwjgl.opengl.GL11.glPushMatrix;
-import static org.lwjgl.opengl.GL11.glPushName;
-import static org.lwjgl.opengl.GL11.glRenderMode;
-import static org.lwjgl.opengl.GL11.glRotatef;
-import static org.lwjgl.opengl.GL11.glSelectBuffer;
-import static org.lwjgl.opengl.GL11.glTranslated;
-import static org.lwjgl.opengl.GL11.glTranslatef;
+import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.util.glu.GLU.gluPerspective;
 import static org.lwjgl.util.glu.GLU.gluPickMatrix;
 
@@ -131,6 +113,7 @@ public class PickerHelper {
 		glGetInteger(GL_VIEWPORT, viewport);
 		glSelectBuffer(selectBuffer);
 		glRenderMode(GL_SELECT);
+		glDisable(GL_FOG);
 	
 		glInitNames();
 		glPushName(-1);
@@ -142,7 +125,8 @@ public class PickerHelper {
 		gluPickMatrix((float) x, (float) (viewport.get(3) - y), 5.0f, 5.0f,
 				viewport);
 		gluPerspective(60, Display.getDisplayMode().getWidth()
-				/ Display.getDisplayMode().getHeight(), .001f, 1000.0f);
+				/ Display.getDisplayMode().getHeight(),.001f, 100000.0f);
+		
 	
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
@@ -172,6 +156,8 @@ public class PickerHelper {
 	
 		hits = glRenderMode(GL_RENDER);
 		selectBuffer.get(selectBuf);
+		
+		glMatrixMode(GL_MODELVIEW);
 		return processHits(hits, selectBuf); 
 	
 	}

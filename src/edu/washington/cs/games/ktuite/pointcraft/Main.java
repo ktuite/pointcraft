@@ -173,7 +173,7 @@ public class Main {
 			if (IS_SIGGRAPH_DEMO) {
 				Display.setDisplayMode(new DisplayMode(1280, 720));
 			} else {
-				Display.setDisplayMode(new DisplayMode(1400, 900)); // 800x600
+				Display.setDisplayMode(new DisplayMode(800, 600)); // 800x600
 			}
 			Display.setResizable(true);
 			Display.setVSyncEnabled(true);

@@ -81,16 +81,12 @@ public class HoverPellet extends Pellet {
 
 	public static void dimAllPellets() {
 		if (!drag_started) {
-			for (Pellet p : Main.all_pellets_in_world) {
-				p.hover = false;
-			}
+			Pellet.dimAllPellets();
 		}
 	}
 
 	public static void illuminatePellet() {
-		if (hover_pellet >= 0
-				&& hover_pellet < Main.all_pellets_in_world.size())
-			Main.all_pellets_in_world.get(hover_pellet).hover = true;
+		Pellet.illuminatePellet(hover_pellet);
 		if (target_pellet != null)
 			target_pellet.hover = true;
 	}
@@ -101,7 +97,6 @@ public class HoverPellet extends Pellet {
 				updatePelletInPlane();
 			else
 				updatePelletConstantDistance();
-
 		}
 	}
 

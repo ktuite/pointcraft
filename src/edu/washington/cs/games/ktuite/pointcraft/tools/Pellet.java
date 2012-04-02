@@ -18,6 +18,7 @@ import edu.washington.cs.games.ktuite.pointcraft.geometry.LineScaffold;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.PlaneScaffold;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Primitive;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Scaffold;
+import edu.washington.cs.games.ktuite.pointcraft.tools.ModelingGun.InteractionMode;
 import static org.lwjgl.opengl.GL11.*;
 
 public class Pellet implements org.json.JSONString {
@@ -97,7 +98,21 @@ public class Pellet implements org.json.JSONString {
 	}
 
 	protected void snapToCenterOfPoints() {
-		pos.set(PointStore.getCenter(pos.x, pos.y, pos.z, radius));
+		if (ModelingGun.mode == InteractionMode.PELLET_GUN) {
+			pos.set(PointStore.getCenter(pos.x, pos.y, pos.z, radius));
+		}
+	}
+
+	public static void dimAllPellets() {
+		for (Pellet p : Main.all_pellets_in_world) {
+			p.hover = false;
+		}
+	}
+
+	public static void illuminatePellet(int i) {
+		if (i >= 0 && i < Main.all_pellets_in_world.size()) {
+			Main.all_pellets_in_world.get(i).hover = true;
+		}
 	}
 
 	protected int queryKdTree(float x, float y, float z, float radius) {
@@ -267,7 +282,7 @@ public class Pellet implements org.json.JSONString {
 		else
 			p = new ScaffoldPellet();
 
-		p.radius = default_radius  / 2f;
+		p.radius = default_radius / 2f;
 		p.max_radius = p.radius;
 		p.alive = true;
 		p.constructing = true;
