@@ -154,15 +154,13 @@ public class LineScaffold extends Scaffold {
 
 		Vector3f pt = new Vector3f();
 
-		Vector3f line = new Vector3f();
-		Vector3f.sub(pt_2, pt_1, line);
-		line.normalise();
+		Vector3f line = Vector3f.sub(pt_2, pt_1, null);
 
-		Vector3f diag = new Vector3f();
-		Vector3f.sub(pos, pt_1, diag);
+		Vector3f diag = Vector3f.sub(pos, pt_1, null);
 
-		float dot = Vector3f.dot(line, diag);
-		Vector3f.add(pt_1, (Vector3f) line.scale(dot), pt);
+		float dot = Vector3f.dot(line, diag) / line.lengthSquared();
+		if (dot > 0 && dot < 1)
+			Vector3f.add(pt_1, (Vector3f) line.scale(dot), pt);
 
 		return pt;
 	}
@@ -183,7 +181,6 @@ public class LineScaffold extends Scaffold {
 		Vector3f.cross(sub1, sub2, temp);
 		dist = temp.length() / sub3.length();
 
-		// System.out.println("distancE: " + dist);
 		return Math.abs(dist);
 	}
 

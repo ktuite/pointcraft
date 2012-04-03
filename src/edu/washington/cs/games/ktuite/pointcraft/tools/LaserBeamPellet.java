@@ -1,5 +1,6 @@
 package edu.washington.cs.games.ktuite.pointcraft.tools;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.lwjgl.util.vector.Vector3f;
@@ -9,6 +10,7 @@ import edu.washington.cs.games.ktuite.pointcraft.PickerHelper;
 import edu.washington.cs.games.ktuite.pointcraft.PointStore;
 import edu.washington.cs.games.ktuite.pointcraft.Main.GunMode;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.LineScaffold;
+import edu.washington.cs.games.ktuite.pointcraft.geometry.PlaneScaffold;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Scaffold;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -102,10 +104,6 @@ public class LaserBeamPellet extends PolygonPellet {
 
 		Vector3f closest_point = closestPoint();
 
-		Vector3f closest_point_on_line = closestPointOnLine();
-		if (closest_point_on_line != null)
-			closest_point = closest_point_on_line;
-
 		if (closest_point != null) {
 			laser_beam_pellet.pos.set(closest_point);
 			laser_beam_pellet.visible = true;
@@ -143,12 +141,17 @@ public class LaserBeamPellet extends PolygonPellet {
 	}
 
 	private static Vector3f closestPoint() {
-		Vector3f closest_cloud_point = closestPointCloudPoint();
+		LinkedList<Vector3f> closest_scaffold_points = closestPointsOnScaffolding();
+		Vector3f closest_point_cloud_point = closestPointCloudPoint();
+		if (closest_point_cloud_point != null)
+			closest_scaffold_points.add(closestPointInSightLine(closest_point_cloud_point));
+		Vector3f closest_3d_point = closestPointFromList(closest_scaffold_points);
+
 		Pellet closest_pellet = closestPellet();
 
 		Pellet.dimAllPellets();
 
-		if (closest_cloud_point == null) {
+		if (closest_3d_point == null) {
 			if (closest_pellet == null) {
 				return null;
 			} else {
@@ -156,30 +159,46 @@ public class LaserBeamPellet extends PolygonPellet {
 				return closest_pellet.pos;
 			}
 		} else {
-			closest_cloud_point = closestPointInSightLine(closest_cloud_point);
 			if (closest_pellet == null) {
-				return closest_cloud_point;
+				return closest_3d_point;
 			} else {
 				float d_pellet = Vector3f.sub(closest_pellet.pos, Main.pos,
 						null).length()
 						- closest_pellet.radius;
-				float d_cloud = Vector3f.sub(closest_cloud_point, Main.pos,
-						null).length();
+				float d_cloud = Vector3f.sub(closest_3d_point, Main.pos, null)
+						.length();
 				if (d_pellet < d_cloud) {
 					closest_pellet.hover = true;
 					return closest_pellet.pos;
 				} else {
-					return closest_cloud_point;
+					return closest_3d_point;
 				}
 			}
 		}
 	}
 
-	public static Vector3f closestPointOnLine() {
+	private static Vector3f closestPointFromList(
+			LinkedList<Vector3f> closest_scaffold_points) {
+		float min_dist = Float.MAX_VALUE;
+		Vector3f closest_point = null;
+		for (Vector3f v : closest_scaffold_points) {
+			if (v != null) {
+				float d = Vector3f.sub(v, Main.pos, null).length();
+				if (d < min_dist) {
+					min_dist = d;
+					closest_point = v;
+				}
+			}
+		}
+		return closest_point;
+	}
+
+	public static LinkedList<Vector3f> closestPointsOnScaffolding() {
+		LinkedList<Vector3f> close_points = new LinkedList<Vector3f>();
 		for (Scaffold scaffold : Main.geometry_v) {
 			if (scaffold instanceof LineScaffold && scaffold.isReady()) {
 				LineScaffold line = (LineScaffold) scaffold;
-				
+
 				Vector3f a = Main.pos;
 				Vector3f b = Main.gun_direction;
 				Vector3f c = line.pt_1;
@@ -197,12 +216,19 @@ public class LaserBeamPellet extends PolygonPellet {
 					if (t > 0 && t < 1) {
 						Vector3f p = Vector3f.add(c,
 								(Vector3f) d.scale((float) t), null);
-						return p;
+						close_points.add(p);
 					}
+				}
+			} else if (scaffold instanceof PlaneScaffold && scaffold.isReady()) {
+				PlaneScaffold plane = (PlaneScaffold) scaffold;
+				Vector3f p = plane.checkForIntersectionLineWithPlane(Main.pos,
+						Vector3f.add(Main.pos, Main.gun_direction, null));
+				if (p != null) {
+					close_points.add(p);
 				}
 			}
 		}
-		return null;
+		return close_points;
 	}
 
 	public static float distanceToPoint(Vector3f pos) {

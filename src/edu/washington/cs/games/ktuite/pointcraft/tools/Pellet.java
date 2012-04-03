@@ -144,7 +144,7 @@ public class Pellet implements org.json.JSONString {
 		Vector3f closest_point = null;
 		for (Scaffold geom : Main.geometry_v) {
 			if (radius > geom.distanceToPoint(pos)) {
-				closest_point = geom.closestPoint(pos);
+				closest_point = geom.closestPoint(pos); 
 				break;
 			}
 		}

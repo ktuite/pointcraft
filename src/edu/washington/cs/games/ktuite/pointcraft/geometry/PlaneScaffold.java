@@ -30,6 +30,7 @@ public class PlaneScaffold extends Scaffold {
 	private Vector3f center;
 	private float plane_extent;
 	private List<Vector3f> grid_vertices;
+	private float corner_points[];
 
 	public PlaneScaffold() {
 		super();
@@ -73,7 +74,7 @@ public class PlaneScaffold extends Scaffold {
 		if (center != null) {
 			Vector3f dist_to_center = new Vector3f();
 			Vector3f.sub(pos, center, dist_to_center);
-			if (dist_to_center.length() > plane_extent * 2)
+			if (outOfPlaneBounds(pos))
 				return dist;
 
 			if (isReady()) {
@@ -145,74 +146,86 @@ public class PlaneScaffold extends Scaffold {
 		// System.out.println("plane parameters: " + a + "," + b + "," + c + ","
 		// + d);
 
-		float pts[] = new float[12];
+		corner_points = new float[12];
 		plane_extent = findPlaneExtent();
 
 		center = findPlaneCenter();
 
 		if (Math.abs(a) > Math.abs(b) && Math.abs(a) > Math.abs(c)) {
 			// set y and z
-			pts[0 * 3 + 1] = 1 * plane_extent + center.y;
-			pts[0 * 3 + 2] = 1 * plane_extent + center.z;
-			pts[0 * 3 + 0] = -1 * (pts[0 * 3 + 1] * b + pts[0 * 3 + 2] * c + d)
-					/ a;
+			corner_points[0 * 3 + 1] = 1 * plane_extent + center.y;
+			corner_points[0 * 3 + 2] = 1 * plane_extent + center.z;
+			corner_points[0 * 3 + 0] = -1
+					* (corner_points[0 * 3 + 1] * b + corner_points[0 * 3 + 2]
+							* c + d) / a;
 
-			pts[1 * 3 + 1] = 1 * plane_extent + center.y;
-			pts[1 * 3 + 2] = -1 * plane_extent + center.z;
-			pts[1 * 3 + 0] = -1 * (pts[1 * 3 + 1] * b + pts[1 * 3 + 2] * c + d)
-					/ a;
+			corner_points[1 * 3 + 1] = 1 * plane_extent + center.y;
+			corner_points[1 * 3 + 2] = -1 * plane_extent + center.z;
+			corner_points[1 * 3 + 0] = -1
+					* (corner_points[1 * 3 + 1] * b + corner_points[1 * 3 + 2]
+							* c + d) / a;
 
-			pts[2 * 3 + 1] = -1 * plane_extent + center.y;
-			pts[2 * 3 + 2] = -1 * plane_extent + center.z;
-			pts[2 * 3 + 0] = -1 * (pts[2 * 3 + 1] * b + pts[2 * 3 + 2] * c + d)
-					/ a;
+			corner_points[2 * 3 + 1] = -1 * plane_extent + center.y;
+			corner_points[2 * 3 + 2] = -1 * plane_extent + center.z;
+			corner_points[2 * 3 + 0] = -1
+					* (corner_points[2 * 3 + 1] * b + corner_points[2 * 3 + 2]
+							* c + d) / a;
 
-			pts[3 * 3 + 1] = -1 * plane_extent + center.y;
-			pts[3 * 3 + 2] = 1 * plane_extent + center.z;
-			pts[3 * 3 + 0] = -1 * (pts[3 * 3 + 1] * b + pts[3 * 3 + 2] * c + d)
-					/ a;
+			corner_points[3 * 3 + 1] = -1 * plane_extent + center.y;
+			corner_points[3 * 3 + 2] = 1 * plane_extent + center.z;
+			corner_points[3 * 3 + 0] = -1
+					* (corner_points[3 * 3 + 1] * b + corner_points[3 * 3 + 2]
+							* c + d) / a;
 		} else if (Math.abs(b) > Math.abs(a) && Math.abs(b) > Math.abs(c)) {
 			// horizontal plane! set x and z
-			pts[0 * 3 + 0] = 1 * plane_extent + center.x;
-			pts[0 * 3 + 2] = 1 * plane_extent + center.z;
-			pts[0 * 3 + 1] = -1 * (pts[0 * 3 + 0] * a + pts[0 * 3 + 2] * c + d)
-					/ b;
+			corner_points[0 * 3 + 0] = 1 * plane_extent + center.x;
+			corner_points[0 * 3 + 2] = 1 * plane_extent + center.z;
+			corner_points[0 * 3 + 1] = -1
+					* (corner_points[0 * 3 + 0] * a + corner_points[0 * 3 + 2]
+							* c + d) / b;
 
-			pts[1 * 3 + 0] = 1 * plane_extent + center.x;
-			pts[1 * 3 + 2] = -1 * plane_extent + center.z;
-			pts[1 * 3 + 1] = -1 * (pts[1 * 3 + 0] * a + pts[1 * 3 + 2] * c + d)
-					/ b;
+			corner_points[1 * 3 + 0] = 1 * plane_extent + center.x;
+			corner_points[1 * 3 + 2] = -1 * plane_extent + center.z;
+			corner_points[1 * 3 + 1] = -1
+					* (corner_points[1 * 3 + 0] * a + corner_points[1 * 3 + 2]
+							* c + d) / b;
 
-			pts[2 * 3 + 0] = -1 * plane_extent + center.x;
-			pts[2 * 3 + 2] = -1 * plane_extent + center.z;
-			pts[2 * 3 + 1] = -1 * (pts[2 * 3 + 0] * a + pts[2 * 3 + 2] * c + d)
-					/ b;
+			corner_points[2 * 3 + 0] = -1 * plane_extent + center.x;
+			corner_points[2 * 3 + 2] = -1 * plane_extent + center.z;
+			corner_points[2 * 3 + 1] = -1
+					* (corner_points[2 * 3 + 0] * a + corner_points[2 * 3 + 2]
+							* c + d) / b;
 
-			pts[3 * 3 + 0] = -1 * plane_extent + center.x;
-			pts[3 * 3 + 2] = 1 * plane_extent + center.z;
-			pts[3 * 3 + 1] = -1 * (pts[3 * 3 + 0] * a + pts[3 * 3 + 2] * c + d)
-					/ b;
+			corner_points[3 * 3 + 0] = -1 * plane_extent + center.x;
+			corner_points[3 * 3 + 2] = 1 * plane_extent + center.z;
+			corner_points[3 * 3 + 1] = -1
+					* (corner_points[3 * 3 + 0] * a + corner_points[3 * 3 + 2]
+							* c + d) / b;
 		} else {
 			// set x and y
-			pts[0 * 3 + 0] = 1 * plane_extent + center.x;
-			pts[0 * 3 + 1] = 1 * plane_extent + center.y;
-			pts[0 * 3 + 2] = -1 * (pts[0 * 3 + 0] * a + pts[0 * 3 + 1] * b + d)
-					/ c;
+			corner_points[0 * 3 + 0] = 1 * plane_extent + center.x;
+			corner_points[0 * 3 + 1] = 1 * plane_extent + center.y;
+			corner_points[0 * 3 + 2] = -1
+					* (corner_points[0 * 3 + 0] * a + corner_points[0 * 3 + 1]
+							* b + d) / c;
 
-			pts[1 * 3 + 0] = 1 * plane_extent + center.x;
-			pts[1 * 3 + 1] = -1 * plane_extent + center.y;
-			pts[1 * 3 + 2] = -1 * (pts[1 * 3 + 0] * a + pts[1 * 3 + 1] * b + d)
-					/ c;
+			corner_points[1 * 3 + 0] = 1 * plane_extent + center.x;
+			corner_points[1 * 3 + 1] = -1 * plane_extent + center.y;
+			corner_points[1 * 3 + 2] = -1
+					* (corner_points[1 * 3 + 0] * a + corner_points[1 * 3 + 1]
+							* b + d) / c;
 
-			pts[2 * 3 + 0] = -1 * plane_extent + center.x;
-			pts[2 * 3 + 1] = -1 * plane_extent + center.y;
-			pts[2 * 3 + 2] = -1 * (pts[2 * 3 + 0] * a + pts[2 * 3 + 1] * b + d)
-					/ c;
+			corner_points[2 * 3 + 0] = -1 * plane_extent + center.x;
+			corner_points[2 * 3 + 1] = -1 * plane_extent + center.y;
+			corner_points[2 * 3 + 2] = -1
+					* (corner_points[2 * 3 + 0] * a + corner_points[2 * 3 + 1]
+							* b + d) / c;
 
-			pts[3 * 3 + 0] = -1 * plane_extent + center.x;
-			pts[3 * 3 + 1] = 1 * plane_extent + center.y;
-			pts[3 * 3 + 2] = -1 * (pts[3 * 3 + 0] * a + pts[3 * 3 + 1] * b + d)
-					/ c;
+			corner_points[3 * 3 + 0] = -1 * plane_extent + center.x;
+			corner_points[3 * 3 + 1] = 1 * plane_extent + center.y;
+			corner_points[3 * 3 + 2] = -1
+					* (corner_points[3 * 3 + 0] * a + corner_points[3 * 3 + 1]
+							* b + d) / c;
 		}
 
 		grid_vertices = new LinkedList<Vector3f>();
@@ -221,30 +234,36 @@ public class PlaneScaffold extends Scaffold {
 		for (int i = 0; i <= grid; i++) {
 			Vector3f begin = new Vector3f();
 			Vector3f end = new Vector3f();
-			begin.x = pts[0 * 3 + 0] * i / grid + pts[1 * 3 + 0]
-					* (1 - i / grid);
-			begin.y = pts[0 * 3 + 1] * i / grid + pts[1 * 3 + 1]
-					* (1 - i / grid);
-			begin.z = pts[0 * 3 + 2] * i / grid + pts[1 * 3 + 2]
-					* (1 - i / grid);
-			end.x = pts[3 * 3 + 0] * i / grid + pts[2 * 3 + 0] * (1 - i / grid);
-			end.y = pts[3 * 3 + 1] * i / grid + pts[2 * 3 + 1] * (1 - i / grid);
-			end.z = pts[3 * 3 + 2] * i / grid + pts[2 * 3 + 2] * (1 - i / grid);
+			begin.x = corner_points[0 * 3 + 0] * i / grid
+					+ corner_points[1 * 3 + 0] * (1 - i / grid);
+			begin.y = corner_points[0 * 3 + 1] * i / grid
+					+ corner_points[1 * 3 + 1] * (1 - i / grid);
+			begin.z = corner_points[0 * 3 + 2] * i / grid
+					+ corner_points[1 * 3 + 2] * (1 - i / grid);
+			end.x = corner_points[3 * 3 + 0] * i / grid
+					+ corner_points[2 * 3 + 0] * (1 - i / grid);
+			end.y = corner_points[3 * 3 + 1] * i / grid
+					+ corner_points[2 * 3 + 1] * (1 - i / grid);
+			end.z = corner_points[3 * 3 + 2] * i / grid
+					+ corner_points[2 * 3 + 2] * (1 - i / grid);
 			grid_vertices.add(begin);
 			grid_vertices.add(end);
 		}
 		for (int i = 0; i <= grid; i++) {
 			Vector3f begin = new Vector3f();
 			Vector3f end = new Vector3f();
-			begin.x = pts[0 * 3 + 0] * i / grid + pts[3 * 3 + 0]
-					* (1 - i / grid);
-			begin.y = pts[0 * 3 + 1] * i / grid + pts[3 * 3 + 1]
-					* (1 - i / grid);
-			begin.z = pts[0 * 3 + 2] * i / grid + pts[3 * 3 + 2]
-					* (1 - i / grid);
-			end.x = pts[1 * 3 + 0] * i / grid + pts[2 * 3 + 0] * (1 - i / grid);
-			end.y = pts[1 * 3 + 1] * i / grid + pts[2 * 3 + 1] * (1 - i / grid);
-			end.z = pts[1 * 3 + 2] * i / grid + pts[2 * 3 + 2] * (1 - i / grid);
+			begin.x = corner_points[0 * 3 + 0] * i / grid
+					+ corner_points[3 * 3 + 0] * (1 - i / grid);
+			begin.y = corner_points[0 * 3 + 1] * i / grid
+					+ corner_points[3 * 3 + 1] * (1 - i / grid);
+			begin.z = corner_points[0 * 3 + 2] * i / grid
+					+ corner_points[3 * 3 + 2] * (1 - i / grid);
+			end.x = corner_points[1 * 3 + 0] * i / grid
+					+ corner_points[2 * 3 + 0] * (1 - i / grid);
+			end.y = corner_points[1 * 3 + 1] * i / grid
+					+ corner_points[2 * 3 + 1] * (1 - i / grid);
+			end.z = corner_points[1 * 3 + 2] * i / grid
+					+ corner_points[2 * 3 + 2] * (1 - i / grid);
 			grid_vertices.add(begin);
 			grid_vertices.add(end);
 		}
@@ -312,14 +331,34 @@ public class PlaneScaffold extends Scaffold {
 				i.y = p1.y + u * (p2.y - p1.y);
 				i.z = p1.z + u * (p2.z - p1.z);
 
-				Vector3f dist = new Vector3f();
-				Vector3f.sub(i, center, dist);
-				if (dist.length() > plane_extent)
+				if (outOfPlaneBounds(i))
 					return null;
 			}
 		}
 
 		return i;
+	}
+
+	private boolean outOfPlaneBounds(Vector3f i) {
+		Vector3f corner1 = new Vector3f(corner_points[1 * 3 + 0],
+				corner_points[1 * 3 + 1], corner_points[1 * 3 + 2]);
+		Vector3f corner2 = new Vector3f(corner_points[2 * 3 + 0],
+				corner_points[2 * 3 + 1], corner_points[2 * 3 + 2]);
+		Vector3f corner3 = new Vector3f(corner_points[3 * 3 + 0],
+				corner_points[3 * 3 + 1], corner_points[3 * 3 + 2]);
+
+		Vector3f line1 = Vector3f.sub(corner1, corner2, null);
+		Vector3f diag1 = Vector3f.sub(i, corner2, null);
+		float dot1 = Vector3f.dot(line1, diag1) / line1.lengthSquared();
+
+		Vector3f line2 = Vector3f.sub(corner3, corner2, null);
+		Vector3f diag2 = Vector3f.sub(i, corner2, null);
+		float dot2 = Vector3f.dot(line2, diag2) / line2.lengthSquared();
+
+		if (dot1 < 0 || dot1 > 1 || dot2 < 0 || dot2 > 1)
+			return true;
+		else
+			return false;
 	}
 
 	public Vector3f checkForIntersectionLineWithPlaneNoBounds(Vector3f p1,
