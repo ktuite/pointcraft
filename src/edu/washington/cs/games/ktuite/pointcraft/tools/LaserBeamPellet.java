@@ -8,6 +8,8 @@ import edu.washington.cs.games.ktuite.pointcraft.Main;
 import edu.washington.cs.games.ktuite.pointcraft.PickerHelper;
 import edu.washington.cs.games.ktuite.pointcraft.PointStore;
 import edu.washington.cs.games.ktuite.pointcraft.Main.GunMode;
+import edu.washington.cs.games.ktuite.pointcraft.geometry.LineScaffold;
+import edu.washington.cs.games.ktuite.pointcraft.geometry.Scaffold;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -84,11 +86,11 @@ public class LaserBeamPellet extends PolygonPellet {
 	public static void updateLaserBeamPellet(Vector3f pos,
 			Vector3f gun_direction) {
 
-		if (Main.which_gun == GunMode.DRAG_TO_EDIT || Main.which_gun == GunMode.COMBINE){
+		if (Main.which_gun == GunMode.DRAG_TO_EDIT
+				|| Main.which_gun == GunMode.COMBINE) {
 			laser_beam_pellet.visible = false;
 			return;
-		}
-		else if (laser_beam_pellet.colored_pellet.pellet_type != Main.which_gun) {
+		} else if (laser_beam_pellet.colored_pellet.pellet_type != Main.which_gun) {
 			laser_beam_pellet.colored_pellet = ModelingGun.makeNewPellet();
 		}
 
@@ -100,8 +102,12 @@ public class LaserBeamPellet extends PolygonPellet {
 
 		Vector3f closest_point = closestPoint();
 
+		Vector3f closest_point_on_line = closestPointOnLine();
+		if (closest_point_on_line != null)
+			closest_point = closest_point_on_line;
+
 		if (closest_point != null) {
-			laser_beam_pellet.pos.set(closest_point);//closestPointInSightLine(closest_point));
+			laser_beam_pellet.pos.set(closest_point);
 			laser_beam_pellet.visible = true;
 		} else {
 			laser_beam_pellet.visible = false;
@@ -136,40 +142,69 @@ public class LaserBeamPellet extends PolygonPellet {
 			return null;
 	}
 
-	private static Vector3f closestPoint(){
+	private static Vector3f closestPoint() {
 		Vector3f closest_cloud_point = closestPointCloudPoint();
 		Pellet closest_pellet = closestPellet();
-		
+
 		Pellet.dimAllPellets();
-		
-		if (closest_cloud_point == null){
-			if (closest_pellet == null){
+
+		if (closest_cloud_point == null) {
+			if (closest_pellet == null) {
 				return null;
-			}
-			else {
+			} else {
 				closest_pellet.hover = true;
 				return closest_pellet.pos;
 			}
-		}
-		else {
+		} else {
 			closest_cloud_point = closestPointInSightLine(closest_cloud_point);
-			if (closest_pellet == null){
+			if (closest_pellet == null) {
 				return closest_cloud_point;
-			}
-			else {
-				float d_pellet = Vector3f.sub(closest_pellet.pos, Main.pos, null).length() - closest_pellet.radius;
-				float d_cloud = Vector3f.sub(closest_cloud_point, Main.pos, null).length();
-				if (d_pellet < d_cloud){
+			} else {
+				float d_pellet = Vector3f.sub(closest_pellet.pos, Main.pos,
+						null).length()
+						- closest_pellet.radius;
+				float d_cloud = Vector3f.sub(closest_cloud_point, Main.pos,
+						null).length();
+				if (d_pellet < d_cloud) {
 					closest_pellet.hover = true;
 					return closest_pellet.pos;
-				}
-				else {
+				} else {
 					return closest_cloud_point;
 				}
 			}
 		}
 	}
-	
+
+	public static Vector3f closestPointOnLine() {
+		for (Scaffold scaffold : Main.geometry_v) {
+			if (scaffold instanceof LineScaffold && scaffold.isReady()) {
+				LineScaffold line = (LineScaffold) scaffold;
+				
+				Vector3f a = Main.pos;
+				Vector3f b = Main.gun_direction;
+				Vector3f c = line.pt_1;
+				Vector3f d = Vector3f.sub(line.pt_2, line.pt_1, null);
+
+				Vector3f u = Vector3f.cross(b, d, null);
+				u.normalise();
+				float g = Vector3f.dot(Vector3f.sub(a, c, null), u);
+
+				if (Math.abs(g) < laser_beam_pellet.radius) {
+
+					double t = (a.x * b.z - b.x * g * u.z - b.x * a.z + b.x
+							* c.z - c.x * b.z + g * b.z * u.x)
+							/ (d.x * b.z - b.x * d.z);
+					if (t > 0 && t < 1) {
+						Vector3f p = Vector3f.add(c,
+								(Vector3f) d.scale((float) t), null);
+						return p;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 	public static float distanceToPoint(Vector3f pos) {
 		float dist = Float.MAX_VALUE;
 

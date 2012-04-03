@@ -18,8 +18,8 @@ import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
 
 public class LineScaffold extends Scaffold {
 
-	private Vector3f pt_1;
-	private Vector3f pt_2;
+	public Vector3f pt_1;
+	public Vector3f pt_2;
 	private float line_width = 3f;
 
 	public LineScaffold() {
