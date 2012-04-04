@@ -153,6 +153,7 @@ public class Main {
 
 			// main.current_level = new
 			// CustomLevelFromFile(main,"data/desk.ply", .25f);
+			main.current_level = new CustomLevelFromFile(main, "/homes/grail/banerjee/src/grail/sketchymodeler/texviewer/sampler/colorboxsmallfiles/colorboxsmall.ply", 0.2f);
 
 			main.run();
 		} catch (Exception e) {

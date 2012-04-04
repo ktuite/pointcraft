@@ -29,7 +29,7 @@ public class Scoring {
 		return result;
 	}
 	
-	private static Vector3f computeNormal(Vector3f v0, Vector3f v1, Vector3f v2)
+	public static Vector3f computeNormal(Vector3f v0, Vector3f v1, Vector3f v2)
 	{
 		Vector3f va = new Vector3f();
 		Vector3f vb = new Vector3f();
