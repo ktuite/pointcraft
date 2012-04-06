@@ -249,7 +249,7 @@ public class Save {
 					String tmp = "\nPOLYGON WITH MORE THAN 4 vertices\n";
 					if (l.size() == 4) {
 						// triangle (last vertex repeated)
-						tmp = new String("f " + v_idx + "/1/" + g_idx + " "
+						tmp = new String("f " + v_idx + "/4/" + g_idx + " "
 								+ (v_idx + 1) + "/2/" + g_idx + " "
 								+ (v_idx + 2) + "/3/" + g_idx + "\n");
 						v_idx += 3;
