@@ -91,7 +91,7 @@ public class Main {
 	private double max_speed = 1 * world_scale;
 	private Texture skybox = null;
 	public static boolean minecraft_flight = false;
-	public static boolean use_local_textures = false;
+	public static boolean use_local_textures = true;
 
 	// stuff for fast rendering of the point cloud
 	public static boolean USE_VBO = false;

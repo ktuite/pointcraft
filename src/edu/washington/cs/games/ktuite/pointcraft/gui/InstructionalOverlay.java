@@ -128,7 +128,7 @@ public class InstructionalOverlay extends Widget {
 
 		export_button.addCallback(new Runnable() {
 			public void run() {
-				Save.savePly();
+				Save.saveObj();
 			}
 		});
 
