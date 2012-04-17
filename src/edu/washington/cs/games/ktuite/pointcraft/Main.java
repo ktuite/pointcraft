@@ -11,6 +11,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.Stack;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -20,6 +21,7 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.util.Timer;
+import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.newdawn.slick.Color;
@@ -124,6 +126,7 @@ public class Main {
 
 	// level, kind of like state
 	public BaseLevel current_level = null;
+	private FloatBuffer rotated_pointcloud_matrix;
 
 	public enum GunMode {
 		DISABLED, PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM, TRIANGULATION, TUTORIAL
@@ -151,10 +154,10 @@ public class Main {
 			// main.current_level = new CubeLevel(main);
 			// main.current_level = new
 			// CustomLevelFromFile(main,"data/simplehouse_nofloor.ply", .25f);
-			main.current_level = new CustomLevelFromFile(main,
-					"data/desk.ply", 1f);
+			main.current_level = new CustomLevelFromFile(main, "data/desk.ply",
+					1f);
 
-			ModelingGun.useLaser();
+			ModelingGun.useGun();
 
 			main.run();
 		} catch (Exception e) {
@@ -175,7 +178,7 @@ public class Main {
 			if (IS_SIGGRAPH_DEMO) {
 				Display.setDisplayMode(new DisplayMode(1280, 720));
 			} else {
-				Display.setDisplayMode(new DisplayMode(1400, 900)); // 800x600
+				Display.setDisplayMode(new DisplayMode(800, 600)); // 800x600
 			}
 			Display.setResizable(true);
 			Display.setVSyncEnabled(true);
@@ -208,6 +211,9 @@ public class Main {
 		// glOrtho(-800.0f / 600.0f, 800.0f / 600.0f, -1f, 1f, 0.001f, 1000.0f);
 		// gluLookAt(0, 0, 0, 0, 0, -1, 0.05343333f, 0.9966372f, -0.062121693f);
 		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		rotated_pointcloud_matrix = BufferUtils.createFloatBuffer(16);
+		glGetFloat(GL_MODELVIEW_MATRIX, rotated_pointcloud_matrix);
 
 		// fog
 		FloatBuffer fogColorBuffer = ByteBuffer.allocateDirect(4 * 4)
@@ -248,6 +254,7 @@ public class Main {
 		}
 
 		Pellet.initSphereDisplayList();
+
 	}
 
 	private void initGameVariables() {
@@ -404,10 +411,11 @@ public class Main {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void handleKeyboardMouseAndMotion() {
 		// WASD key motion, with a little bit of gliding
 
-		if (false) {
+		if (true) {
 			if (Keyboard.isKeyDown(Keyboard.KEY_W)
 					|| Keyboard.isKeyDown(Keyboard.KEY_UP)) {
 				vel.x += Math.sin(pan_angle * 3.14159 / 180f) * walkforce
@@ -592,6 +600,10 @@ public class Main {
 						draw_polygons = !draw_polygons;
 					}
 
+					if (Keyboard.getEventKey() == Keyboard.KEY_V) {
+						makeCurrentPositionOrigin();
+					}
+
 					if (Keyboard.getEventKey() >= Keyboard.KEY_1
 							&& Keyboard.getEventKey() <= Keyboard.KEY_9) {
 						int key = Keyboard.getEventKey() - Keyboard.KEY_1;
@@ -703,6 +715,31 @@ public class Main {
 		}
 	}
 
+	private void makeCurrentPositionOrigin() {
+		Matrix4f rot = new Matrix4f();
+		
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		
+		glRotatef(tilt_angle, 1.0f, 0.0f, 0.0f); // rotate our camera up/down
+		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
+		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
+		glMultMatrix(rotated_pointcloud_matrix);
+
+		
+		glGetFloat(GL_MODELVIEW_MATRIX, rotated_pointcloud_matrix);
+		glPopMatrix();
+		System.out.println("New matrix: ");
+		
+		rot.load(rotated_pointcloud_matrix);
+		rotated_pointcloud_matrix.rewind();
+		rot.invert();
+		rotated_pointcloud_matrix.rewind();
+		pos.set(0, 0, 0);
+		pan_angle = 0;
+		tilt_angle = 0;
+	}
+
 	private void handleMouseDown() {
 		if (Mouse.getEventButton() == 0) {
 			if (which_gun == GunMode.COMBINE) {
@@ -730,12 +767,16 @@ public class Main {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glPushMatrix();
 
+
 		glRotatef(tilt_angle, 1.0f, 0.0f, 0.0f); // rotate our camera up/down
 		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
 
 		drawSkybox(); // draw skybox before translate
 
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
+
+		glMultMatrix(rotated_pointcloud_matrix);
+
 
 		glEnable(GL_FOG);
 		if (Ground.enabled) {
