@@ -24,6 +24,7 @@ import org.lwjgl.util.Timer;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.util.vector.Vector4f;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.openal.Audio;
 import org.newdawn.slick.openal.AudioLoader;
@@ -126,7 +127,7 @@ public class Main {
 
 	// level, kind of like state
 	public BaseLevel current_level = null;
-	private FloatBuffer rotated_pointcloud_matrix;
+	private static FloatBuffer rotated_pointcloud_matrix;
 
 	public enum GunMode {
 		DISABLED, PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM, TRIANGULATION, TUTORIAL
@@ -154,7 +155,7 @@ public class Main {
 			// main.current_level = new CubeLevel(main);
 			// main.current_level = new
 			// CustomLevelFromFile(main,"data/simplehouse_nofloor.ply", .25f);
-			main.current_level = new CustomLevelFromFile(main, "data/desk.ply",
+			main.current_level = new CustomLevelFromFile(main, "data/airspace_dense.ply",
 					1f);
 
 			ModelingGun.useGun();
@@ -717,20 +718,19 @@ public class Main {
 
 	private void makeCurrentPositionOrigin() {
 		Matrix4f rot = new Matrix4f();
-		
+
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
-		
+
 		glRotatef(tilt_angle, 1.0f, 0.0f, 0.0f); // rotate our camera up/down
 		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
 		glMultMatrix(rotated_pointcloud_matrix);
 
-		
 		glGetFloat(GL_MODELVIEW_MATRIX, rotated_pointcloud_matrix);
 		glPopMatrix();
 		System.out.println("New matrix: ");
-		
+
 		rot.load(rotated_pointcloud_matrix);
 		rotated_pointcloud_matrix.rewind();
 		rot.invert();
@@ -767,7 +767,6 @@ public class Main {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glPushMatrix();
 
-
 		glRotatef(tilt_angle, 1.0f, 0.0f, 0.0f); // rotate our camera up/down
 		glRotatef(pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
 
@@ -776,7 +775,6 @@ public class Main {
 		glTranslated(-pos.x, -pos.y, -pos.z); // translate the screen
 
 		glMultMatrix(rotated_pointcloud_matrix);
-
 
 		glEnable(GL_FOG);
 		if (Ground.enabled) {
@@ -1209,22 +1207,58 @@ public class Main {
 		glEnable(GL_DEPTH_TEST);
 	}
 
-	public void computeGunDirection() {
+	@SuppressWarnings("unused")
+	public static void computeGunDirection() {
 		// do all this extra stuff with horizontal angle so that shooting up
 		// in the air makes the pellet go up in the air
-		Vector2f horiz = new Vector2f();
-		horiz.x = (float) Math.sin(pan_angle * 3.14159 / 180f);
-		horiz.y = -1 * (float) Math.cos(pan_angle * 3.14159 / 180f);
-		horiz.normalise();
-		horiz.scale((float) Math.cos(tilt_angle * 3.14159 / 180f));
-		gun_direction.x = horiz.x;
-		gun_direction.z = horiz.y;
-		gun_direction.y = -1 * (float) Math.sin(tilt_angle * 3.14159 / 180f);
-		gun_direction.normalise();
+
+		if (false) {
+			Vector2f horiz = new Vector2f();
+			horiz.x = (float) Math.sin(pan_angle * 3.14159 / 180f);
+			horiz.y = -1 * (float) Math.cos(pan_angle * 3.14159 / 180f);
+			horiz.normalise();
+			horiz.scale((float) Math.cos(tilt_angle * 3.14159 / 180f));
+			gun_direction.x = horiz.x;
+			gun_direction.z = horiz.y;
+			gun_direction.y = -1
+					* (float) Math.sin(tilt_angle * 3.14159 / 180f);
+			gun_direction.normalise();
+		} else {
+			Matrix4f trans = new Matrix4f();
+			Vector4f dir = new Vector4f(0, 0, -1, 1);
+			
+			trans.setIdentity();
+			trans.rotate(-pan_angle * 3.14159f / 180f, new Vector3f(0, 1, 0));
+			trans.rotate(-tilt_angle * 3.14159f / 180f, new Vector3f(1, 0, 0));
+			Matrix4f.transform(trans, dir, dir);
+			
+			trans.load(rotated_pointcloud_matrix);
+			rotated_pointcloud_matrix.rewind();
+			trans.m30 = 0;
+			trans.m31 = 0;
+			trans.m32 = 0;
+			trans.invert();
+			Matrix4f.transform(trans, dir, dir);
+
+			gun_direction.set(dir.x, dir.y, dir.z);
+		}
+
 	}
 
 	public static Vector3f getTransformedPos() {
-		return pos;
+		Vector3f gun_pos = new Vector3f();
+		
+		Matrix4f trans = new Matrix4f();
+		Vector4f p = new Vector4f(pos.x, pos.y, pos.z, 1);
+		
+		trans.load(rotated_pointcloud_matrix);
+		rotated_pointcloud_matrix.rewind();
+		trans.invert();
+		Matrix4f.transform(trans, p, p);
+		
+		gun_pos.set(p.x, p.y, p.z);
+				
+		return gun_pos;
 	}
 
 	/**

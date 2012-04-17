@@ -86,7 +86,8 @@ public class ModelingGun {
 		System.out.println("shooting gun");
 		Pellet pellet = makeNewPellet();
 
-		pellet.pos.set(Main.pos);
+		Main.computeGunDirection();
+		pellet.pos.set(Main.getTransformedPos());
 		pellet.vel.set(Main.gun_direction);
 		pellet.vel.scale(Main.gun_speed);
 		pellet.vel.scale(Main.pellet_scale);
