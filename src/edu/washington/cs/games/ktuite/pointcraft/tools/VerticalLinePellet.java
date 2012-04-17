@@ -227,7 +227,7 @@ public class VerticalLinePellet extends Pellet {
 			cycle.add(top_pellet);
 
 			Primitive polygon = new Primitive(GL_POLYGON, cycle);
-			polygon.setPlayerPositionAndViewingDirection(Main.pos, Main.gun_direction);
+			polygon.setPlayerPositionAndViewingDirection(Main.getTransformedPos(), Main.gun_direction);
 			Main.geometry.add(polygon);
 
 			// fit the new polygon's plane
