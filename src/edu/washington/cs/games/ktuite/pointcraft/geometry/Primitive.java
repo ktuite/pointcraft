@@ -24,7 +24,6 @@ import org.newdawn.slick.opengl.TextureLoader;
 import edu.washington.cs.games.ktuite.pointcraft.Main;
 import edu.washington.cs.games.ktuite.pointcraft.TextureMaker;
 import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
-import edu.washington.cs.games.ktuite.pointcraft.geometry.Scoring;
 
 /* these primitives built out of pellets...
  * keep a list of pellets and then draw lines or polygons between them.
@@ -105,7 +104,7 @@ public class Primitive implements org.json.JSONString {
 		player_viewing_direction.normalise();
 		if (vertices.size() >= 4) {
 			// scoring
-			Scoring.computeTextureScore(this);
+			// Scoring.computeTextureScore(this);
 			// drawColor[0] = drawColor[1] = drawColor[2] =
 			// (float)Scoring.computeTextureScore(this);
 			startDownloadingTexture();

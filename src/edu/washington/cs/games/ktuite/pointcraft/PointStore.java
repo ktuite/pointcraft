@@ -389,7 +389,7 @@ public class PointStore {
 		if (max_corner[2] - min_corner[2] > max_span)
 			max_span = max_corner[2] - min_corner[2];
 
-		tree = new PointOctree(center, max_span);
+		tree = new PointOctree(center, max_span + 0.001f);
 		tree.setMinNodeSize(max_span / 2);
 
 		index_map = new HashMap<Vec3D, Integer>();

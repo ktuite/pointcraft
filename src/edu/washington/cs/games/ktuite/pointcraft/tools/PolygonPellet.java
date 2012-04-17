@@ -17,6 +17,7 @@ public class PolygonPellet extends Pellet {
 	public static Stack<Pellet> current_cycle = new Stack<Pellet>();
 	private static PlaneScaffold plane = new PlaneScaffold();
 	public static Stack<Primitive> edges_to_display = new Stack<Primitive>();
+	private static boolean PLANER_POLYGONS = false;
 
 	/*
 	 * A Pellet is a magical thing that you can shoot out of a gun that will
@@ -86,9 +87,10 @@ public class PolygonPellet extends Pellet {
 						ActionTracker.newPolygonPellet(neighbor_pellet);
 					}
 
-				} else if (current_cycle.size() >= 3
+				} else if (PLANER_POLYGONS && current_cycle.size() >= 3
 						&& plane.distanceToPointNoBounds(pos) < radius) {
 					pos.set(plane.closestPoint(pos));
+
 					constructing = true;
 					if (CONNECT_TO_PREVIOUS)
 						current_cycle.add(this);
@@ -192,7 +194,8 @@ public class PolygonPellet extends Pellet {
 		}
 		Primitive polygon = new Primitive(GL_POLYGON, cycle);
 		polygon.setPlane(plane);
-		polygon.setPlayerPositionAndViewingDirection(Main.pos, Main.gun_direction);
+		polygon.setPlayerPositionAndViewingDirection(Main.pos,
+				Main.gun_direction);
 		Main.geometry.add(polygon);
 
 		ActionTracker.newPolygon(polygon,

@@ -148,11 +148,13 @@ public class Main {
 			main.initGraphics();
 			main.initGameVariables();
 
-			main.current_level = new CubeLevel(main);
-			ModelingGun.useLaser();
-
+			// main.current_level = new CubeLevel(main);
 			// main.current_level = new
-			// CustomLevelFromFile(main,"data/desk.ply", .25f);
+			// CustomLevelFromFile(main,"data/simplehouse_nofloor.ply", .25f);
+			main.current_level = new CustomLevelFromFile(main,
+					"data/desk.ply", 1f);
+
+			ModelingGun.useLaser();
 
 			main.run();
 		} catch (Exception e) {
@@ -173,7 +175,7 @@ public class Main {
 			if (IS_SIGGRAPH_DEMO) {
 				Display.setDisplayMode(new DisplayMode(1280, 720));
 			} else {
-				Display.setDisplayMode(new DisplayMode(800, 600)); // 800x600
+				Display.setDisplayMode(new DisplayMode(1400, 900)); // 800x600
 			}
 			Display.setResizable(true);
 			Display.setVSyncEnabled(true);
@@ -378,7 +380,7 @@ public class Main {
 			all_pellets_in_world.add(pellet);
 		}
 		new_pellets_to_add_to_world.clear();
-		
+
 		ModelingGun.update(pos, gun_direction, pan_angle, tilt_angle);
 	}
 
@@ -404,19 +406,33 @@ public class Main {
 
 	private void handleKeyboardMouseAndMotion() {
 		// WASD key motion, with a little bit of gliding
-		if (Keyboard.isKeyDown(Keyboard.KEY_W)
-				|| Keyboard.isKeyDown(Keyboard.KEY_UP)) {
-			vel.x += Math.sin(pan_angle * 3.14159 / 180f) * walkforce
-					* pellet_scale;
-			vel.z -= Math.cos(pan_angle * 3.14159 / 180f) * walkforce
-					* pellet_scale;
-		}
-		if (Keyboard.isKeyDown(Keyboard.KEY_S)
-				|| Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
-			vel.x -= Math.sin(pan_angle * 3.14159 / 180f) * walkforce
-					* pellet_scale;
-			vel.z += Math.cos(pan_angle * 3.14159 / 180f) * walkforce
-					* pellet_scale;
+
+		if (false) {
+			if (Keyboard.isKeyDown(Keyboard.KEY_W)
+					|| Keyboard.isKeyDown(Keyboard.KEY_UP)) {
+				vel.x += Math.sin(pan_angle * 3.14159 / 180f) * walkforce
+						* pellet_scale;
+				vel.z -= Math.cos(pan_angle * 3.14159 / 180f) * walkforce
+						* pellet_scale;
+			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_S)
+					|| Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
+				vel.x -= Math.sin(pan_angle * 3.14159 / 180f) * walkforce
+						* pellet_scale;
+				vel.z += Math.cos(pan_angle * 3.14159 / 180f) * walkforce
+						* pellet_scale;
+			}
+		} else {
+			if (Keyboard.isKeyDown(Keyboard.KEY_W)
+					|| Keyboard.isKeyDown(Keyboard.KEY_UP)) {
+				Vector3f.add(vel, (Vector3f) gun_direction.scale(walkforce),
+						vel);
+			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_S)
+					|| Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
+				Vector3f.add(vel, (Vector3f) gun_direction.scale(-walkforce),
+						vel);
+			}
 		}
 		if (Keyboard.isKeyDown(Keyboard.KEY_A)
 				|| Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
@@ -1151,8 +1167,6 @@ public class Main {
 		glMatrixMode(GL_MODELVIEW);
 		glEnable(GL_DEPTH_TEST);
 	}
-
-
 
 	public void computeGunDirection() {
 		// do all this extra stuff with horizontal angle so that shooting up
