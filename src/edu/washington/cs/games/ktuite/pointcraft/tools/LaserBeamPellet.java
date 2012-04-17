@@ -87,7 +87,9 @@ public class LaserBeamPellet extends PolygonPellet {
 
 	public static void updateLaserBeamPellet(Vector3f pos,
 			Vector3f gun_direction) {
-
+		
+		Main.computeGunDirection();
+		
 		if (Main.which_gun == GunMode.DRAG_TO_EDIT
 				|| Main.which_gun == GunMode.COMBINE) {
 			laser_beam_pellet.visible = false;
@@ -98,6 +100,7 @@ public class LaserBeamPellet extends PolygonPellet {
 
 		laser_beam_pellet.colored_pellet.radius = Pellet.default_radius
 				* Main.pellet_scale;
+
 
 		laser_beam_pellet.setGunDirection(gun_direction);
 		laser_beam_pellet.setPlayerPosition(pos);
@@ -162,10 +165,10 @@ public class LaserBeamPellet extends PolygonPellet {
 			if (closest_pellet == null) {
 				return closest_3d_point;
 			} else {
-				float d_pellet = Vector3f.sub(closest_pellet.pos, Main.pos,
+				float d_pellet = Vector3f.sub(closest_pellet.pos, Main.getTransformedPos(),
 						null).length()
 						- closest_pellet.radius;
-				float d_cloud = Vector3f.sub(closest_3d_point, Main.pos, null)
+				float d_cloud = Vector3f.sub(closest_3d_point, Main.getTransformedPos(), null)
 						.length();
 				if (d_pellet < d_cloud) {
 					closest_pellet.hover = true;
@@ -183,7 +186,7 @@ public class LaserBeamPellet extends PolygonPellet {
 		Vector3f closest_point = null;
 		for (Vector3f v : closest_scaffold_points) {
 			if (v != null) {
-				float d = Vector3f.sub(v, Main.pos, null).length();
+				float d = Vector3f.sub(v, Main.getTransformedPos(), null).length();
 				if (d < min_dist) {
 					min_dist = d;
 					closest_point = v;
@@ -199,7 +202,7 @@ public class LaserBeamPellet extends PolygonPellet {
 			if (scaffold instanceof LineScaffold && scaffold.isReady()) {
 				LineScaffold line = (LineScaffold) scaffold;
 
-				Vector3f a = Main.pos;
+				Vector3f a = Main.getTransformedPos();
 				Vector3f b = Main.gun_direction;
 				Vector3f c = line.pt_1;
 				Vector3f d = Vector3f.sub(line.pt_2, line.pt_1, null);
@@ -221,8 +224,8 @@ public class LaserBeamPellet extends PolygonPellet {
 				}
 			} else if (scaffold instanceof PlaneScaffold && scaffold.isReady()) {
 				PlaneScaffold plane = (PlaneScaffold) scaffold;
-				Vector3f p = plane.checkForIntersectionLineWithPlane(Main.pos,
-						Vector3f.add(Main.pos, Main.gun_direction, null));
+				Vector3f p = plane.checkForIntersectionLineWithPlane(Main.getTransformedPos(),
+						Vector3f.add(Main.getTransformedPos(), Main.gun_direction, null));
 				if (p != null) {
 					close_points.add(p);
 				}

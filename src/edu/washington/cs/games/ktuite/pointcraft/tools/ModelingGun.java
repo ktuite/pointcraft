@@ -130,7 +130,7 @@ public class ModelingGun {
 		pellet.vel.set(Main.gun_direction);
 		pellet.vel.scale(Main.gun_speed);
 		pellet.vel.scale(Main.pellet_scale);
-		pellet.pos.set(Main.pos);
+		pellet.pos.set(Main.getTransformedPos());
 		Main.all_pellets_in_world.add(pellet);
 
 	}

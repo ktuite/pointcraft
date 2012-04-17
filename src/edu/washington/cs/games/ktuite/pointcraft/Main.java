@@ -155,10 +155,10 @@ public class Main {
 			// main.current_level = new CubeLevel(main);
 			// main.current_level = new
 			// CustomLevelFromFile(main,"data/simplehouse_nofloor.ply", .25f);
-			main.current_level = new CustomLevelFromFile(main, "data/airspace_dense.ply",
+			main.current_level = new CustomLevelFromFile(main, "data/desk.ply",
 					1f);
 
-			ModelingGun.useGun();
+			ModelingGun.useLaser();
 
 			main.run();
 		} catch (Exception e) {
@@ -389,7 +389,7 @@ public class Main {
 		}
 		new_pellets_to_add_to_world.clear();
 
-		ModelingGun.update(pos, gun_direction, pan_angle, tilt_angle);
+		ModelingGun.update(getTransformedPos(), gun_direction, pan_angle, tilt_angle);
 	}
 
 	private void instructionalEventLoop() {
