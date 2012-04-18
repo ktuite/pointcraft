@@ -80,6 +80,12 @@ public class Primitive implements org.json.JSONString {
 				textures = new Vector<Texture>();
 				textures.setSize(num_textures);
 			}
+
+			for (Pellet p : _vertices) {
+				plane.pellets.add(p);
+			}
+			plane.fitPlane();
+			
 			System.out.println("making new polygon Primitive");
 			System.out.println("number of vertices: " + vertices.size());
 		}
@@ -355,7 +361,7 @@ public class Primitive implements org.json.JSONString {
 		if (Main.use_local_textures) { // Main.server.texture_server == null) {
 			// System.out.println("making local texture");
 			TextureMaker.makeTexture(this);
-		} else if ( Main.server.texture_server == null ){
+		} else if (Main.server.texture_server == null) {
 			// do nothing
 		} else {
 

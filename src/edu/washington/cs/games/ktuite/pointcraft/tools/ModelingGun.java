@@ -114,7 +114,9 @@ public class ModelingGun {
 			pellet = new TriangulationPellet();
 		} else if (Main.which_gun == GunMode.TUTORIAL) {
 			pellet = new TutorialPellet();
-		} else {
+		} else if (Main.which_gun == GunMode.BOX) {
+			pellet = new BoxPellet();
+		}  else {
 			pellet = new PolygonPellet();
 		}
 		return pellet;

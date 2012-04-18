@@ -100,6 +100,9 @@ public class PlaneScaffold extends Scaffold {
 	public Vector3f closestPoint(Vector3f pos) {
 		Vector3f pt = new Vector3f();
 		Vector3f norm = new Vector3f(a, b, c);
+		if (norm.length() == 0){
+			return null;
+		}
 		norm.normalise();
 		norm.scale(signedDistanceToPlane(pos));
 		Vector3f.sub(pos, norm, pt);

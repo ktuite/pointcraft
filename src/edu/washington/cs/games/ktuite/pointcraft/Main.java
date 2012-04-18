@@ -42,6 +42,7 @@ import edu.washington.cs.games.ktuite.pointcraft.tools.LaserBeamPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.LinePellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.ModelingGun;
 import edu.washington.cs.games.ktuite.pointcraft.tools.ModelingGun.InteractionMode;
+import edu.washington.cs.games.ktuite.pointcraft.tools.BoxPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.OrbPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.PlanePellet;
@@ -130,7 +131,7 @@ public class Main {
 	private static FloatBuffer rotated_pointcloud_matrix;
 
 	public enum GunMode {
-		DISABLED, PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM, TRIANGULATION, TUTORIAL
+		DISABLED, PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM, TRIANGULATION, TUTORIAL, BOX
 	}
 
 	public enum ActivityMode {
@@ -645,6 +646,8 @@ public class Main {
 							VerticalLinePellet.clearAllVerticalLines();
 						else if (which_gun == GunMode.TRIANGULATION)
 							TriangulationPellet.startNewTriMesh();
+						else if (which_gun == GunMode.BOX)
+							BoxPellet.startNew();
 					}
 				} else {
 					int n = -1;

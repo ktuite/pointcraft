@@ -79,8 +79,8 @@ public class FullInventoryPanel extends Widget {
 			add(slot[i]);
 		}
 
-		// here's where the tools get initialized... 
-		
+		// here's where the tools get initialized...
+
 		int specialStarting = numSlotsX * numSlotsY;
 		slot[specialStarting + 0].setItemAndGunMode("polygon", GunMode.POLYGON);
 		slot[specialStarting + 1].setItemAndGunMode("pellet", GunMode.PELLET);
@@ -91,7 +91,9 @@ public class FullInventoryPanel extends Widget {
 		slot[specialStarting + 5].setItemAndGunMode("combine", GunMode.COMBINE);
 		slot[specialStarting + 6].setItemAndGunMode("drag",
 				GunMode.DRAG_TO_EDIT);
-		
+
+		slot[specialStarting + 7].setItemAndGunMode("box", GunMode.BOX);
+
 		slot[specialStarting + 9].setItemAndGunMode("camera", GunMode.CAMERA);
 
 		slot[0].setItemAndGunMode("triangle", GunMode.TRIANGULATION);
