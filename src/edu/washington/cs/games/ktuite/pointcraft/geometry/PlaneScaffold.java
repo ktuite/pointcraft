@@ -30,7 +30,7 @@ public class PlaneScaffold extends Scaffold {
 	private Vector3f center;
 	private float plane_extent;
 	private List<Vector3f> grid_vertices;
-	private float corner_points[];
+	private List<Vector3f> corner_vertices;
 
 	public PlaneScaffold() {
 		super();
@@ -100,7 +100,7 @@ public class PlaneScaffold extends Scaffold {
 	public Vector3f closestPoint(Vector3f pos) {
 		Vector3f pt = new Vector3f();
 		Vector3f norm = new Vector3f(a, b, c);
-		if (norm.length() == 0){
+		if (norm.length() == 0) {
 			return null;
 		}
 		norm.normalise();
@@ -149,7 +149,7 @@ public class PlaneScaffold extends Scaffold {
 		// System.out.println("plane parameters: " + a + "," + b + "," + c + ","
 		// + d);
 
-		corner_points = new float[12];
+		float[] corner_points = new float[12];
 		plane_extent = findPlaneExtent();
 
 		center = findPlaneCenter();
@@ -231,6 +231,12 @@ public class PlaneScaffold extends Scaffold {
 							* b + d) / c;
 		}
 
+		corner_vertices = new LinkedList<Vector3f>();
+		for (int i = 0; i < 4; i++) {
+			corner_vertices.add(new Vector3f(corner_points[i * 3 + 0],
+					corner_points[i * 3 + 1], corner_points[i * 3 + 2]));
+		}
+
 		grid_vertices = new LinkedList<Vector3f>();
 
 		float grid = 40;
@@ -294,8 +300,76 @@ public class PlaneScaffold extends Scaffold {
 					Main.new_pellets_to_add_to_world.add(i);
 					ActionTracker.newLinePlaneIntersection(i);
 				}
+			} else if (geom instanceof PlaneScaffold) {
+				// ((PlaneScaffold)
+				// geom).checkForIntersectionPlaneWithPlane(this);
+				// or perhaps switch the order:
+				if (geom != this && geom.isReady()) {
+					checkForIntersectionPlaneWithPlane((PlaneScaffold) geom);
+				}
 			}
 		}
+	}
+
+	public void checkForIntersectionPlaneWithPlane(
+			PlaneScaffold plane_to_intersect) {
+		System.out.println("checking for interesction with plane, "
+				+ plane_to_intersect.a + ", " + plane_to_intersect.b + ","
+				+ plane_to_intersect.c);
+
+		// this is the plane of interest
+		// the passed-in plane is the plane to intersect
+		Vector3f norm = new Vector3f(plane_to_intersect.a,
+				plane_to_intersect.b, plane_to_intersect.c);
+		float angle_1 = Vector3f.angle(Vector3f.sub(corner_vertices.get(0),
+				corner_vertices.get(1), null), norm);
+		float angle_2 = Vector3f.angle(Vector3f.sub(corner_vertices.get(0),
+				corner_vertices.get(3), null), norm);
+		Vector3f a1, a2, b1, b2;
+		if (angle_1 > angle_2) {
+			a1 = corner_vertices.get(0);// 0, 3
+			a2 = corner_vertices.get(3);
+			b1 = corner_vertices.get(1);
+			b2 = corner_vertices.get(2);
+		} else {
+			a1 = corner_vertices.get(0);
+			a2 = corner_vertices.get(1);
+			b1 = corner_vertices.get(3);
+			b2 = corner_vertices.get(2);
+		}
+		Vector3f i1 = plane_to_intersect
+				.checkForIntersectionLineWithPlaneNoBounds(a1, a2);
+		Vector3f i2 = plane_to_intersect
+				.checkForIntersectionLineWithPlaneNoBounds(b1, b2);
+		if (i1 != null && i2 != null){
+			LineScaffold line = new LineScaffold();
+		
+			LinePellet p1 = new LinePellet();
+			p1.alive = true;
+			p1.constructing = true;
+			p1.is_intersection = true;
+			p1.pos.set(i1);
+			p1.radius = pellets.get(0).radius;
+			pellets.add(p1);
+			//Main.new_pellets_to_add_to_world.add(p1);
+	
+			LinePellet p2 = new LinePellet();
+			p2.alive = true;
+			p2.constructing = true;
+			p2.is_intersection = true;
+			p2.pos.set(i2);
+			p2.radius = pellets.get(0).radius;
+			pellets.add(p2);
+			//Main.new_pellets_to_add_to_world.add(p2);
+			
+			line.addNewPellet(p1);
+			line.addNewPellet(p2);
+			line.fitLine();
+			
+			Main.new_geometry_v_to_add.add(line);
+		}
+		
+	
 	}
 
 	private float findPlaneExtent() {
@@ -343,12 +417,9 @@ public class PlaneScaffold extends Scaffold {
 	}
 
 	private boolean outOfPlaneBounds(Vector3f i) {
-		Vector3f corner1 = new Vector3f(corner_points[1 * 3 + 0],
-				corner_points[1 * 3 + 1], corner_points[1 * 3 + 2]);
-		Vector3f corner2 = new Vector3f(corner_points[2 * 3 + 0],
-				corner_points[2 * 3 + 1], corner_points[2 * 3 + 2]);
-		Vector3f corner3 = new Vector3f(corner_points[3 * 3 + 0],
-				corner_points[3 * 3 + 1], corner_points[3 * 3 + 2]);
+		Vector3f corner1 = corner_vertices.get(1);
+		Vector3f corner2 = corner_vertices.get(2);
+		Vector3f corner3 = corner_vertices.get(3);
 
 		Vector3f line1 = Vector3f.sub(corner1, corner2, null);
 		Vector3f diag1 = Vector3f.sub(i, corner2, null);

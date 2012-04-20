@@ -92,7 +92,7 @@ public class Main {
 	private double max_speed = 1 * world_scale;
 	private Texture skybox = null;
 	public static boolean minecraft_flight = false;
-	public static boolean use_local_textures = true;
+	public static boolean use_local_textures = false;
 
 	// stuff for fast rendering of the point cloud
 	public static boolean USE_VBO = false;
@@ -111,6 +111,7 @@ public class Main {
 	// stuff about the geometry being built, both polygons and scaffolding
 	public static Stack<Primitive> geometry;
 	public static Stack<Scaffold> geometry_v;
+	public static Stack<Scaffold> new_geometry_v_to_add;
 
 	// more graphics settings - what is displayed on the screen
 	public static boolean draw_lines = true;
@@ -153,13 +154,13 @@ public class Main {
 			main.initGraphics();
 			main.initGameVariables();
 
-			// main.current_level = new CubeLevel(main);
+			//main.current_level = new CubeLevel(main);
 			// main.current_level = new
 			// CustomLevelFromFile(main,"data/simplehouse_nofloor.ply", .25f);
-			main.current_level = new CustomLevelFromFile(main, "data/desk.ply",
+			main.current_level = new CustomLevelFromFile(main, "data/observatory.ply",
 					1f);
 
-			ModelingGun.useLaser();
+			ModelingGun.useGun();
 
 			main.run();
 		} catch (Exception e) {
@@ -276,6 +277,7 @@ public class Main {
 
 		geometry = new Stack<Primitive>();
 		geometry_v = new Stack<Scaffold>();
+		new_geometry_v_to_add = new Stack<Scaffold>();
 		// adding these to geometry_v moved to baselevel
 
 		try {
@@ -389,6 +391,11 @@ public class Main {
 			all_pellets_in_world.add(pellet);
 		}
 		new_pellets_to_add_to_world.clear();
+		
+		for (Scaffold scaffold : new_geometry_v_to_add){
+			geometry_v.add(scaffold);
+		}
+		new_geometry_v_to_add.clear();
 
 		ModelingGun.update(getTransformedPos(), gun_direction, pan_angle, tilt_angle);
 	}
