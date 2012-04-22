@@ -146,8 +146,10 @@ public class LaserBeamPellet extends PolygonPellet {
 	private static Vector3f closestPoint() {
 		LinkedList<Vector3f> closest_scaffold_points = closestPointsOnScaffolding();
 		Vector3f closest_point_cloud_point = closestPointCloudPoint();
-		if (closest_point_cloud_point != null)
-			closest_scaffold_points.add(closestPointInSightLine(closest_point_cloud_point));
+		if (closest_point_cloud_point != null){
+			//closest_scaffold_points.add(closestPointInSightLine(closest_point_cloud_point));
+			closest_scaffold_points.add(closest_point_cloud_point);
+		}
 		Vector3f closest_3d_point = closestPointFromList(closest_scaffold_points);
 
 		Pellet closest_pellet = closestPellet();

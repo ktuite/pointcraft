@@ -154,13 +154,13 @@ public class Main {
 			main.initGraphics();
 			main.initGameVariables();
 
-			main.current_level = new CubeLevel(main);
+			//main.current_level = new CubeLevel(main);
 			// main.current_level = new
 			// CustomLevelFromFile(main,"data/simplehouse_nofloor.ply", .25f);
-			//main.current_level = new CustomLevelFromFile(main, "data/observatory.ply",
-			//		1f);
+			main.current_level = new CustomLevelFromFile(main, "data/observatory.ply",
+					1f);
 
-			ModelingGun.useGun();
+			ModelingGun.useLaser();
 
 			main.run();
 		} catch (Exception e) {
