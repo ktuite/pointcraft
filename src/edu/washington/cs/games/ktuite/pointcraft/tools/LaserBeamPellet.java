@@ -1,8 +1,6 @@
 package edu.washington.cs.games.ktuite.pointcraft.tools;
 
 import java.util.LinkedList;
-import java.util.List;
-
 import org.lwjgl.util.vector.Vector3f;
 
 import edu.washington.cs.games.ktuite.pointcraft.Main;
@@ -32,7 +30,7 @@ public class LaserBeamPellet extends PolygonPellet {
 	 * This pellet doesnt get shot, it just sits in front of the player and gets
 	 * placed in 3d space when they choose to place it somewhere
 	 */
-	public LaserBeamPellet(List<Pellet> _pellets) {
+	public LaserBeamPellet() {
 		super();
 		orb_direction = new Vector3f();
 		scaled_orb_direction = new Vector3f();
@@ -65,7 +63,7 @@ public class LaserBeamPellet extends PolygonPellet {
 	@Override
 	public void update() {
 		if (!constructing) {
-			pos.set(player_position);
+			pos.set(Main.getTransformedPos());
 			scaled_orb_direction.set(orb_direction);
 			scaled_orb_direction.scale(orb_distance);
 			Vector3f.add(pos, scaled_orb_direction, pos);
@@ -85,16 +83,18 @@ public class LaserBeamPellet extends PolygonPellet {
 		colored_pellet.draw();
 	}
 
-	public static void updateLaserBeamPellet(Vector3f pos,
+	public static void updateGun(Vector3f pos,
 			Vector3f gun_direction) {
 		
 		Main.computeGunDirection();
+		orb_direction = gun_direction;
 		
 		if (Main.which_gun == GunMode.DRAG_TO_EDIT
 				|| Main.which_gun == GunMode.COMBINE) {
 			laser_beam_pellet.visible = false;
 			return;
 		} else if (laser_beam_pellet.colored_pellet.pellet_type != Main.which_gun) {
+			System.out.println("laser_beam_pellet.colored_pellet.pellet_type: " + laser_beam_pellet.colored_pellet.pellet_type + ", which gun: " + Main.which_gun);
 			laser_beam_pellet.colored_pellet = ModelingGun.makeNewPellet();
 		}
 
@@ -116,7 +116,7 @@ public class LaserBeamPellet extends PolygonPellet {
 
 	}
 
-	private static Vector3f closestPointCloudPoint() {
+	protected static Vector3f closestPointCloudPoint() {
 		Vector3f closest_point = null;
 		if (Main.draw_points) {
 			float min_dist_to_player = Float.MAX_VALUE;
@@ -131,11 +131,14 @@ public class LaserBeamPellet extends PolygonPellet {
 					}
 				}
 			}
+			if (min_dist_to_player == Float.MAX_VALUE){
+				return null;
+			}
 		}
 		return closest_point;
 	}
 
-	private static Pellet closestPellet() {
+	protected static Pellet closestPellet() {
 		int pellet_id = PickerHelper.pickPellet();
 		if (pellet_id >= 0 && pellet_id < Main.all_pellets_in_world.size())
 			return Main.all_pellets_in_world.get(pellet_id);
@@ -146,9 +149,13 @@ public class LaserBeamPellet extends PolygonPellet {
 	private static Vector3f closestPoint() {
 		LinkedList<Vector3f> closest_scaffold_points = closestPointsOnScaffolding();
 		Vector3f closest_point_cloud_point = closestPointCloudPoint();
-		if (closest_point_cloud_point != null){
-			//closest_scaffold_points.add(closestPointInSightLine(closest_point_cloud_point));
-			closest_scaffold_points.add(closest_point_cloud_point);
+		if (closest_point_cloud_point != null) {
+			if (Main.which_gun == Main.GunMode.PAINTBRUSH) {
+				closest_scaffold_points
+						.add(closestPointInSightLine(closest_point_cloud_point));
+			} else {
+				closest_scaffold_points.add(closest_point_cloud_point);
+			}
 		}
 		Vector3f closest_3d_point = closestPointFromList(closest_scaffold_points);
 
@@ -182,7 +189,7 @@ public class LaserBeamPellet extends PolygonPellet {
 		}
 	}
 
-	private static Vector3f closestPointFromList(
+	protected static Vector3f closestPointFromList(
 			LinkedList<Vector3f> closest_scaffold_points) {
 		float min_dist = Float.MAX_VALUE;
 		Vector3f closest_point = null;
@@ -267,14 +274,13 @@ public class LaserBeamPellet extends PolygonPellet {
 		return pt;
 	}
 
-	public static float distanceToPlayer(Vector3f pos) {
-		Vector3f temp = new Vector3f();
-		Vector3f.sub(pos, player_position, temp);
-		float dot_prod = Vector3f.dot(temp, orb_direction);
-		if (dot_prod > 0)
+	public static float distanceToPlayer(Vector3f p) {
+		Vector3f temp = Vector3f.sub(p, Main.getTransformedPos(), null);
+		float dot = Vector3f.dot(temp, orb_direction);
+		if (dot > 0)
 			return temp.length();
 		else
-			return 10;
+			return Float.MAX_VALUE;
 	}
 
 	public static void drawLaserBeamPellet() {

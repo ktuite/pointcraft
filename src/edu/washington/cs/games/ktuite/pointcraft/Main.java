@@ -44,6 +44,7 @@ import edu.washington.cs.games.ktuite.pointcraft.tools.ModelingGun;
 import edu.washington.cs.games.ktuite.pointcraft.tools.ModelingGun.InteractionMode;
 import edu.washington.cs.games.ktuite.pointcraft.tools.BoxPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.OrbPellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.PaintbrushPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.PlanePellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.PolygonPellet;
@@ -132,7 +133,7 @@ public class Main {
 	private static FloatBuffer rotated_pointcloud_matrix;
 
 	public enum GunMode {
-		DISABLED, PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM, TRIANGULATION, TUTORIAL, BOX
+		DISABLED, PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM, TRIANGULATION, TUTORIAL, BOX, PAINTBRUSH
 	}
 
 	public enum ActivityMode {
@@ -154,11 +155,11 @@ public class Main {
 			main.initGraphics();
 			main.initGameVariables();
 
-			//main.current_level = new CubeLevel(main);
+			main.current_level = new CubeLevel(main);
 			// main.current_level = new
 			// CustomLevelFromFile(main,"data/simplehouse_nofloor.ply", .25f);
-			main.current_level = new CustomLevelFromFile(main, "data/observatory.ply",
-					1f);
+			//main.current_level = new CustomLevelFromFile(main, "data/observatory.ply",
+			//		1f);
 
 			ModelingGun.useLaser();
 
@@ -382,6 +383,9 @@ public class Main {
 	private void updateGameObjects() {
 		computeGunDirection();
 		HoverPellet.handleDrag();
+		if (which_gun == GunMode.PAINTBRUSH){
+			PaintbrushPellet.updatePaintbrush(getTransformedPos(), gun_direction);
+		}
 
 		for (Pellet pellet : all_pellets_in_world) {
 			pellet.update();
@@ -756,6 +760,8 @@ public class Main {
 				HoverPellet.click();
 			} else if (which_gun == GunMode.DRAG_TO_EDIT) {
 				HoverPellet.startDrag();
+			} else if (which_gun == GunMode.PAINTBRUSH){
+				//dont do anything
 			} else {
 				ModelingGun.shootGun();
 			}
@@ -802,8 +808,13 @@ public class Main {
 			drawPellets();
 			if (ModelingGun.mode == InteractionMode.ORB)
 				OrbPellet.drawOrbPellet();
+			else if (which_gun == GunMode.PAINTBRUSH){
+				PaintbrushPellet.drawLaserBeamPellet();
+			}
 			else if (ModelingGun.mode == InteractionMode.LASER)
 				LaserBeamPellet.drawLaserBeamPellet();
+			
+			
 		}
 
 		if (draw_cameras) {

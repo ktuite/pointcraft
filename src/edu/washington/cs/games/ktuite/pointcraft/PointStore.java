@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,6 +29,7 @@ public class PointStore {
 	public static int num_points, num_cameras;
 	public static FloatBuffer point_positions;
 	public static ByteBuffer point_colors;
+	private static ByteBuffer backup_colors;
 	// VBO state tracking
 	private static boolean point_vbo_dirty = false;
 
@@ -63,6 +65,8 @@ public class PointStore {
 
 	private static void initBuffers() {
 		point_colors = BufferUtils.createByteBuffer(num_points * 4);
+		backup_colors = BufferUtils.createByteBuffer(num_points * 4);
+
 		markPointVBODirty();
 		point_positions = BufferUtils.createFloatBuffer(num_points * 3);
 		point_properties = BufferUtils.createByteBuffer(num_points * 3);
@@ -241,12 +245,12 @@ public class PointStore {
 
 	public static void loadCubesOfDifferentSizes(List<Vector3f> cube_positions,
 			float[] cube_extent, int[] points_per_cube, float world_extent) {
-		
+
 		int num_cubes = cube_positions.size();
 		for (int i = 0; i < num_cubes; i++) {
 			num_points += points_per_cube[i];
 		}
-		
+
 		initBuffers();
 
 		for (int c = 0; c < num_cubes; c++) {
@@ -256,7 +260,7 @@ public class PointStore {
 			cube_center[2] = cube_positions.get(c).getZ();
 
 			for (int h = 0; h < points_per_cube[c]; h++) {
-				
+
 				double pos[] = new double[3];
 				for (int k = 0; k < 3; k++) {
 					pos[k] = cube_extent[c] * (Math.random() * 2 - 1)
@@ -376,13 +380,17 @@ public class PointStore {
 		point_positions.rewind();
 		point_colors.rewind();
 
+		backup_colors.put(point_colors);
+		backup_colors.rewind();
+		
 		Main.world_scale = (float) ((float) ((PointStore.max_corner[1] - PointStore.min_corner[1])) / 0.071716);
 		if (Main.world_scale == 0)
 			Main.world_scale = 1;
 		// lewis hall height for scale ref...
 
 		System.out.println("starting to build lookup tree");
-		Vec3D center = new Vec3D(min_corner[0] - 0.001f, min_corner[1]- 0.001f, min_corner[2]- 0.001f);
+		Vec3D center = new Vec3D(min_corner[0] - 0.001f,
+				min_corner[1] - 0.001f, min_corner[2] - 0.001f);
 		float max_span = max_corner[0] - min_corner[0];
 		if (max_corner[1] - min_corner[1] > max_span)
 			max_span = max_corner[1] - min_corner[1];
@@ -814,6 +822,19 @@ public class PointStore {
 			point_colors.put(i * 4 + 2, (byte) gray);
 			markPointVBODirty();
 		}
+	}
+
+	public static void updateColors(BitSet bs) {
+		point_colors.rewind();
+		backup_colors.rewind();
+		point_colors.put(backup_colors);
+		point_colors.rewind();
+		backup_colors.rewind();
+		
+		for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i + 1)) {
+			changePointColorToRed(i);
+		}
+
 	}
 
 }

@@ -92,7 +92,7 @@ public class FullInventoryPanel extends Widget {
 		slot[specialStarting + 6].setItemAndGunMode("drag",
 				GunMode.DRAG_TO_EDIT);
 
-		slot[specialStarting + 7].setItemAndGunMode("box", GunMode.BOX);
+		slot[specialStarting + 7].setItemAndGunMode("paintbrush", GunMode.PAINTBRUSH);
 
 		slot[specialStarting + 9].setItemAndGunMode("camera", GunMode.CAMERA);
 

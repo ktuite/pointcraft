@@ -67,6 +67,7 @@
         <area name="icon.direction" xywh="256,0,32,32" center="true"/>
         <area name="icon.camera" xywh="288,0,32,32" center="true"/>
         <area name="icon.box" xywh="320,0,32,32" center="true"/>
+        <area name="icon.paintbrush" xywh="352,0,32,32" center="true"/>
     </images>
 
     <include filename="cursors.xml"/>

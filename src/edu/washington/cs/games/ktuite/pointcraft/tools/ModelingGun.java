@@ -8,7 +8,7 @@ import edu.washington.cs.games.ktuite.pointcraft.Main.GunMode;
 public class ModelingGun {
 
 	public enum InteractionMode {
-		PELLET_GUN, LASER, ORB, EDITING
+		PELLET_GUN, LASER, ORB, EDITING, PAINTBRUSH
 		// TODO: implement/move orb and editing tools over here or into something related like an "editing" gun
 	}
 
@@ -19,8 +19,7 @@ public class ModelingGun {
 	}
 
 	public static void init() {
-		LaserBeamPellet.laser_beam_pellet = new LaserBeamPellet(
-				Main.all_pellets_in_world); 
+		LaserBeamPellet.laser_beam_pellet = new LaserBeamPellet(); 
 		OrbPellet.orb_pellet = new OrbPellet(Main.all_pellets_in_world);
 	}
 
@@ -34,11 +33,16 @@ public class ModelingGun {
 		init();
 	}
 	
+	public static void usePaintbrush(){
+		setInteractionMode(ModelingGun.InteractionMode.PAINTBRUSH);
+		init();
+	}
+	
 	public static void update(Vector3f pos, Vector3f gun_direction, float pan_angle, float tilt_angle){
 		if (mode == InteractionMode.ORB) {
 			OrbPellet.updateOrbPellet(pos, gun_direction, pan_angle, tilt_angle);
 		} else if (mode == InteractionMode.LASER) {
-			LaserBeamPellet.updateLaserBeamPellet(pos, gun_direction);
+			LaserBeamPellet.updateGun(pos, gun_direction);
 			LaserBeamPellet.laser_beam_pellet.pellet_type = Main.which_gun;
 		}
 	}
@@ -62,7 +66,7 @@ public class ModelingGun {
 			//CameraGun.takeSnapshot(this);
 		} */
 		
-		if (mode == InteractionMode.PELLET_GUN){
+		if (mode == InteractionMode.PELLET_GUN) {
 			firePellet();
 		} else if (mode == InteractionMode.LASER) {
 			placePellet();
@@ -71,9 +75,17 @@ public class ModelingGun {
 	}
 
 	private static void placePellet() {
-		if (LaserBeamPellet.laser_beam_pellet.visible){
+		if (InteractionMode.LASER == mode && LaserBeamPellet.laser_beam_pellet.visible){
 			Pellet pellet = makeNewPellet();
 			pellet.pos.set(LaserBeamPellet.laser_beam_pellet.pos);
+			// pellet.constructing = true;
+			pellet.max_radius = pellet.radius; // keep it from growing
+			Main.all_pellets_in_world.add(pellet);
+			Main.server.pelletFiredActionUpdate(pellet.getType());
+		}
+		else if (InteractionMode.PAINTBRUSH == mode && PaintbrushPellet.laser_beam_pellet.visible){
+			Pellet pellet = makeNewPellet();
+			pellet.pos.set(PaintbrushPellet.laser_beam_pellet.pos);
 			// pellet.constructing = true;
 			pellet.max_radius = pellet.radius; // keep it from growing
 			Main.all_pellets_in_world.add(pellet);
@@ -116,6 +128,8 @@ public class ModelingGun {
 			pellet = new TutorialPellet();
 		} else if (Main.which_gun == GunMode.BOX) {
 			pellet = new BoxPellet();
+		} else if (Main.which_gun == GunMode.PAINTBRUSH) {
+			pellet = new PaintbrushPellet();
 		}  else {
 			pellet = new PolygonPellet();
 		}
