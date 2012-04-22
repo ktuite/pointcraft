@@ -326,6 +326,7 @@ public class PlaneScaffold extends Scaffold {
 		float angle_2 = Vector3f.angle(Vector3f.sub(corner_vertices.get(0),
 				corner_vertices.get(3), null), norm);
 		Vector3f a1, a2, b1, b2;
+		System.out.println("angles: " + angle_1 + ", " + angle_2);
 		if (angle_1 > angle_2) {
 			a1 = corner_vertices.get(0);// 0, 3
 			a2 = corner_vertices.get(3);
@@ -440,7 +441,8 @@ public class PlaneScaffold extends Scaffold {
 		Vector3f i = null;
 		float u_denom = a * (p1.x - p2.x) + b * (p1.y - p2.y) + c
 				* (p1.z - p2.z);
-		if (u_denom != 0) {
+		if (Math.abs(u_denom) > 0.001f) {
+			System.out.println("u denom: " + u_denom);
 			float u_num = a * p1.x + b * p1.y + c * p1.z + d;
 			float u = u_num / u_denom;
 
