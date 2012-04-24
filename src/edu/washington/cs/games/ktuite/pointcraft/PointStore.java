@@ -382,6 +382,7 @@ public class PointStore {
 
 		backup_colors.put(point_colors);
 		backup_colors.rewind();
+		point_colors.rewind();
 		
 		Main.world_scale = (float) ((float) ((PointStore.max_corner[1] - PointStore.min_corner[1])) / 0.071716);
 		if (Main.world_scale == 0)

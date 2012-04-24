@@ -158,7 +158,7 @@ public class Main {
 			main.current_level = new CubeLevel(main);
 			// main.current_level = new
 			// CustomLevelFromFile(main,"data/simplehouse_nofloor.ply", .25f);
-			//main.current_level = new CustomLevelFromFile(main, "data/observatory.ply",
+			//main.current_level = new CustomLevelFromFile(main, "data/desk.ply",
 			//		1f);
 
 			ModelingGun.useLaser();
@@ -659,6 +659,8 @@ public class Main {
 							TriangulationPellet.startNewTriMesh();
 						else if (which_gun == GunMode.BOX)
 							BoxPellet.startNew();
+						else if (which_gun == GunMode.PAINTBRUSH)
+							PaintbrushPellet.startPoisson();
 					}
 				} else {
 					int n = -1;

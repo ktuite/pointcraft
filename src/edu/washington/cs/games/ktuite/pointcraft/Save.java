@@ -330,20 +330,23 @@ public class Save {
 		Mouse.setGrabbed(mouseGrabbed);
 	}
 
-	private static void readGeometryFile(BufferedReader in) throws IOException {
-		Main.geometry.clear();
-		Main.geometry_v.clear();
-		Main.all_pellets_in_world.clear();
-
+	public static void readGeometryFile(BufferedReader in) throws IOException {
 		String first_line = in.readLine();
 		JSONObject version_obj;
 		float file_version = 0;
 		try {
+			System.out.println(first_line);
+			if (first_line == null)
+				return;
 			version_obj = new JSONObject(first_line);
 			file_version = (float) version_obj.getDouble("version");
+			
+			Main.geometry.clear();
+			Main.geometry_v.clear();
+			Main.all_pellets_in_world.clear();
+			
 		} catch (JSONException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			return;
 		}
 
 		while (in.ready()) {
@@ -360,7 +363,7 @@ public class Save {
 		}
 	}
 
-	private static void loadModelAndFetchNewTextures(File file)
+	public static void loadModelAndFetchNewTextures(File file)
 			throws IOException {
 		BufferedReader in = new BufferedReader(new FileReader(file));
 		readGeometryFile(in);
@@ -371,7 +374,7 @@ public class Save {
 		}
 	}
 
-	private static void loadZipOfModelAndTexture(File file) {
+	public static void loadZipOfModelAndTexture(File file) {
 
 		ZipFile zf;
 		try {
