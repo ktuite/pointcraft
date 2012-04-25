@@ -84,20 +84,27 @@ public class FullInventoryPanel extends Widget {
 		int specialStarting = numSlotsX * numSlotsY;
 		slot[specialStarting + 0].setItemAndGunMode("polygon", GunMode.POLYGON);
 		slot[specialStarting + 1].setItemAndGunMode("pellet", GunMode.PELLET);
-		slot[specialStarting + 2].setItemAndGunMode("line", GunMode.LINE);
-		slot[specialStarting + 3].setItemAndGunMode("plane", GunMode.PLANE);
-		slot[specialStarting + 4].setItemAndGunMode("wall",
-				GunMode.VERTICAL_LINE);
-		slot[specialStarting + 5].setItemAndGunMode("combine", GunMode.COMBINE);
-		slot[specialStarting + 6].setItemAndGunMode("drag",
-				GunMode.DRAG_TO_EDIT);
+		slot[specialStarting + 2].setItemAndGunMode("paintbrush", GunMode.PAINTBRUSH);
 
-		slot[specialStarting + 7].setItemAndGunMode("paintbrush", GunMode.PAINTBRUSH);
-
+		slot[specialStarting + 3].setItemAndGunMode("box", GunMode.BOX);
+		slot[specialStarting + 4].setItemAndGunMode("circle", GunMode.CIRCLE);
+		slot[specialStarting + 5].setItemAndGunMode("dome", GunMode.DOME);
+		slot[specialStarting + 6].setItemAndGunMode("cylinder", GunMode.CYLINDER);
+		slot[specialStarting + 7].setItemAndGunMode("extrudepoly", GunMode.EXTRUDE_POLYGON);
+		slot[specialStarting + 8].setItemAndGunMode("extrudeline", GunMode.EXTRUDE_LINE);
+		
+		
 		slot[specialStarting + 9].setItemAndGunMode("camera", GunMode.CAMERA);
 
 		slot[0].setItemAndGunMode("triangle", GunMode.TRIANGULATION);
 		slot[1].setItemAndGunMode("direction", GunMode.DIRECTION_PICKER);
+		slot[2].setItemAndGunMode("line", GunMode.LINE);
+		slot[3].setItemAndGunMode("plane", GunMode.PLANE);
+		slot[4].setItemAndGunMode("wall",
+				GunMode.VERTICAL_LINE);
+		slot[5].setItemAndGunMode("combine", GunMode.COMBINE);
+		slot[6].setItemAndGunMode("drag",
+				GunMode.DRAG_TO_EDIT);
 
 		copySpecialSlotsToOnscreen();
 	}

@@ -128,6 +128,16 @@ public class ModelingGun {
 			pellet = new TutorialPellet();
 		} else if (Main.which_gun == GunMode.BOX) {
 			pellet = new BoxPellet();
+		} else if (Main.which_gun == GunMode.CYLINDER) {
+			pellet = new CylinderPellet();
+		} else if (Main.which_gun == GunMode.CIRCLE) {
+			pellet = new CirclePellet();
+		} else if (Main.which_gun == GunMode.DOME) {
+			pellet = new DomePellet();
+		} else if (Main.which_gun == GunMode.EXTRUDE_LINE) {
+			pellet = new ExtrudeLinePellet();
+		} else if (Main.which_gun == GunMode.EXTRUDE_POLYGON) {
+			pellet = new ExtrudePolyPellet();
 		} else if (Main.which_gun == GunMode.PAINTBRUSH) {
 			pellet = new PaintbrushPellet();
 		}  else {

@@ -37,12 +37,17 @@ import edu.washington.cs.games.ktuite.pointcraft.geometry.Primitive;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Scaffold;
 import edu.washington.cs.games.ktuite.pointcraft.gui.GuiManager;
 import edu.washington.cs.games.ktuite.pointcraft.levels.*;
+import edu.washington.cs.games.ktuite.pointcraft.tools.CylinderPellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.DomePellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.HoverPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.LaserBeamPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.LinePellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.ModelingGun;
 import edu.washington.cs.games.ktuite.pointcraft.tools.ModelingGun.InteractionMode;
 import edu.washington.cs.games.ktuite.pointcraft.tools.BoxPellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.CirclePellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.ExtrudeLinePellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.ExtrudePolyPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.OrbPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.PaintbrushPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
@@ -133,7 +138,7 @@ public class Main {
 	private static FloatBuffer rotated_pointcloud_matrix;
 
 	public enum GunMode {
-		DISABLED, PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, CIRCLE, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM, TRIANGULATION, TUTORIAL, BOX, PAINTBRUSH
+		DISABLED, PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM, TRIANGULATION, TUTORIAL, PAINTBRUSH, BOX, CIRCLE, CYLINDER, DOME, EXTRUDE_POLYGON, EXTRUDE_LINE
 	}
 
 	public enum ActivityMode {
@@ -155,11 +160,12 @@ public class Main {
 			main.initGraphics();
 			main.initGameVariables();
 
-			main.current_level = new CubeLevel(main);
-			// main.current_level = new
-			// CustomLevelFromFile(main,"data/simplehouse_nofloor.ply", .25f);
-			//main.current_level = new CustomLevelFromFile(main, "data/desk.ply",
-			//		1f);
+			if (false) {
+				main.current_level = new CubeLevel(main);
+			} else {
+				main.current_level = new CustomLevelFromFile(main,
+						"data/observatory.ply", 1f);
+			}
 
 			ModelingGun.useLaser();
 
@@ -383,8 +389,9 @@ public class Main {
 	private void updateGameObjects() {
 		computeGunDirection();
 		HoverPellet.handleDrag();
-		if (which_gun == GunMode.PAINTBRUSH){
-			PaintbrushPellet.updatePaintbrush(getTransformedPos(), gun_direction);
+		if (which_gun == GunMode.PAINTBRUSH) {
+			PaintbrushPellet.updatePaintbrush(getTransformedPos(),
+					gun_direction);
 		}
 
 		for (Pellet pellet : all_pellets_in_world) {
@@ -395,13 +402,14 @@ public class Main {
 			all_pellets_in_world.add(pellet);
 		}
 		new_pellets_to_add_to_world.clear();
-		
-		for (Scaffold scaffold : new_geometry_v_to_add){
+
+		for (Scaffold scaffold : new_geometry_v_to_add) {
 			geometry_v.add(scaffold);
 		}
 		new_geometry_v_to_add.clear();
 
-		ModelingGun.update(getTransformedPos(), gun_direction, pan_angle, tilt_angle);
+		ModelingGun.update(getTransformedPos(), gun_direction, pan_angle,
+				tilt_angle);
 	}
 
 	private void instructionalEventLoop() {
@@ -659,6 +667,17 @@ public class Main {
 							TriangulationPellet.startNewTriMesh();
 						else if (which_gun == GunMode.BOX)
 							BoxPellet.startNew();
+						else if (which_gun == GunMode.CYLINDER)
+							CylinderPellet.startNew();
+						else if (which_gun == GunMode.CIRCLE)
+							CirclePellet.startNew();
+						else if (which_gun == GunMode.DOME)
+							DomePellet.startNew();
+						else if (which_gun == GunMode.EXTRUDE_LINE)
+							ExtrudeLinePellet.startNew();
+						else if (which_gun == GunMode.EXTRUDE_POLYGON)
+							ExtrudePolyPellet.startNew();
+						// TODO: Add other guns here
 						else if (which_gun == GunMode.PAINTBRUSH)
 							PaintbrushPellet.startPoisson();
 					}
@@ -762,8 +781,8 @@ public class Main {
 				HoverPellet.click();
 			} else if (which_gun == GunMode.DRAG_TO_EDIT) {
 				HoverPellet.startDrag();
-			} else if (which_gun == GunMode.PAINTBRUSH){
-				//dont do anything
+			} else if (which_gun == GunMode.PAINTBRUSH) {
+				// dont do anything
 			} else {
 				ModelingGun.shootGun();
 			}
@@ -810,13 +829,11 @@ public class Main {
 			drawPellets();
 			if (ModelingGun.mode == InteractionMode.ORB)
 				OrbPellet.drawOrbPellet();
-			else if (which_gun == GunMode.PAINTBRUSH){
+			else if (which_gun == GunMode.PAINTBRUSH) {
 				PaintbrushPellet.drawLaserBeamPellet();
-			}
-			else if (ModelingGun.mode == InteractionMode.LASER)
+			} else if (ModelingGun.mode == InteractionMode.LASER)
 				LaserBeamPellet.drawLaserBeamPellet();
-			
-			
+
 		}
 
 		if (draw_cameras) {
@@ -1249,12 +1266,12 @@ public class Main {
 		} else {
 			Matrix4f trans = new Matrix4f();
 			Vector4f dir = new Vector4f(0, 0, -1, 1);
-			
+
 			trans.setIdentity();
 			trans.rotate(-pan_angle * 3.14159f / 180f, new Vector3f(0, 1, 0));
 			trans.rotate(-tilt_angle * 3.14159f / 180f, new Vector3f(1, 0, 0));
 			Matrix4f.transform(trans, dir, dir);
-			
+
 			trans.load(rotated_pointcloud_matrix);
 			rotated_pointcloud_matrix.rewind();
 			trans.m30 = 0;
@@ -1270,17 +1287,17 @@ public class Main {
 
 	public static Vector3f getTransformedPos() {
 		Vector3f gun_pos = new Vector3f();
-		
+
 		Matrix4f trans = new Matrix4f();
 		Vector4f p = new Vector4f(pos.x, pos.y, pos.z, 1);
-		
+
 		trans.load(rotated_pointcloud_matrix);
 		rotated_pointcloud_matrix.rewind();
 		trans.invert();
 		Matrix4f.transform(trans, p, p);
-		
+
 		gun_pos.set(p.x, p.y, p.z);
-				
+
 		return gun_pos;
 	}
 
