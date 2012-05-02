@@ -160,12 +160,8 @@ public class Main {
 			main.initGraphics();
 			main.initGameVariables();
 
-			if (false) {
-				main.current_level = new CubeLevel(main);
-			} else {
-				main.current_level = new CustomLevelFromFile(main,
-						"data/observatory.ply", 1f);
-			}
+			main.current_level = new CustomLevelFromFile(main,
+					"data/smithcastle.ply", 1f);
 
 			ModelingGun.useLaser();
 
@@ -432,7 +428,6 @@ public class Main {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	private void handleKeyboardMouseAndMotion() {
 		// WASD key motion, with a little bit of gliding
 
@@ -451,7 +446,8 @@ public class Main {
 				vel.z += Math.cos(pan_angle * 3.14159 / 180f) * walkforce
 						* pellet_scale;
 			}
-		} else {
+		} 
+		/*else {
 			if (Keyboard.isKeyDown(Keyboard.KEY_W)
 					|| Keyboard.isKeyDown(Keyboard.KEY_UP)) {
 				Vector3f.add(vel, (Vector3f) gun_direction.scale(walkforce),
@@ -463,6 +459,7 @@ public class Main {
 						vel);
 			}
 		}
+		*/
 		if (Keyboard.isKeyDown(Keyboard.KEY_A)
 				|| Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
 			vel.x -= Math.cos(pan_angle * 3.14159 / 180f) * walkforce / 2

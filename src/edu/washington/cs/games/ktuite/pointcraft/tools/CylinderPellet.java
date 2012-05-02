@@ -6,7 +6,6 @@ import org.lwjgl.util.vector.Vector3f;
 import edu.washington.cs.games.ktuite.pointcraft.Main;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.PlaneScaffold;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Primitive;
-import edu.washington.cs.games.ktuite.pointcraft.geometry.Scaffold;
 import static org.lwjgl.opengl.GL11.*;
 
 public class CylinderPellet extends CirclePellet {

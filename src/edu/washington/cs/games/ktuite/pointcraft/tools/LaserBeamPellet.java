@@ -83,24 +83,24 @@ public class LaserBeamPellet extends PolygonPellet {
 		colored_pellet.draw();
 	}
 
-	public static void updateGun(Vector3f pos,
-			Vector3f gun_direction) {
-		
+	public static void updateGun(Vector3f pos, Vector3f gun_direction) {
+
 		Main.computeGunDirection();
 		orb_direction = gun_direction;
-		
+
 		if (Main.which_gun == GunMode.DRAG_TO_EDIT
 				|| Main.which_gun == GunMode.COMBINE) {
 			laser_beam_pellet.visible = false;
 			return;
 		} else if (laser_beam_pellet.colored_pellet.pellet_type != Main.which_gun) {
-			System.out.println("laser_beam_pellet.colored_pellet.pellet_type: " + laser_beam_pellet.colored_pellet.pellet_type + ", which gun: " + Main.which_gun);
+			System.out.println("laser_beam_pellet.colored_pellet.pellet_type: "
+					+ laser_beam_pellet.colored_pellet.pellet_type
+					+ ", which gun: " + Main.which_gun);
 			laser_beam_pellet.colored_pellet = ModelingGun.makeNewPellet();
 		}
 
 		laser_beam_pellet.colored_pellet.radius = Pellet.default_radius
 				* Main.pellet_scale;
-
 
 		laser_beam_pellet.setGunDirection(gun_direction);
 		laser_beam_pellet.setPlayerPosition(pos);
@@ -131,7 +131,7 @@ public class LaserBeamPellet extends PolygonPellet {
 					}
 				}
 			}
-			if (min_dist_to_player == Float.MAX_VALUE){
+			if (min_dist_to_player == Float.MAX_VALUE) {
 				return null;
 			}
 		}
@@ -174,11 +174,11 @@ public class LaserBeamPellet extends PolygonPellet {
 			if (closest_pellet == null) {
 				return closest_3d_point;
 			} else {
-				float d_pellet = Vector3f.sub(closest_pellet.pos, Main.getTransformedPos(),
-						null).length()
+				float d_pellet = Vector3f.sub(closest_pellet.pos,
+						Main.getTransformedPos(), null).length()
 						- closest_pellet.radius;
-				float d_cloud = Vector3f.sub(closest_3d_point, Main.getTransformedPos(), null)
-						.length();
+				float d_cloud = Vector3f.sub(closest_3d_point,
+						Main.getTransformedPos(), null).length();
 				if (d_pellet < d_cloud) {
 					closest_pellet.hover = true;
 					return closest_pellet.pos;
@@ -195,7 +195,8 @@ public class LaserBeamPellet extends PolygonPellet {
 		Vector3f closest_point = null;
 		for (Vector3f v : closest_scaffold_points) {
 			if (v != null) {
-				float d = Vector3f.sub(v, Main.getTransformedPos(), null).length();
+				float d = Vector3f.sub(v, Main.getTransformedPos(), null)
+						.length();
 				if (d < min_dist) {
 					min_dist = d;
 					closest_point = v;
@@ -217,6 +218,9 @@ public class LaserBeamPellet extends PolygonPellet {
 				Vector3f d = Vector3f.sub(line.pt_2, line.pt_1, null);
 
 				Vector3f u = Vector3f.cross(b, d, null);
+				if (u.lengthSquared() == 0) {
+					return close_points;
+				}
 				u.normalise();
 				float g = Vector3f.dot(Vector3f.sub(a, c, null), u);
 
@@ -233,8 +237,9 @@ public class LaserBeamPellet extends PolygonPellet {
 				}
 			} else if (scaffold instanceof PlaneScaffold && scaffold.isReady()) {
 				PlaneScaffold plane = (PlaneScaffold) scaffold;
-				Vector3f p = plane.checkForIntersectionLineWithPlane(Main.getTransformedPos(),
-						Vector3f.add(Main.getTransformedPos(), Main.gun_direction, null));
+				Vector3f p = plane.checkForIntersectionLineWithPlane(Main
+						.getTransformedPos(), Vector3f.add(
+						Main.getTransformedPos(), Main.gun_direction, null));
 				if (p != null) {
 					close_points.add(p);
 				}
