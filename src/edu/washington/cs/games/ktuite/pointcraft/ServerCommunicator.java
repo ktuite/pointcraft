@@ -71,7 +71,7 @@ public class ServerCommunicator {
 
 			if (page_contents.length() > 0) {
 				texture_server = page_contents;
-				System.out.println("texture server set");
+				System.out.println("texture server set: " + texture_server);
 			} else {
 				texture_server = null;
 			}

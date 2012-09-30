@@ -84,6 +84,11 @@ public class InputManager {
 				if (Keyboard.getEventKey() == Keyboard.KEY_U) {
 					Renderer.draw_polygons = !Renderer.draw_polygons;
 				}
+				
+				if (Keyboard.getEventKey() == Keyboard.KEY_V) {
+					// TODO: make this not broken
+					//Renderer.makeCurrentPositionOrigin();
+				}
 
 				if (Keyboard.getEventKey() >= Keyboard.KEY_1
 						&& Keyboard.getEventKey() <= Keyboard.KEY_9) {

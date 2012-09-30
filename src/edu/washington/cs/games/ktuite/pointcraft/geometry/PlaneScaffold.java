@@ -27,8 +27,8 @@ public class PlaneScaffold extends Scaffold {
 
 	private float line_width = 1f;
 	public float a, b, c, d;
-	private Vector3f center;
-	private float plane_extent;
+	public Vector3f center;
+	public float plane_extent;
 	private List<Vector3f> grid_vertices;
 	private List<Vector3f> corner_vertices;
 
@@ -149,11 +149,95 @@ public class PlaneScaffold extends Scaffold {
 		// System.out.println("plane parameters: " + a + "," + b + "," + c + ","
 		// + d);
 
-		float[] corner_points = new float[12];
 		plane_extent = findPlaneExtent();
 
 		center = findPlaneCenter();
 
+		buildGrid();
+
+		// checkForIntersections();
+	}
+
+	public void buildGrid() {
+		float[] corner_points = computeCornerPoints();
+
+		grid_vertices = new LinkedList<Vector3f>();
+
+		float grid = 40;
+		for (int i = 0; i <= grid; i++) {
+			Vector3f begin = new Vector3f();
+			Vector3f end = new Vector3f();
+			begin.x = corner_points[0 * 3 + 0] * i / grid
+					+ corner_points[1 * 3 + 0] * (1 - i / grid);
+			begin.y = corner_points[0 * 3 + 1] * i / grid
+					+ corner_points[1 * 3 + 1] * (1 - i / grid);
+			begin.z = corner_points[0 * 3 + 2] * i / grid
+					+ corner_points[1 * 3 + 2] * (1 - i / grid);
+			end.x = corner_points[3 * 3 + 0] * i / grid
+					+ corner_points[2 * 3 + 0] * (1 - i / grid);
+			end.y = corner_points[3 * 3 + 1] * i / grid
+					+ corner_points[2 * 3 + 1] * (1 - i / grid);
+			end.z = corner_points[3 * 3 + 2] * i / grid
+					+ corner_points[2 * 3 + 2] * (1 - i / grid);
+			grid_vertices.add(begin);
+			grid_vertices.add(end);
+		}
+		for (int i = 0; i <= grid; i++) {
+			Vector3f begin = new Vector3f();
+			Vector3f end = new Vector3f();
+			begin.x = corner_points[0 * 3 + 0] * i / grid
+					+ corner_points[3 * 3 + 0] * (1 - i / grid);
+			begin.y = corner_points[0 * 3 + 1] * i / grid
+					+ corner_points[3 * 3 + 1] * (1 - i / grid);
+			begin.z = corner_points[0 * 3 + 2] * i / grid
+					+ corner_points[3 * 3 + 2] * (1 - i / grid);
+			end.x = corner_points[1 * 3 + 0] * i / grid
+					+ corner_points[2 * 3 + 0] * (1 - i / grid);
+			end.y = corner_points[1 * 3 + 1] * i / grid
+					+ corner_points[2 * 3 + 1] * (1 - i / grid);
+			end.z = corner_points[1 * 3 + 2] * i / grid
+					+ corner_points[2 * 3 + 2] * (1 - i / grid);
+			grid_vertices.add(begin);
+			grid_vertices.add(end);
+		}
+	}
+
+	public void checkForIntersections() {
+		if (pellets.size() < 3)
+			return;
+
+		for (Scaffold geom : Main.geometry_v) {
+			if (geom instanceof LineScaffold) {
+				Vector3f intersect = ((LineScaffold) geom)
+						.checkForIntersectionPlaneWithLine(a, b, c, d);
+				if (intersect != null) {
+					LinePellet i = new LinePellet();
+					i.alive = true;
+					i.constructing = true;
+					i.is_intersection = true;
+					i.pos.set(intersect);
+					i.radius = pellets.get(0).radius;
+
+					pellets.add(i);
+					Main.new_pellets_to_add_to_world.add(i);
+					ActionTracker.newLinePlaneIntersection(i);
+				}
+			} else if (geom instanceof PlaneScaffold) {
+				// ((PlaneScaffold)
+				// geom).checkForIntersectionPlaneWithPlane(this);
+				// or perhaps switch the order:
+				if (geom != this && geom.isReady()) {
+					LineScaffold line = checkForIntersectionPlaneWithPlane((PlaneScaffold) geom);
+					if (line != null) {
+						Main.new_geometry_v_to_add.add(line);
+					}
+				}
+			}
+		}
+	}
+
+	public float[] computeCornerPoints() {
+		float[] corner_points = new float[12];
 		if (Math.abs(a) > Math.abs(b) && Math.abs(a) > Math.abs(c)) {
 			// set y and z
 			corner_points[0 * 3 + 1] = 1 * plane_extent + center.y;
@@ -237,85 +321,16 @@ public class PlaneScaffold extends Scaffold {
 					corner_points[i * 3 + 1], corner_points[i * 3 + 2]));
 		}
 
-		grid_vertices = new LinkedList<Vector3f>();
-
-		float grid = 40;
-		for (int i = 0; i <= grid; i++) {
-			Vector3f begin = new Vector3f();
-			Vector3f end = new Vector3f();
-			begin.x = corner_points[0 * 3 + 0] * i / grid
-					+ corner_points[1 * 3 + 0] * (1 - i / grid);
-			begin.y = corner_points[0 * 3 + 1] * i / grid
-					+ corner_points[1 * 3 + 1] * (1 - i / grid);
-			begin.z = corner_points[0 * 3 + 2] * i / grid
-					+ corner_points[1 * 3 + 2] * (1 - i / grid);
-			end.x = corner_points[3 * 3 + 0] * i / grid
-					+ corner_points[2 * 3 + 0] * (1 - i / grid);
-			end.y = corner_points[3 * 3 + 1] * i / grid
-					+ corner_points[2 * 3 + 1] * (1 - i / grid);
-			end.z = corner_points[3 * 3 + 2] * i / grid
-					+ corner_points[2 * 3 + 2] * (1 - i / grid);
-			grid_vertices.add(begin);
-			grid_vertices.add(end);
-		}
-		for (int i = 0; i <= grid; i++) {
-			Vector3f begin = new Vector3f();
-			Vector3f end = new Vector3f();
-			begin.x = corner_points[0 * 3 + 0] * i / grid
-					+ corner_points[3 * 3 + 0] * (1 - i / grid);
-			begin.y = corner_points[0 * 3 + 1] * i / grid
-					+ corner_points[3 * 3 + 1] * (1 - i / grid);
-			begin.z = corner_points[0 * 3 + 2] * i / grid
-					+ corner_points[3 * 3 + 2] * (1 - i / grid);
-			end.x = corner_points[1 * 3 + 0] * i / grid
-					+ corner_points[2 * 3 + 0] * (1 - i / grid);
-			end.y = corner_points[1 * 3 + 1] * i / grid
-					+ corner_points[2 * 3 + 1] * (1 - i / grid);
-			end.z = corner_points[1 * 3 + 2] * i / grid
-					+ corner_points[2 * 3 + 2] * (1 - i / grid);
-			grid_vertices.add(begin);
-			grid_vertices.add(end);
-		}
-
-		// checkForIntersections();
+		return corner_points;
 	}
 
-	public void checkForIntersections() {
-		if (pellets.size() < 3)
-			return;
-
-		for (Scaffold geom : Main.geometry_v) {
-			if (geom instanceof LineScaffold) {
-				Vector3f intersect = ((LineScaffold) geom)
-						.checkForIntersectionPlaneWithLine(a, b, c, d);
-				if (intersect != null) {
-					LinePellet i = new LinePellet();
-					i.alive = true;
-					i.constructing = true;
-					i.is_intersection = true;
-					i.pos.set(intersect);
-					i.radius = pellets.get(0).radius;
-
-					pellets.add(i);
-					Main.new_pellets_to_add_to_world.add(i);
-					ActionTracker.newLinePlaneIntersection(i);
-				}
-			} else if (geom instanceof PlaneScaffold) {
-				// ((PlaneScaffold)
-				// geom).checkForIntersectionPlaneWithPlane(this);
-				// or perhaps switch the order:
-				if (geom != this && geom.isReady()) {
-					checkForIntersectionPlaneWithPlane((PlaneScaffold) geom);
-				}
-			}
-		}
-	}
-
-	public void checkForIntersectionPlaneWithPlane(
+	public LineScaffold checkForIntersectionPlaneWithPlane(
 			PlaneScaffold plane_to_intersect) {
 		System.out.println("checking for interesction with plane, "
 				+ plane_to_intersect.a + ", " + plane_to_intersect.b + ","
 				+ plane_to_intersect.c);
+
+		LineScaffold line = null;
 
 		// this is the plane of interest
 		// the passed-in plane is the plane to intersect
@@ -326,7 +341,13 @@ public class PlaneScaffold extends Scaffold {
 		float angle_2 = Vector3f.angle(Vector3f.sub(corner_vertices.get(0),
 				corner_vertices.get(3), null), norm);
 		Vector3f a1, a2, b1, b2;
+		
 		System.out.println("angles: " + angle_1 + ", " + angle_2);
+		if (angle_1 > 1.57079)
+			angle_1 = 3.14159f - angle_1;
+		if (angle_2 > 1.57079)
+			angle_2 = 3.14159f - angle_2;
+		
 		if (angle_1 > angle_2) {
 			a1 = corner_vertices.get(0);// 0, 3
 			a2 = corner_vertices.get(3);
@@ -342,35 +363,36 @@ public class PlaneScaffold extends Scaffold {
 				.checkForIntersectionLineWithPlaneNoBounds(a1, a2);
 		Vector3f i2 = plane_to_intersect
 				.checkForIntersectionLineWithPlaneNoBounds(b1, b2);
-		if (i1 != null && i2 != null){
-			LineScaffold line = new LineScaffold();
 		
+		//System.out.println("i1 and i2: " + i1 + ", " + i2);
+		
+		if (i1 != null && i2 != null) {
+			line = new LineScaffold();
+
 			LinePellet p1 = new LinePellet();
 			p1.alive = true;
 			p1.constructing = true;
 			p1.is_intersection = true;
 			p1.pos.set(i1);
-			p1.radius = pellets.get(0).radius;
+			p1.radius = Pellet.default_radius;
 			pellets.add(p1);
-			//Main.new_pellets_to_add_to_world.add(p1);
-	
+			// Main.new_pellets_to_add_to_world.add(p1);
+
 			LinePellet p2 = new LinePellet();
 			p2.alive = true;
 			p2.constructing = true;
 			p2.is_intersection = true;
 			p2.pos.set(i2);
-			p2.radius = pellets.get(0).radius;
+			p2.radius = Pellet.default_radius;
 			pellets.add(p2);
-			//Main.new_pellets_to_add_to_world.add(p2);
-			
+			// Main.new_pellets_to_add_to_world.add(p2);
+
 			line.addNewPellet(p1);
 			line.addNewPellet(p2);
-			line.fitLine();
-			
-			Main.new_geometry_v_to_add.add(line);
+			//line.fitLine();
 		}
-		
-	
+
+		return line;
 	}
 
 	private float findPlaneExtent() {

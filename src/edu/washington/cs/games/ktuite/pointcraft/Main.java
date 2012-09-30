@@ -79,7 +79,7 @@ public class Main {
 	public static boolean animatingToSavedView = false;
 
 	// stuff about the atmosphere
-	private float FOG_COLOR[] = new float[] { .89f, .89f, .89f, 1.0f };
+	private float FOG_COLOR[] = new float[] { .59f, .59f, .59f, 1.0f };
 	public static Audio launch_effect;
 	public static Audio attach_effect;
 
@@ -153,17 +153,16 @@ public class Main {
 			Main main = new Main();
 
 			server = new ServerCommunicator(
-					"http://www.photocitygame.com/pointcraft/");
+					"http://phci03.cs.washington.edu/pointcraft/");
 
 			main.initDisplay();
 			main.initGUI();
 			main.initGraphics();
 			main.initGameVariables();
 
-			main.current_level = new CustomLevelFromFile(main,
-					"data/smithcastle.ply", 1f);
+			main.current_level = new CustomLevelFromFile(main, "data/lewis.bundle", 1f);
 
-			ModelingGun.useLaser();
+			ModelingGun.useGun();
 
 			main.run();
 		} catch (Exception e) {
@@ -179,7 +178,7 @@ public class Main {
 		}
 	}
 
-	private void initDisplay() {
+	void initDisplay() {
 		try {
 			if (IS_SIGGRAPH_DEMO) {
 				Display.setDisplayMode(new DisplayMode(1280, 720));
@@ -197,7 +196,7 @@ public class Main {
 		}
 	}
 
-	private void initGUI() {
+	void initGUI() {
 		gui_manager = new GuiManager(this);
 		if (IS_RELEASE)
 			setActivityMode(ActivityMode.INSTRUCTIONS);
@@ -205,7 +204,7 @@ public class Main {
 			setActivityMode(ActivityMode.MODELING);
 	}
 
-	private void initGraphics() {
+	void initGraphics() {
 		float width = Display.getDisplayMode().getWidth();
 		float height = Display.getDisplayMode().getHeight();
 		System.out.println("init graphics: " + width + "," + height);
@@ -263,7 +262,7 @@ public class Main {
 
 	}
 
-	private void initGameVariables() {
+	void initGameVariables() {
 		pos = new Vector3f();
 		vel = new Vector3f();
 		tilt_angle = 0;
@@ -320,9 +319,10 @@ public class Main {
 		PointStore.markPointVBODirty();
 	}
 
-	private void run() {
+	void run() {
 		while (!Display.isCloseRequested()) {
 			Timer.tick();
+			Display.sync(60);
 
 			if (!GuiManager.is_logged_in) {
 				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT
@@ -887,6 +887,7 @@ public class Main {
 			gui_manager.updateOnscreenGui();
 		}
 
+		
 		Display.update();
 	}
 

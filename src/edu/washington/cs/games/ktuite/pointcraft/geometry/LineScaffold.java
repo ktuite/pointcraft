@@ -25,8 +25,8 @@ public class LineScaffold extends Scaffold {
 	public LineScaffold() {
 		super();
 	}
-	
-	public boolean isReady(){
+
+	public boolean isReady() {
 		if (pt_1 == null || pt_2 == null)
 			return false;
 		else
@@ -57,10 +57,10 @@ public class LineScaffold extends Scaffold {
 
 		Vector3f line_direction = new Vector3f();
 		Vector3f.sub(pellets.get(0).pos, pellets.get(1).pos, line_direction);
-		
+
 		if (line_direction.lengthSquared() == 0)
 			return;
-		
+
 		line_direction.normalise();
 
 		Vector3f center = new Vector3f();
@@ -76,14 +76,13 @@ public class LineScaffold extends Scaffold {
 		Vector3f.add(center, line_direction, center);
 		pt_2.set(center);
 
-
-		//checkForIntersections();
+		// checkForIntersections();
 	}
 
 	public void checkForIntersections() {
 		if (pellets.size() < 2)
 			return;
-		
+
 		for (Scaffold geom : Main.geometry_v) {
 			if (geom instanceof PlaneScaffold) {
 				Vector3f intersect = ((PlaneScaffold) geom)
@@ -123,6 +122,22 @@ public class LineScaffold extends Scaffold {
 			}
 		}
 		return i;
+	}
+
+	public float distanceToLine(LineScaffold line_to_intersect) {
+		Vector3f a = pt_2;
+		Vector3f b = Vector3f.sub(pt_2, pt_1, null);
+		Vector3f c = line_to_intersect.pt_2;
+		Vector3f d = Vector3f.sub(line_to_intersect.pt_2,
+				line_to_intersect.pt_1, null);
+
+		Vector3f u = Vector3f.cross(b, d, null);
+		if (u.lengthSquared() == 0) {
+			return Float.MAX_VALUE;
+		}
+		u.normalise();
+		float g = Vector3f.dot(Vector3f.sub(a, c, null), u);
+		return g;
 	}
 
 	public void addNewPellet(Pellet p) {
@@ -200,12 +215,12 @@ public class LineScaffold extends Scaffold {
 		pt_1 = null;
 		pt_2 = null;
 	}
-	
-	public void removeLastPointAndRefit(){
+
+	public void removeLastPointAndRefit() {
 		Main.all_dead_pellets_in_world.add(pellets.pop());
 		fitLine();
 	}
-	
+
 	@Override
 	public String toJSONString() {
 		JSONStringer s = new JSONStringer();
@@ -221,13 +236,13 @@ public class LineScaffold extends Scaffold {
 			s.value(Pellet.JSONVector3f(pt_2));
 			s.key("pellets");
 			s.array();
-			for (Pellet p : pellets){
+			for (Pellet p : pellets) {
 				s.value(Main.all_pellets_in_world.indexOf(p));
 			}
 			s.endArray();
 			s.key("pellet_objs");
 			s.array();
-			for (Pellet p : pellets){
+			for (Pellet p : pellets) {
 				s.value(p);
 			}
 			s.endArray();
@@ -235,25 +250,26 @@ public class LineScaffold extends Scaffold {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-        return s.toString();
+		return s.toString();
 	}
-	
+
 	public static void loadFromJSONv2(JSONObject obj) throws JSONException {
 		LineScaffold line = new LineScaffold();
-		
+
 		JSONArray json_verts = obj.getJSONArray("pellets");
-		for (int i = 0; i < json_verts.length(); i++){
-			line.pellets.add(Main.all_pellets_in_world.get(json_verts.getInt(i)));
+		for (int i = 0; i < json_verts.length(); i++) {
+			line.pellets
+					.add(Main.all_pellets_in_world.get(json_verts.getInt(i)));
 		}
 		line.fitLine();
 		Main.geometry_v.add(line);
 	}
-	
+
 	public static void loadFromJSONv3(JSONObject obj) throws JSONException {
 		LineScaffold line = new LineScaffold();
-		
+
 		JSONArray json_verts = obj.getJSONArray("pellet_objs");
-		for (int i = 0; i < json_verts.length(); i++){
+		for (int i = 0; i < json_verts.length(); i++) {
 			line.pellets.add(Pellet.loadFromJSON(json_verts.getJSONObject(i)));
 		}
 		line.fitLine();

@@ -19,7 +19,7 @@ public class Skybox {
 		// skybox texture loaded
 		try {
 			skybox_texture = TextureLoader.getTexture("JPG",
-					ResourceLoader.getResourceAsStream("gray_sky.jpg"));
+					ResourceLoader.getResourceAsStream("gray_sky_orig.jpg"));
 			/*
 			System.out.println("Texture loaded: " + skybox_texture);
 			System.out.println(">> Image width: " + skybox_texture.getImageWidth());

@@ -780,7 +780,7 @@ public class PointStore {
 	}
 
 	public static Vector3f getIthPoint(int i) {
-		i = point_indices.get(i);
+		//i = point_indices.get(i);
 		return new Vector3f((float) point_positions.get(i * 3 + 0),
 				(float) point_positions.get(i * 3 + 1),
 				(float) point_positions.get(i * 3 + 2));

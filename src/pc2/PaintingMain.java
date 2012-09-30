@@ -6,12 +6,18 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 
 public class PaintingMain {
-	
+
 	public static void main(String[] args) {
-		//String pc_file = "data/observatory.ply";
+		String pc_file = null;
+
+		pc_file = "data/observatory.ply";
 
 		initDisplay();
-		PointStore.loadCube();
+		if (pc_file == null) {
+			PointStore.loadCube();
+		} else {
+			PointStore.load(pc_file);
+		}
 		Player.initPlayer();
 		Renderer.initGraphics();
 		run();
@@ -22,23 +28,21 @@ public class PaintingMain {
 		while (!Display.isCloseRequested()) {
 			// manage input
 			InputManager.handleInput();
-			
+
 			// update elements
 			Player.update();
 			Paintbrush.update();
-			
+
 			// render
 			Renderer.drawSceneAndGUI();
-			
+
 			Display.update();
 		}
 		Display.destroy();
-		
+
 		// AL.destroy();
 		System.out.println("PointCraft is closing");
 	}
-
-
 
 	public static void initDisplay() {
 		try {
@@ -52,7 +56,7 @@ public class PaintingMain {
 			System.out.println("ERROR running initDisplay... exiting");
 			System.exit(1);
 		}
-		
+
 		Mouse.setGrabbed(true);
 	}
 

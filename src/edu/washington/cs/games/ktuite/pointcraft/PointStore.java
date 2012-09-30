@@ -383,7 +383,7 @@ public class PointStore {
 		backup_colors.put(point_colors);
 		backup_colors.rewind();
 		point_colors.rewind();
-		
+
 		Main.world_scale = (float) ((float) ((PointStore.max_corner[1] - PointStore.min_corner[1])) / 0.071716);
 		if (Main.world_scale == 0)
 			Main.world_scale = 1;
@@ -695,12 +695,30 @@ public class PointStore {
 			}
 			String[] point = buf.readLine().split("\\s+");
 			String[] color = buf.readLine().split("\\s+");
-			buf.readLine(); // features
+			String[] tracks = buf.readLine().split("\\s+");
 
-			point_colors.put((byte) Integer.parseInt(color[0]));
-			point_colors.put((byte) Integer.parseInt(color[1]));
-			point_colors.put((byte) Integer.parseInt(color[2]));
-			point_colors.put((byte) 255);
+			int track_count = Integer.parseInt(tracks[0]);
+
+			if (true) {
+				point_colors.put((byte) 0);
+				if (track_count >= 12) {
+					point_colors.put((byte) (track_count*3));
+				} else {
+					point_colors.put((byte) 0);
+				}
+				point_colors.put((byte) 0);
+				
+			} else {
+				point_colors.put((byte) Integer.parseInt(color[0]));
+				point_colors.put((byte) Integer.parseInt(color[1]));
+				point_colors.put((byte) Integer.parseInt(color[2]));
+
+			}
+
+			if (track_count > 0)
+				point_colors.put((byte) 255);
+			else
+				point_colors.put((byte) 0);
 
 			point_positions.put(Float.parseFloat(point[0]));
 			point_positions.put(Float.parseFloat(point[1]));
@@ -831,7 +849,7 @@ public class PointStore {
 		point_colors.put(backup_colors);
 		point_colors.rewind();
 		backup_colors.rewind();
-		
+
 		for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i + 1)) {
 			changePointColorToRed(i);
 		}

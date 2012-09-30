@@ -10,6 +10,7 @@ import edu.washington.cs.games.ktuite.pointcraft.geometry.Ground;
 
 public class Player {
 	public static Vector3f pos;
+	public static Vector3f transformed_pos;
 	public static Vector3f vel;
 	public static float tilt_angle;
 	public static float pan_angle;
@@ -20,15 +21,16 @@ public class Player {
 
 	public static void initPlayer() {
 		pos = new Vector3f();
+		transformed_pos = new Vector3f();
 		vel = new Vector3f();
 		pellet_scale = 1;
 		tilt_angle = 0;
 		pan_angle = 0;
 		veldecay = .90f;
-		walkforce = 1 / 4000f * Renderer.world_scale;
+		walkforce = 1 / 4000f * PointStore.world_scale;
 		max_speed = 1 * Renderer.world_scale;
 		System.out.println("Starting position: " + pos + " Starting velocity: "
-				+ vel);
+				+ vel + " Walk force: " + walkforce);
 	}
 
 	public static void update() {
@@ -70,6 +72,16 @@ public class Player {
 			pan_angle -= 360;
 		if (pan_angle < 0)
 			pan_angle += 360;
+		
+		// compute transformed pos
+		Matrix4f trans = new Matrix4f();
+		Vector4f p = new Vector4f(pos.x, pos.y, pos.z, 1);
+		trans.load(Renderer.rotated_pointcloud_matrix);
+		Renderer.rotated_pointcloud_matrix.rewind();
+		trans.invert();
+		Matrix4f.transform(trans, p, p);
+		transformed_pos.set(p.x, p.y, p.z);
+
 	}
 
 	public static void changePelletScale(int i) {
@@ -94,8 +106,8 @@ public class Player {
 		trans.rotate(-tilt_angle * 3.14159f / 180f, new Vector3f(1, 0, 0));
 		Matrix4f.transform(trans, dir, dir);
 
-		//trans.load(Renderer.rotated_pointcloud_matrix);
-		//rotated_pointcloud_matrix.rewind();
+		trans.load(Renderer.rotated_pointcloud_matrix);
+		Renderer.rotated_pointcloud_matrix.rewind();
 		trans.setIdentity();
 		trans.m30 = 0;
 		trans.m31 = 0;
@@ -104,7 +116,12 @@ public class Player {
 		Matrix4f.transform(trans, dir, dir);
 
 		gun_direction.set(dir.x, dir.y, dir.z);
-		
+
 		return gun_direction;
 	}
+
+	public static Vector3f getTransformedPos() {
+		return transformed_pos;
+	}
+
 }

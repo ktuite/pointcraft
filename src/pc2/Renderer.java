@@ -9,6 +9,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Sphere;
+import org.lwjgl.util.vector.Matrix4f;
 
 import pc2.PointStore;
 
@@ -27,7 +28,7 @@ public class Renderer {
 	public static boolean draw_polygons = true;
 	public static boolean draw_cameras = false;
 
-	private static FloatBuffer rotated_pointcloud_matrix;
+	static FloatBuffer rotated_pointcloud_matrix;
 
 	private static int sphere_display_list;
 
@@ -79,6 +80,8 @@ public class Renderer {
 
 		if (draw_points)
 			drawPoints();
+		
+		MathTest.draw();
 
 		Paintbrush.draw();
 
@@ -142,5 +145,29 @@ public class Renderer {
 		else if (fog_density > 50 / world_scale)
 			fog_density = 50 / world_scale;
 		glFogf(GL_FOG_DENSITY, fog_density);
+	}
+	
+	public static void makeCurrentPositionOrigin() {
+		Matrix4f rot = new Matrix4f();
+
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+
+		glRotatef(Player.tilt_angle, 1.0f, 0.0f, 0.0f); // rotate our camera up/down
+		glRotatef(Player.pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
+		glTranslated(-Player.pos.x, -Player.pos.y, -Player.pos.z); // translate the screen
+		glMultMatrix(rotated_pointcloud_matrix);
+
+		glGetFloat(GL_MODELVIEW_MATRIX, rotated_pointcloud_matrix);
+		glPopMatrix();
+		System.out.println("New matrix: ");
+
+		rot.load(rotated_pointcloud_matrix);
+		rotated_pointcloud_matrix.rewind();
+		rot.invert();
+		rotated_pointcloud_matrix.rewind();
+		Player.pos.set(0, 0, 0);
+		Player.pan_angle = 0;
+		Player.tilt_angle = 0;
 	}
 }

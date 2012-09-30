@@ -20,8 +20,7 @@ import pc2.PointStore;
 public class Paintbrush {
 
 	private static Vector3f pos = new Vector3f();
-	private static float radius = Player.pellet_scale * 0.0005f
-			* Renderer.world_scale;
+	public static float radius = 0;
 	private static Vector3f viewing_direction;
 	public static Mode mode = Mode.DELETE;
 	static BitSet selected_points = new BitSet();
@@ -33,7 +32,12 @@ public class Paintbrush {
 		DELETE, WALL, GROUND, ROOF
 	};
 
+	public static void setRadius(float scale) {
+		radius = scale * 0.0005f * Renderer.world_scale;
+	}
+
 	public static void update() {
+		setRadius(Player.pellet_scale);
 		Vector3f closest_point = closestPointCloudPoint();
 		if (closest_point != null)
 			pos.set(closestPointInSightLine(closest_point));
@@ -105,12 +109,14 @@ public class Paintbrush {
 			float min_dist_to_player = Float.MAX_VALUE;
 			for (int i = 0; i < PointStore.num_display_points; i++) {
 				Vector3f pt = PointStore.getIthPoint(i);
-				float dist_to_line = distanceToPoint(pt);
-				if (dist_to_line < radius) {
-					float dist_to_player = distanceToPlayer(pt);
-					if (dist_to_player < min_dist_to_player) {
-						min_dist_to_player = dist_to_player;
-						closest_point = pt;
+				if (pt != null) {
+					float dist_to_line = distanceToPoint(pt);
+					if (dist_to_line < radius) {
+						float dist_to_player = distanceToPlayer(pt);
+						if (dist_to_player < min_dist_to_player) {
+							min_dist_to_player = dist_to_player;
+							closest_point = pt;
+						}
 					}
 				}
 			}
@@ -122,7 +128,7 @@ public class Paintbrush {
 	}
 
 	public static Vector3f closestPointInSightLine(Vector3f pos) {
-		Vector3f pt_1 = Player.pos;
+		Vector3f pt_1 = Player.getTransformedPos();
 		Vector3f pt_2 = Vector3f.add(pt_1, viewing_direction, null);
 		Vector3f pt = new Vector3f();
 
@@ -141,7 +147,7 @@ public class Paintbrush {
 
 	public static float distanceToPoint(Vector3f pos) {
 		float dist = Float.MAX_VALUE;
-		Vector3f pt_1 = Player.pos;
+		Vector3f pt_1 = Player.getTransformedPos();
 		Vector3f pt_2 = Vector3f.add(pt_1, viewing_direction, null);
 
 		Vector3f temp = new Vector3f();
@@ -157,7 +163,7 @@ public class Paintbrush {
 	}
 
 	public static float distanceToPlayer(Vector3f p) {
-		Vector3f temp = Vector3f.sub(p, Player.pos, null);
+		Vector3f temp = Vector3f.sub(p, Player.getTransformedPos(), null);
 		float dot = Vector3f.dot(temp, viewing_direction);
 		if (dot > 0)
 			return temp.length();
@@ -195,6 +201,10 @@ public class Paintbrush {
 		buffer_map.put(mode, ib);
 		System.out.println("Points moved to buffer: " + mode);
 
+		if (mode == Mode.WALL) {
+			MathTest.fitPlane(selected_points);
+		}
+
 		// TODO also add to appropriate array of intbuffers
 	}
 
@@ -216,6 +226,7 @@ public class Paintbrush {
 			glDrawElements(GL_POINTS, highlight_indices);
 		}
 
+		glEnable(GL_DEPTH_TEST);
 		glPointSize(Renderer.point_size);
 		for (Entry<Mode, IntBuffer> entry : buffer_map.entrySet()) {
 			Mode key = entry.getKey();
