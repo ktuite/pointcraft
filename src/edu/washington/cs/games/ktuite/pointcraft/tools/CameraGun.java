@@ -111,6 +111,9 @@ public class CameraGun {
 		
 		outStream.writeBytes("\r\n");
 		outStream.writeBytes("--"+BOUNDARY+"--\r\n");
+		
+		inStream.close();
+		
 		if(conn.getResponseCode() == 200) {
 			return true;
 		} else {

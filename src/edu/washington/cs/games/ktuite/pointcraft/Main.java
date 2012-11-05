@@ -1,7 +1,64 @@
 package edu.washington.cs.games.ktuite.pointcraft;
 
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL11.GL_BLEND;
+import static org.lwjgl.opengl.GL11.GL_COLOR_ARRAY;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
+import static org.lwjgl.opengl.GL11.GL_EXP2;
+import static org.lwjgl.opengl.GL11.GL_FLOAT;
+import static org.lwjgl.opengl.GL11.GL_FOG;
+import static org.lwjgl.opengl.GL11.GL_FOG_COLOR;
+import static org.lwjgl.opengl.GL11.GL_FOG_DENSITY;
+import static org.lwjgl.opengl.GL11.GL_FOG_END;
+import static org.lwjgl.opengl.GL11.GL_FOG_MODE;
+import static org.lwjgl.opengl.GL11.GL_FOG_START;
+import static org.lwjgl.opengl.GL11.GL_LINES;
+import static org.lwjgl.opengl.GL11.GL_LINE_LOOP;
+import static org.lwjgl.opengl.GL11.GL_LINE_SMOOTH;
+import static org.lwjgl.opengl.GL11.GL_MODELVIEW;
+import static org.lwjgl.opengl.GL11.GL_MODELVIEW_MATRIX;
+import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_POINTS;
+import static org.lwjgl.opengl.GL11.GL_POLYGON_SMOOTH;
+import static org.lwjgl.opengl.GL11.GL_PROJECTION;
+import static org.lwjgl.opengl.GL11.GL_QUADS;
+import static org.lwjgl.opengl.GL11.GL_SMOOTH;
+import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
+import static org.lwjgl.opengl.GL11.GL_VERTEX_ARRAY;
+import static org.lwjgl.opengl.GL11.glBegin;
+import static org.lwjgl.opengl.GL11.glBlendFunc;
+import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glColor4f;
+import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL11.glDisableClientState;
+import static org.lwjgl.opengl.GL11.glDrawArrays;
+import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glEnableClientState;
+import static org.lwjgl.opengl.GL11.glEnd;
+import static org.lwjgl.opengl.GL11.glFog;
+import static org.lwjgl.opengl.GL11.glFogf;
+import static org.lwjgl.opengl.GL11.glFogi;
+import static org.lwjgl.opengl.GL11.glGetFloat;
+import static org.lwjgl.opengl.GL11.glLineWidth;
+import static org.lwjgl.opengl.GL11.glLoadIdentity;
+import static org.lwjgl.opengl.GL11.glMatrixMode;
+import static org.lwjgl.opengl.GL11.glMultMatrix;
+import static org.lwjgl.opengl.GL11.glOrtho;
+import static org.lwjgl.opengl.GL11.glPointSize;
+import static org.lwjgl.opengl.GL11.glPopMatrix;
+import static org.lwjgl.opengl.GL11.glPushMatrix;
+import static org.lwjgl.opengl.GL11.glRotatef;
+import static org.lwjgl.opengl.GL11.glTexCoord2f;
+import static org.lwjgl.opengl.GL11.glTranslated;
+import static org.lwjgl.opengl.GL11.glTranslatef;
+import static org.lwjgl.opengl.GL11.glVertex2f;
+import static org.lwjgl.opengl.GL11.glVertex3f;
+import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 import static org.lwjgl.util.glu.GLU.gluPerspective;
 
 import java.io.File;
@@ -36,18 +93,19 @@ import edu.washington.cs.games.ktuite.pointcraft.geometry.Ground;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Primitive;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Scaffold;
 import edu.washington.cs.games.ktuite.pointcraft.gui.GuiManager;
-import edu.washington.cs.games.ktuite.pointcraft.levels.*;
+import edu.washington.cs.games.ktuite.pointcraft.levels.BaseLevel;
+import edu.washington.cs.games.ktuite.pointcraft.levels.CustomLevelFromFile;
+import edu.washington.cs.games.ktuite.pointcraft.tools.BoxPellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.CirclePellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.CylinderPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.DomePellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.ExtrudeLinePellet;
+import edu.washington.cs.games.ktuite.pointcraft.tools.ExtrudePolyPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.HoverPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.LaserBeamPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.LinePellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.ModelingGun;
 import edu.washington.cs.games.ktuite.pointcraft.tools.ModelingGun.InteractionMode;
-import edu.washington.cs.games.ktuite.pointcraft.tools.BoxPellet;
-import edu.washington.cs.games.ktuite.pointcraft.tools.CirclePellet;
-import edu.washington.cs.games.ktuite.pointcraft.tools.ExtrudeLinePellet;
-import edu.washington.cs.games.ktuite.pointcraft.tools.ExtrudePolyPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.OrbPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.PaintbrushPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
@@ -127,6 +185,7 @@ public class Main {
 	public static boolean draw_textures = true;
 	public static boolean draw_polygons = true;
 	public static boolean draw_cameras = false;
+	public static boolean draw_matches = true;
 	public static boolean rotate_world = false;
 
 	// central classes for managing the GUI and the interaction with the server
@@ -160,7 +219,7 @@ public class Main {
 			main.initGraphics();
 			main.initGameVariables();
 
-			main.current_level = new CustomLevelFromFile(main, "data/lewis.bundle", 1f);
+			main.current_level = new CustomLevelFromFile(main, "/Users/ktuite/Desktop/trevi-flickr/trevi.bundle", 1f);
 
 			ModelingGun.useGun();
 
@@ -183,7 +242,7 @@ public class Main {
 			if (IS_SIGGRAPH_DEMO) {
 				Display.setDisplayMode(new DisplayMode(1280, 720));
 			} else {
-				Display.setDisplayMode(new DisplayMode(800, 600)); // 800x600
+				Display.setDisplayMode(new DisplayMode(1200, 900)); // 800x600
 			}
 			Display.setResizable(true);
 			Display.setVSyncEnabled(true);
@@ -244,7 +303,7 @@ public class Main {
 		// skybox texture loaded
 		try {
 			skybox = TextureLoader.getTexture("JPG",
-					ResourceLoader.getResourceAsStream("gray_sky.jpg"));
+					ResourceLoader.getResourceAsStream("gray_sky_orig.jpg"));
 			System.out.println("Texture loaded: " + skybox);
 			System.out.println(">> Image width: " + skybox.getImageWidth());
 			System.out.println(">> Image height: " + skybox.getImageHeight());
@@ -617,6 +676,9 @@ public class Main {
 					if (Keyboard.getEventKey() == Keyboard.KEY_U) {
 						draw_polygons = !draw_polygons;
 					}
+					if (Keyboard.getEventKey() == Keyboard.KEY_M) {
+						draw_matches = !draw_matches;
+					}
 
 					if (Keyboard.getEventKey() == Keyboard.KEY_V) {
 						makeCurrentPositionOrigin();
@@ -836,6 +898,11 @@ public class Main {
 		if (draw_cameras) {
 			drawCameraFrusta();
 		}
+		
+		if (draw_matches){
+			drawMatches();
+		}
+		
 
 		glClearColor(.3f, .3f, .3f, 1.0f);
 
@@ -962,6 +1029,18 @@ public class Main {
 
 		GL11.glVertexPointer(3, 0, PointStore.camera_frusta_lines);
 		glDrawArrays(GL_LINES, 0, PointStore.num_cameras * 16);
+
+		glDisableClientState(GL_VERTEX_ARRAY);
+	}
+	
+	private void drawMatches() {
+		glColor4f(.9f, .3f, .4f, .3f);
+		glLineWidth(2);
+
+		glEnableClientState(GL_VERTEX_ARRAY);
+
+		GL11.glVertexPointer(3, 0, PointStore.camera_match_lines);
+		glDrawArrays(GL_LINES, 0, PointStore.num_camera_matches * 2);
 
 		glDisableClientState(GL_VERTEX_ARRAY);
 	}

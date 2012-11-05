@@ -11,10 +11,11 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector2f;
@@ -42,6 +43,12 @@ public class PointStore {
 	private static Map<Vec3D, Integer> index_map;
 	public static FloatBuffer camera_frusta_lines;
 	private static List<Camera> cameras = new LinkedList<Camera>();
+	public static boolean[][] camera_matches;
+	public static FloatBuffer camera_match_lines;
+	public static int num_camera_matches;
+
+	// draw pts as black or greenish based on bundle track length
+	private static boolean draw_spooky_track_colors = false;
 
 	private static class Camera {
 		Matrix3f r;
@@ -632,6 +639,8 @@ public class PointStore {
 		num_cameras = Integer.parseInt(second_line.split("\\s+")[0]);
 		num_points = Integer.parseInt(second_line.split("\\s+")[1]);
 
+		camera_matches = new boolean[num_cameras][num_cameras];
+
 		System.out.println("Version #: " + version + ", Reading " + num_cameras
 				+ " cameras and " + num_points + " points");
 
@@ -699,15 +708,35 @@ public class PointStore {
 
 			int track_count = Integer.parseInt(tracks[0]);
 
-			if (true) {
+			if (track_count < 30) {
+				for (int j = 0; j < track_count; j++) {
+					for (int k = j + 1; k < track_count; k++) {
+						int a, b;
+						if (version == "0.3") {
+							a = Integer.parseInt(tracks[j * 4 + 1]);
+							b = Integer.parseInt(tracks[k * 4 + 1]);
+						} else {
+							a = Integer.parseInt(tracks[j * 2 + 1]);
+							b = Integer.parseInt(tracks[k * 2 + 1]);
+						}
+						boolean m = camera_matches[a][b];
+						if (m == false) {
+							camera_matches[a][b] = true;
+							num_camera_matches++;
+						}
+					}
+				}
+			}
+
+			if (draw_spooky_track_colors) {
 				point_colors.put((byte) 0);
 				if (track_count >= 12) {
-					point_colors.put((byte) (track_count*3));
+					point_colors.put((byte) (track_count * 3));
 				} else {
 					point_colors.put((byte) 0);
 				}
 				point_colors.put((byte) 0);
-				
+
 			} else {
 				point_colors.put((byte) Integer.parseInt(color[0]));
 				point_colors.put((byte) Integer.parseInt(color[1]));
@@ -734,8 +763,38 @@ public class PointStore {
 			}
 		}
 
+		buildCameraMatchLines();
+
 		buildCameraFrustaWithWorldScale();
 
+	}
+
+	private static void buildCameraMatchLines() {
+		camera_match_lines = BufferUtils
+				.createFloatBuffer(num_camera_matches * 2 * 3);
+		camera_match_lines.rewind();
+		int edges_added = 0;
+		for (int i = 0; i < num_cameras; i++) {
+			for (int j = 0; j < num_cameras; j++) {
+				if (i != j) {
+					boolean m = camera_matches[i][j];
+					if (m == true) {
+						camera_match_lines.put(cameras.get(i).pos.x);
+						camera_match_lines.put(cameras.get(i).pos.y);
+						camera_match_lines.put(cameras.get(i).pos.z);
+						camera_match_lines.put(cameras.get(j).pos.x);
+						camera_match_lines.put(cameras.get(j).pos.y);
+						camera_match_lines.put(cameras.get(j).pos.z);
+						edges_added++;
+					}
+				}
+			}
+		}
+
+		camera_match_lines.rewind();
+
+		System.out.println("edges_added: " + edges_added
+				+ ", camera match lines; " + num_camera_matches);
 	}
 
 	private static void buildCameraFrustaWithWorldScale() {
