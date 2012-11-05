@@ -143,6 +143,8 @@ public class Save {
 			if (!f.mkdir()) {
 				System.out
 						.println("failed to create dir: " + texturePathPrefix);
+				mtlFile.close();
+				objFile.close();
 				throw new FileNotFoundException();
 			}
 
@@ -545,6 +547,8 @@ public class Save {
 					Main.geometry_v = (Stack<Scaffold>) in.readObject();
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
+				} finally {
+					in.close();
 				}
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();

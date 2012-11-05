@@ -3,14 +3,19 @@ package edu.washington.cs.games.ktuite.pointcraft;
 import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Canvas;
+
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.DisplayMode;
 
 import edu.washington.cs.games.ktuite.pointcraft.levels.CubeLevel;
 import edu.washington.cs.games.ktuite.pointcraft.tools.ModelingGun;
 
 public class PointCraftApplet extends Applet {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	Canvas display_parent;
 
@@ -92,6 +97,11 @@ public class PointCraftApplet extends Applet {
 		setLayout(new BorderLayout());
 		try {
 			display_parent = new Canvas() {
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
 				public final void addNotify() {
 					super.addNotify();
 					startLWJGL();

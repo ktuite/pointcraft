@@ -11,11 +11,10 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector2f;
@@ -603,8 +602,10 @@ public class PointStore {
 					}
 				}
 
+				stream.close();
 			}
 
+			
 			point_colors.rewind();
 			point_positions.rewind();
 		} catch (IOException e) {
