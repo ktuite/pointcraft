@@ -79,7 +79,8 @@ public class PickerHelper {
 		glRotatef(Main.tilt_angle, 1.0f, 0.0f, 0.0f); // rotate our camera up/down
 		glRotatef(Main.pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
 		glTranslated(-Main.pos.x, -Main.pos.y, -Main.pos.z); // translate the screen
-	
+		glMultMatrix(Main.rotated_pointcloud_matrix);
+		
 		// draw polygons for picking
 		for (int i = 0; i < Main.geometry.size(); i++) {
 			Primitive g = Main.geometry.get(i);
@@ -133,7 +134,8 @@ public class PickerHelper {
 		glRotatef(Main.tilt_angle, 1.0f, 0.0f, 0.0f); // rotate our camera up/down
 		glRotatef(Main.pan_angle, 0.0f, 1.0f, 0.0f); // rotate our camera left/right
 		glTranslated(-Main.pos.x, -Main.pos.y, -Main.pos.z); // translate the screen
-	
+		glMultMatrix(Main.rotated_pointcloud_matrix);
+		
 		// draw polygons for picking
 		for (int i = 0; i < Main.all_pellets_in_world.size(); i++) {
 			Pellet pellet = Main.all_pellets_in_world.get(i);

@@ -191,7 +191,7 @@ public class Primitive implements org.json.JSONString {
 
 		// draw a border around the polygons
 		if (Main.draw_lines) {
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			glPolygonMode(GL_FRONT, GL_LINE);
 			for (int h = 0; h < num_textures; h++) {
 				glDisable(GL_TEXTURE_2D);
 				glColor3f(.6f, .6f, .6f);

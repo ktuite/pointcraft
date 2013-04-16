@@ -637,6 +637,49 @@ public class Save {
 		}
 		Mouse.setGrabbed(mouseGrabbed);
 	}
+	
+	public static void savePointcloudPly() {
+		boolean mouseGrabbed = Mouse.isGrabbed();
+		Mouse.setGrabbed(false);
+		if (fc == null) {
+			fc = new JFileChooser();
+		}
+		int returnVal = fc.showSaveDialog(fc);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = fc.getSelectedFile();
+			try {
+				Writer output = new BufferedWriter(new FileWriter(file));
+				int VERTEX_COUNT = PointStore.num_points;
+
+				String header = "ply\n" + "format ascii 1.0\n"
+						+ "element vertex " + VERTEX_COUNT + "\n"
+						+ "property float x\n" + "property float y\n"
+						+ "property float z\n" 
+						+ "property float nx\n"
+						+ "property float ny\n"
+						+ "property float nz\n" 
+						+ "property uchar diffuse_red\n"
+						+ "property uchar diffuse_green\n"
+						+ "property uchar diffuse_blue\n" 
+						+ "end_header\n";
+				output.write(header);
+
+				for (int i = 0; i < PointStore.num_points; i++){
+					output.write(PointStore.point_positions.get(i*3 + 0) + " " + PointStore.point_positions.get(i*3 + 1) + " " + PointStore.point_positions.get(i*3 + 2));
+					output.write(" " + PointStore.point_normals.get(i*3 + 0) + " " + PointStore.point_normals.get(i*3 + 1) + " " + PointStore.point_normals.get(i*3 + 2));
+					output.write(" " + PointStore.point_colors.get(i*4 + 0) + " "  + PointStore.point_colors.get(i*4 + 1) + " " + PointStore.point_colors.get(i*4 + 2));
+					output.write("\n");
+				}
+
+				output.close();
+
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		Mouse.setGrabbed(mouseGrabbed);
+	}
 
 	public static void loadCinematics() {
 		boolean mouseGrabbed = Mouse.isGrabbed();

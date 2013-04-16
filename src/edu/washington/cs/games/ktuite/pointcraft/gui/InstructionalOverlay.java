@@ -26,6 +26,8 @@ public class InstructionalOverlay extends Widget {
 	private Button export_button;
 
 	private Button load_ply_button;
+	private Button save_point_ply_button;
+
 
 	// minecraft controls / toggle button experiment
 	private SimpleBooleanModel toggle_minecraft;
@@ -46,6 +48,7 @@ public class InstructionalOverlay extends Widget {
 	private Button load_cinematics_button;
 
 	private Button save_cinematics_button;
+
 
 	public void setPointerToMainProgram(Main m) {
 		main_program = m;
@@ -70,7 +73,8 @@ public class InstructionalOverlay extends Widget {
 		load_ply_button = new Button("Load ply");
 		save_cinematics_button = new Button("Save Scene");
 		load_cinematics_button = new Button("Load Scene");
-
+		save_point_ply_button = new Button("Save Pt Cloud");
+		
 		// minecraft toggle setup
 		toggle_minecraft = new SimpleBooleanModel();
 		toggle_minecraft.setValue(Main.minecraft_flight);
@@ -119,6 +123,12 @@ public class InstructionalOverlay extends Widget {
 				Save.saveModel();
 			}
 		});
+		
+		save_point_ply_button.addCallback(new Runnable() {
+			public void run() {
+				Save.savePointcloudPly();
+			}
+		});
 
 		load_button.addCallback(new Runnable() {
 			public void run() {
@@ -165,6 +175,7 @@ public class InstructionalOverlay extends Widget {
 		add(load_button);
 		add(export_button);
 		add(load_ply_button);
+		add(save_point_ply_button);
 
 		add(toggle_minecraft_label);
 		add(toggle_minecraft_checkbox);
@@ -234,5 +245,11 @@ public class InstructionalOverlay extends Widget {
 		toggle_cinematics_label.setPosition(
 				toggle_cinematics_checkbox.getInnerX() + 30,
 				toggle_cinematics_checkbox.getInnerY());
+		
+		save_point_ply_button.adjustSize();
+		save_point_ply_button.setPosition(
+				export_button.getX() + export_button.getWidth() + 10,
+				export_button.getY() + 40);
+
 	}
 }

@@ -89,7 +89,9 @@ import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
 
+import edu.washington.cs.games.ktuite.pointcraft.PointStore.Camera;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Ground;
+import edu.washington.cs.games.ktuite.pointcraft.geometry.PolygonSampler;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Primitive;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Scaffold;
 import edu.washington.cs.games.ktuite.pointcraft.gui.GuiManager;
@@ -194,7 +196,7 @@ public class Main {
 
 	// level, kind of like state
 	public BaseLevel current_level = null;
-	private static FloatBuffer rotated_pointcloud_matrix;
+	static FloatBuffer rotated_pointcloud_matrix;
 
 	public enum GunMode {
 		DISABLED, PELLET, ORB, LINE, VERTICAL_LINE, PLANE, ARC, POLYGON, DESTRUCTOR, COMBINE, DRAG_TO_EDIT, CAMERA, DIRECTION_PICKER, LASER_BEAM, TRIANGULATION, TUTORIAL, PAINTBRUSH, BOX, CIRCLE, CYLINDER, DOME, EXTRUDE_POLYGON, EXTRUDE_LINE
@@ -219,8 +221,14 @@ public class Main {
 			main.initGraphics();
 			main.initGameVariables();
 
-			main.current_level = new CustomLevelFromFile(main, "/Users/ktuite/Desktop/trevi-flickr/trevi.bundle", 1f);
-
+			/*
+			main.current_level = new CustomLevelFromFile(main,
+					"/Users/ktuite/Desktop/trevi-flickr/trevi.bundle", 5f);
+			FaceManager
+					.loadFacesFromFile("/Users/ktuite/Desktop/trevi-flickr/trevi-people/faceList.txt");
+			*/
+			main.current_level = new CustomLevelFromFile(main, "data/uris.ply", 1f);
+					//"/Users/ktuite/Desktop/sistine_chapel.ply", 1f);
 			ModelingGun.useGun();
 
 			main.run();
@@ -505,20 +513,15 @@ public class Main {
 				vel.z += Math.cos(pan_angle * 3.14159 / 180f) * walkforce
 						* pellet_scale;
 			}
-		} 
-		/*else {
-			if (Keyboard.isKeyDown(Keyboard.KEY_W)
-					|| Keyboard.isKeyDown(Keyboard.KEY_UP)) {
-				Vector3f.add(vel, (Vector3f) gun_direction.scale(walkforce),
-						vel);
-			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_S)
-					|| Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
-				Vector3f.add(vel, (Vector3f) gun_direction.scale(-walkforce),
-						vel);
-			}
 		}
-		*/
+		/*
+		 * else { if (Keyboard.isKeyDown(Keyboard.KEY_W) ||
+		 * Keyboard.isKeyDown(Keyboard.KEY_UP)) { Vector3f.add(vel, (Vector3f)
+		 * gun_direction.scale(walkforce), vel); } if
+		 * (Keyboard.isKeyDown(Keyboard.KEY_S) ||
+		 * Keyboard.isKeyDown(Keyboard.KEY_DOWN)) { Vector3f.add(vel, (Vector3f)
+		 * gun_direction.scale(-walkforce), vel); } }
+		 */
 		if (Keyboard.isKeyDown(Keyboard.KEY_A)
 				|| Keyboard.isKeyDown(Keyboard.KEY_LEFT)) {
 			vel.x -= Math.cos(pan_angle * 3.14159 / 180f) * walkforce / 2
@@ -682,6 +685,10 @@ public class Main {
 
 					if (Keyboard.getEventKey() == Keyboard.KEY_V) {
 						makeCurrentPositionOrigin();
+					}
+					
+					if (Keyboard.getEventKey() == Keyboard.KEY_J) {
+						PolygonSampler.sampleAllPolygons();
 					}
 
 					if (Keyboard.getEventKey() >= Keyboard.KEY_1
@@ -895,15 +902,16 @@ public class Main {
 
 		}
 
+		//glDisable(GL_DEPTH_TEST);
+		if (draw_matches) {
+			drawMatches();
+		}
+
+		
 		if (draw_cameras) {
 			drawCameraFrusta();
 		}
 		
-		if (draw_matches){
-			drawMatches();
-		}
-		
-
 		glClearColor(.3f, .3f, .3f, 1.0f);
 
 		for (Primitive geom : geometry) {
@@ -954,7 +962,6 @@ public class Main {
 			gui_manager.updateOnscreenGui();
 		}
 
-		
 		Display.update();
 	}
 
@@ -1022,6 +1029,7 @@ public class Main {
 	}
 
 	private void drawCameraFrusta() {
+		
 		glColor4f(.3f, .3f, .3f, .6f);
 		glLineWidth(1);
 
@@ -1031,9 +1039,19 @@ public class Main {
 		glDrawArrays(GL_LINES, 0, PointStore.num_cameras * 16);
 
 		glDisableClientState(GL_VERTEX_ARRAY);
+
+		for (Camera c : PointStore.cameras) {
+			if (c.draw) {
+				c.draw();
+			}
+		}
+		
+		FaceManager.drawFaces();
 	}
-	
+
 	private void drawMatches() {
+		// test code... for visualizng matches in bundle files only
+		/*
 		glColor4f(.9f, .3f, .4f, .3f);
 		glLineWidth(2);
 
@@ -1043,6 +1061,7 @@ public class Main {
 		glDrawArrays(GL_LINES, 0, PointStore.num_camera_matches * 2);
 
 		glDisableClientState(GL_VERTEX_ARRAY);
+		*/
 	}
 
 	private void drawPellets() {

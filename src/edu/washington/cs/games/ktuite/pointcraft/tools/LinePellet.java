@@ -68,7 +68,7 @@ public class LinePellet extends Pellet {
 					neighbor_pellet.ref_count++;
 					ActionTracker.newLinePellet(this);
 					current_line.add(this);
-
+					
 					current_line.fitLine();
 					if (current_line.pellets.size() >= 2)
 						ActionTracker.newLine(current_line);

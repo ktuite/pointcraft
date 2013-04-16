@@ -20,6 +20,8 @@ import org.lwjgl.util.vector.Matrix3f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 
+import static org.lwjgl.opengl.GL11.*;
+
 import toxi.geom.PointOctree;
 import toxi.geom.Vec3D;
 
@@ -28,6 +30,7 @@ public class PointStore {
 	// stuff about the point cloud
 	public static int num_points, num_cameras;
 	public static FloatBuffer point_positions;
+	public static FloatBuffer point_normals;
 	public static ByteBuffer point_colors;
 	private static ByteBuffer backup_colors;
 	// VBO state tracking
@@ -41,7 +44,8 @@ public class PointStore {
 			-1 * Float.MAX_VALUE, -1 * Float.MAX_VALUE };
 	private static Map<Vec3D, Integer> index_map;
 	public static FloatBuffer camera_frusta_lines;
-	private static List<Camera> cameras = new LinkedList<Camera>();
+	public static LinkedList<Camera> cameras = new LinkedList<Camera>();
+	public static HashMap<String, Camera> cameraMap = new HashMap<String, Camera>();
 	public static boolean[][] camera_matches;
 	public static FloatBuffer camera_match_lines;
 	public static int num_camera_matches;
@@ -49,14 +53,19 @@ public class PointStore {
 	// draw pts as black or greenish based on bundle track length
 	private static boolean draw_spooky_track_colors = false;
 
-	private static class Camera {
+	public static class Camera {
 		Matrix3f r;
-		@SuppressWarnings("unused")
 		Vector3f t;
 		Vector3f pos;
 		float focal_length;
 		int w;
 		int h;
+		public Vector3f pt0;
+		public Vector3f pt1;
+		public Vector3f pt2;
+		public Vector3f pt3;
+		public Vector3f center;
+		public boolean draw = false;
 
 		public Camera(float focal_length2, Matrix3f r2, Vector3f t2,
 				Vector3f pos2, int w2, int h2) {
@@ -67,6 +76,40 @@ public class PointStore {
 			w = w2;
 			h = h2;
 		}
+
+		public void setFrustaVertices(Vector3f pt0, Vector3f pt1, Vector3f pt2,
+				Vector3f pt3, Vector3f pt4) {
+			this.pt0 = pt0;
+			this.pt1 = pt1;
+			this.pt2 = pt2;
+			this.pt3 = pt3;
+			this.center= pt4;
+		}
+
+		public void draw() {
+
+			glColor3f(.3f, 0, .6f);
+			glLineWidth(2);
+			glBegin(GL_LINES);
+			glVertex3f(center.x, center.y, center.z);
+			glVertex3f(pt0.x, pt0.y, pt0.z);
+			glVertex3f(center.x, center.y, center.z);
+			glVertex3f(pt1.x, pt1.y, pt1.z);
+			glVertex3f(center.x, center.y, center.z);
+			glVertex3f(pt2.x, pt2.y, pt2.z);
+			glVertex3f(center.x, center.y, center.z);
+			glVertex3f(pt3.x, pt3.y, pt3.z);
+			glEnd();
+			
+			glBegin(GL_LINE_LOOP);
+			glVertex3f(pt0.x, pt0.y, pt0.z);
+			glVertex3f(pt1.x, pt1.y, pt1.z);
+			glVertex3f(pt2.x, pt2.y, pt2.z);
+			glVertex3f(pt3.x, pt3.y, pt3.z);
+			glEnd();
+			
+
+		}
 	}
 
 	private static void initBuffers() {
@@ -75,11 +118,13 @@ public class PointStore {
 
 		markPointVBODirty();
 		point_positions = BufferUtils.createFloatBuffer(num_points * 3);
+		point_normals = BufferUtils.createFloatBuffer(num_points * 3);
 		point_properties = BufferUtils.createByteBuffer(num_points * 3);
 		camera_frusta_lines = BufferUtils
 				.createFloatBuffer(num_cameras * 3 * 16);
 		point_colors.rewind();
 		point_positions.rewind();
+		point_normals.rewind();
 		point_properties.rewind();
 
 		for (int i = 0; i < num_points; i++) {
@@ -333,6 +378,45 @@ public class PointStore {
 		}
 	}
 
+	private static Matrix3f testRotate() {
+		Vector3f p1 = new Vector3f(-0.005176955f, 0.0143530285f,-0.013278407f);
+		Vector3f p2 = new Vector3f(-0.021221291f, -0.03875064f, -0.010480127f);
+		Vector3f v1 = new Vector3f(0,1,0);
+		Vector3f v2 = Vector3f.sub(p1, p2, null);
+		v2.normalise();
+		Vector3f v3 = Vector3f.cross(v1, v2, null);
+		v3.normalise();
+		Vector3f v4 = Vector3f.cross(v3, v1, null);
+		float cos = Vector3f.dot(v2, v1);
+		float sin = Vector3f.dot(v2, v4);
+		
+		Matrix3f m1 = new Matrix3f();
+		m1.m00 = v1.x;
+		m1.m10 = v1.y;
+		m1.m20 = v1.z;
+		m1.m01 = v4.x;
+		m1.m11 = v4.y;
+		m1.m21 = v4.z;
+		m1.m02 = v3.x;
+		m1.m12 = v3.y;
+		m1.m22 = v3.z;
+		
+		Matrix3f m2 = new Matrix3f();
+		m2.setIdentity();
+		m2.m00 = cos;
+		m2.m10 = sin;
+		m2.m01 = -sin;
+		m2.m11 = cos;
+		
+		Matrix3f m1i = new Matrix3f();
+		m1i.load(m1);
+		m1i.invert();
+		
+		Matrix3f t = Matrix3f.mul(Matrix3f.mul(m1i, m2, null), m1, null);
+		
+		return t;
+	}
+
 	public static int getNearestPoint(float x, float y, float z, float radius) {
 		ArrayList<Vec3D> results = tree.getPointsWithinSphere(
 				new Vec3D(x, y, z), radius);
@@ -426,8 +510,10 @@ public class PointStore {
 		try {
 			int r_idx, g_idx, b_idx, a_idx;
 			int x_idx, y_idx, z_idx;
+			int nx_idx, ny_idx, nz_idx;
 			r_idx = g_idx = b_idx = x_idx = y_idx = z_idx = 0;
 			a_idx = -1;
+			nx_idx = ny_idx = nz_idx = 0;
 
 			initPointStore();
 
@@ -477,6 +563,15 @@ public class PointStore {
 					a_idx = count;
 					len -= 3;
 				}
+				else if (line.contains(" nx")) {
+					nx_idx = count;
+				}
+				else if (line.contains(" ny")) {
+					ny_idx = count;
+				}
+				else if (line.contains(" nz")) {
+					nz_idx = count;
+				}
 
 				if (line.contains("property") && vert_properties_started
 						&& !vert_properties_finished)
@@ -510,7 +605,18 @@ public class PointStore {
 					point_positions.put(Float.parseFloat(split_line[x_idx]));
 					point_positions.put(Float.parseFloat(split_line[y_idx]));
 					point_positions.put(Float.parseFloat(split_line[z_idx]));
-
+					
+					if (nx_idx > 0 || ny_idx > 0 || nz_idx > 0) {
+						point_normals.put(Float.parseFloat(split_line[nx_idx]));
+						point_normals.put(Float.parseFloat(split_line[ny_idx]));
+						point_normals.put(Float.parseFloat(split_line[nz_idx]));
+					}
+					else {
+						point_normals.put(0f);
+						point_normals.put(1f);
+						point_normals.put(0f);
+					}
+					
 					for (int k = 0; k < 3; k++) {
 						if (point_positions.get(i * 3 + k) < min_corner[k]) {
 							min_corner[k] = (float) point_positions.get(i * 3
@@ -549,6 +655,7 @@ public class PointStore {
 
 					byte r = 0, g = 0, b = 0;
 					float x = 0, y = 0, z = 0;
+					float nx = 0, ny = 1, nz = 0;
 					for (int i = 0; i < count; i++) {
 						if (i == r_idx) {
 							r = bb.get();
@@ -567,6 +674,12 @@ public class PointStore {
 							y = bb.getFloat();
 						} else if (i == z_idx) {
 							z = bb.getFloat();
+						} else if (i == nx_idx) {
+							nx = bb.getFloat();
+						} else if (i == ny_idx) {
+							ny = bb.getFloat();
+						} else if (i == nz_idx) {
+							nz = bb.getFloat();
 						} else {
 							bb.getFloat();
 							// System.out.print(f + ", ");
@@ -582,6 +695,10 @@ public class PointStore {
 					point_positions.put(x);
 					point_positions.put(y);
 					point_positions.put(z);
+					
+					point_normals.put(nx);
+					point_normals.put(ny);
+					point_normals.put(nz);
 
 					for (int k = 0; k < 3; k++) {
 						if (point_positions.get(h * 3 + k) < min_corner[k]) {
@@ -605,7 +722,6 @@ public class PointStore {
 				stream.close();
 			}
 
-			
 			point_colors.rewind();
 			point_positions.rewind();
 		} catch (IOException e) {
@@ -648,6 +764,12 @@ public class PointStore {
 		initBuffers();
 
 		Main.draw_cameras = true;
+		
+		Matrix3f testRotate = testRotate();
+		testRotate.setIdentity();
+		Matrix3f testRotateTrans = new Matrix3f();
+		testRotateTrans.load(testRotate);
+		testRotateTrans.transpose();
 
 		for (int i = 0; i < num_cameras; i++) {
 			float focal_length;
@@ -657,9 +779,11 @@ public class PointStore {
 			String[] s;
 			int w = 1600; // default image width
 			int h = 1200; // and height
+			String path = "";
 
 			if (version == "0.5") {
 				s = buf.readLine().split("\\s+"); // file name
+				path = s[0];
 				w = Integer.parseInt(s[1]);
 				h = Integer.parseInt(s[2]);
 			}
@@ -689,20 +813,27 @@ public class PointStore {
 
 			s = buf.readLine().split("\\s+");
 
+			Matrix3f.mul(r, testRotateTrans, r);
+			
 			t.x = Float.parseFloat(s[0]);
 			t.y = Float.parseFloat(s[1]);
 			t.z = Float.parseFloat(s[2]);
+			
+			//Matrix3f.transform(testRotate, t, t);
 
 			Vector3f pos = (Vector3f) Matrix3f.transform(
 					Matrix3f.transpose(r, null), t, null).scale(-1f);
 
-			cameras.add(new Camera(focal_length, r, t, pos, w, h));
+			Camera c = new Camera(focal_length, r, t, pos, w, h);
+			cameras.add(c);
+			cameraMap.put(path, c);
 		}
 
 		for (int i = 0; i < num_points; i++) {
 			if (version == "0.5") {
 				buf.readLine(); // player id who owns the point
 			}
+			System.out.println("point number: " + i);
 			String[] point = buf.readLine().split("\\s+");
 			String[] color = buf.readLine().split("\\s+");
 			String[] tracks = buf.readLine().split("\\s+");
@@ -750,9 +881,16 @@ public class PointStore {
 			else
 				point_colors.put((byte) 0);
 
+			Vector3f p = new Vector3f(Float.parseFloat(point[0]), Float.parseFloat(point[1]), Float.parseFloat(point[2]));
+			Matrix3f.transform(testRotate, p, p);
+			point_positions.put(p.x);
+			point_positions.put(p.y);
+			point_positions.put(p.z);
+			/*
 			point_positions.put(Float.parseFloat(point[0]));
 			point_positions.put(Float.parseFloat(point[1]));
 			point_positions.put(Float.parseFloat(point[2]));
+			*/
 
 			for (int k = 0; k < 3; k++) {
 				if (point_positions.get(i * 3 + k) < min_corner[k]) {
@@ -827,6 +965,8 @@ public class PointStore {
 			// center of plane
 			Vector3f pt4 = new Vector3f(0, 0, -ref_length * scale);
 			pt4 = Vector3f.add(Matrix3f.transform(c.r, pt4, null), pos, null);
+
+			c.setFrustaVertices(pt0, pt1, pt2, pt3, pos);
 
 			int n = 16;
 			addFrustaVertex(i, n, 0, pos);
