@@ -9,12 +9,13 @@
 	<classpathentry kind="lib" path="lib/slick-util.jar"/>
 	<classpathentry kind="lib" path="lib/mesh.jar"/>
 	<classpathentry kind="lib" path="lib/quickhull3d.1.4.jar"/>
-	<classpathentry kind="lib" path="lib/lwjgl-2.8.2/jar/lwjgl_util.jar"/>
-	<classpathentry kind="lib" path="lib/lwjgl-2.8.2/jar/lwjgl.jar">
+	<classpathentry kind="lib" path="lib/toxiclibscore.jar"/>
+	<classpathentry kind="lib" path="lib/Jama-1.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/lwjgl-2.8.4/jar/lwjgl_util.jar"/>
+	<classpathentry kind="lib" path="lib/lwjgl-2.8.4/jar/lwjgl.jar">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="PointCraft/lib/lwjgl-2.8.2/native/linux"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="PointCraft/lib/lwjgl-2.8.4/native/macosx"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/toxiclibscore.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

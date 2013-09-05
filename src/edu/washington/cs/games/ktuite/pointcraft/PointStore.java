@@ -629,9 +629,10 @@ public class PointStore {
 					}
 					line = buf.readLine();
 					i++;
-					if (i % 10000 == 0)
+					if (i % 10000 == 0){
 						System.out.println("points loaded: " + i + "/"
 								+ num_points);
+					}
 				}
 			} else {
 				// advance the binary thing forward past the ascii
@@ -902,7 +903,9 @@ public class PointStore {
 			}
 		}
 
-		buildCameraMatchLines();
+		if (Main.draw_matches){
+			buildCameraMatchLines();
+		}
 
 		buildCameraFrustaWithWorldScale();
 

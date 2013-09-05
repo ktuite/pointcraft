@@ -96,7 +96,6 @@ import edu.washington.cs.games.ktuite.pointcraft.geometry.Primitive;
 import edu.washington.cs.games.ktuite.pointcraft.geometry.Scaffold;
 import edu.washington.cs.games.ktuite.pointcraft.gui.GuiManager;
 import edu.washington.cs.games.ktuite.pointcraft.levels.BaseLevel;
-import edu.washington.cs.games.ktuite.pointcraft.levels.CustomLevelFromFile;
 import edu.washington.cs.games.ktuite.pointcraft.tools.BoxPellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.CirclePellet;
 import edu.washington.cs.games.ktuite.pointcraft.tools.CylinderPellet;
@@ -158,7 +157,7 @@ public class Main {
 	private double max_speed = 1 * world_scale;
 	private Texture skybox = null;
 	public static boolean minecraft_flight = false;
-	public static boolean use_local_textures = false;
+	public static boolean use_local_textures = true;
 
 	// stuff for fast rendering of the point cloud
 	public static boolean USE_VBO = false;
@@ -187,7 +186,7 @@ public class Main {
 	public static boolean draw_textures = true;
 	public static boolean draw_polygons = true;
 	public static boolean draw_cameras = false;
-	public static boolean draw_matches = true;
+	public static boolean draw_matches = false;
 	public static boolean rotate_world = false;
 
 	// central classes for managing the GUI and the interaction with the server
@@ -213,8 +212,7 @@ public class Main {
 		try {
 			Main main = new Main();
 
-			server = new ServerCommunicator(
-					"http://phci03.cs.washington.edu/pointcraft/");
+			server = new ServerCommunicator("");
 
 			main.initDisplay();
 			main.initGUI();
@@ -227,10 +225,15 @@ public class Main {
 			FaceManager
 					.loadFacesFromFile("/Users/ktuite/Desktop/trevi-flickr/trevi-people/faceList.txt");
 			*/
-			main.current_level = new CustomLevelFromFile(main, "data/uris.ply", 1f);
-					//"/Users/ktuite/Desktop/sistine_chapel.ply", 1f);
-			ModelingGun.useGun();
+			main.current_level = new BaseLevel(main);
+					
+					//new CustomLevelFromFile(main, //"/Users/ktuite/Code/CollectionFlow/model/grid-igor2.ply", 10f);
+					//"data/lewis.bundle", 1f);
+					//"data/lewis_hall.ply", 1f);
+			ModelingGun.useGun(main);
 
+
+			
 			main.run();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -250,7 +253,7 @@ public class Main {
 			if (IS_SIGGRAPH_DEMO) {
 				Display.setDisplayMode(new DisplayMode(1280, 720));
 			} else {
-				Display.setDisplayMode(new DisplayMode(1200, 900)); // 800x600
+				Display.setDisplayMode(new DisplayMode(1400, 1000)); // 800x600
 			}
 			Display.setResizable(true);
 			Display.setVSyncEnabled(true);
@@ -1051,7 +1054,7 @@ public class Main {
 
 	private void drawMatches() {
 		// test code... for visualizng matches in bundle files only
-		/*
+		
 		glColor4f(.9f, .3f, .4f, .3f);
 		glLineWidth(2);
 
@@ -1061,7 +1064,7 @@ public class Main {
 		glDrawArrays(GL_LINES, 0, PointStore.num_camera_matches * 2);
 
 		glDisableClientState(GL_VERTEX_ARRAY);
-		*/
+		
 	}
 
 	private void drawPellets() {

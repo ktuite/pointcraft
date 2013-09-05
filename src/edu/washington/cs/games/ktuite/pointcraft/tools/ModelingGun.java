@@ -6,6 +6,8 @@ import edu.washington.cs.games.ktuite.pointcraft.Main;
 import edu.washington.cs.games.ktuite.pointcraft.Main.GunMode;
 
 public class ModelingGun {
+	
+	static Main main_prog;
 
 	public enum InteractionMode {
 		PELLET_GUN, LASER, ORB, EDITING, PAINTBRUSH
@@ -23,12 +25,14 @@ public class ModelingGun {
 		OrbPellet.orb_pellet = new OrbPellet(Main.all_pellets_in_world);
 	}
 
-	public static void useGun() {
+	public static void useGun(Main main) {
+		main_prog = main;
 		setInteractionMode(ModelingGun.InteractionMode.PELLET_GUN);
 		init();
 	}
 	
-	public static void useLaser(){
+	public static void useLaser(Main main) {
+		main_prog = main;
 		setInteractionMode(ModelingGun.InteractionMode.LASER);
 		init();
 	}
@@ -76,12 +80,17 @@ public class ModelingGun {
 
 	private static void placePellet() {
 		if (InteractionMode.LASER == mode && LaserBeamPellet.laser_beam_pellet.visible){
-			Pellet pellet = makeNewPellet();
-			pellet.pos.set(LaserBeamPellet.laser_beam_pellet.pos);
-			// pellet.constructing = true;
-			pellet.max_radius = pellet.radius; // keep it from growing
-			Main.all_pellets_in_world.add(pellet);
-			Main.server.pelletFiredActionUpdate(pellet.getType());
+			if (Main.which_gun == GunMode.CAMERA) {
+				CameraGun.takeSnapshot(main_prog);
+			}
+			else {
+				Pellet pellet = makeNewPellet();
+				pellet.pos.set(LaserBeamPellet.laser_beam_pellet.pos);
+				// pellet.constructing = true;
+				pellet.max_radius = pellet.radius; // keep it from growing
+				Main.all_pellets_in_world.add(pellet);
+				Main.server.pelletFiredActionUpdate(pellet.getType());
+			}
 		}
 		else if (InteractionMode.PAINTBRUSH == mode && PaintbrushPellet.laser_beam_pellet.visible){
 			Pellet pellet = makeNewPellet();
@@ -96,16 +105,21 @@ public class ModelingGun {
 	private static void firePellet() {
 		// TODO Auto-generated method stub
 		System.out.println("shooting gun");
-		Pellet pellet = makeNewPellet();
-
-		Main.computeGunDirection();
-		pellet.pos.set(Main.getTransformedPos());
-		pellet.vel.set(Main.gun_direction);
-		pellet.vel.scale(Main.gun_speed);
-		pellet.vel.scale(Main.pellet_scale);
-
-		Main.all_pellets_in_world.add(pellet);
-		Main.server.pelletFiredActionUpdate(pellet.getType());
+		if (Main.which_gun == GunMode.CAMERA) {
+			CameraGun.takeSnapshot(main_prog);
+		}
+		else {
+			Pellet pellet = makeNewPellet();
+	
+			Main.computeGunDirection();
+			pellet.pos.set(Main.getTransformedPos());
+			pellet.vel.set(Main.gun_direction);
+			pellet.vel.scale(Main.gun_speed);
+			pellet.vel.scale(Main.pellet_scale);
+	
+			Main.all_pellets_in_world.add(pellet);
+			Main.server.pelletFiredActionUpdate(pellet.getType());
+		}
 	}
 
 	public static Pellet makeNewPellet() {

@@ -49,7 +49,7 @@ public class CameraGun {
 	public static boolean upload(BufferedImage bi, String basename) throws Exception {
 		final String BOUNDARY = "====CATSCATSCATS====";
 		//URL url = new URL("http://www.postbin.org/q7oqzc");
-		URL url = new URL("http://phci03.cs.washington.edu/pointcraft/upload.php?player_id="+Main.server.player_id+"&cloud_id="+Main.server.cloud_id);
+		URL url = new URL(Main.server.server_url + "upload.php?player_id="+Main.server.player_id+"&cloud_id="+Main.server.cloud_id);
 		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 		conn.setDoOutput(true);
 		conn.setRequestMethod("POST");
@@ -74,8 +74,9 @@ public class CameraGun {
 		
 		outStream.writeBytes("--"+BOUNDARY+"--\r\n");
 		
+		System.out.println("upload response code " + conn.getResponseCode());
 		
-		if(conn.getResponseCode() == 200) {
+		if(conn.getResponseCode() == 200) {	
 			return true;
 		} else {
 			return false;
@@ -85,7 +86,7 @@ public class CameraGun {
 	public static boolean uploadBitmap(File image_file) throws Exception {
 		final String BOUNDARY = "====CATSCATSCATS==";
 		//URL url = new URL("http://www.postbin.org/q7oqzc");
-		URL url = new URL("http://phci03.cs.washington.edu/pointcraft/upload.php?player_id="+Main.server.player_id);
+		URL url = new URL(Main.server.server_url + "/upload.php?player_id="+Main.server.player_id);
 		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 		conn.setDoOutput(true);
 		conn.setRequestMethod("POST");

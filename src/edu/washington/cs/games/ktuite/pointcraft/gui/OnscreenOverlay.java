@@ -71,7 +71,7 @@ public class OnscreenOverlay extends Widget {
 		full_frame.setTitle("Drag and drop tools into your tool palette:");
 		full_frame.setResizableAxis(ResizableFrame.ResizableAxis.NONE);
 
-		full_inventory_panel.add(level_selection_button);
+		//full_inventory_panel.add(level_selection_button);
 		full_inventory_panel.add(instructions_button);
 		full_frame.add(full_inventory_panel);
 		add(full_frame);
@@ -140,6 +140,7 @@ public class OnscreenOverlay extends Widget {
 						- instructions_button.getWidth(),
 				full_frame.getInnerY());
 
+			
 		level_selection_button.adjustSize();
 		level_selection_button
 				.setPosition(instructions_button.getInnerX()

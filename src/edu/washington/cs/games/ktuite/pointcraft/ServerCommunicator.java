@@ -15,7 +15,7 @@ import edu.washington.cs.games.ktuite.pointcraft.tools.Pellet;
 public class ServerCommunicator {
 
 	public int player_id, session_id;
-	private String server_url;
+	public String server_url;
 	public int cloud_id = 0;
 	public String texture_server = null;
 	public boolean is_up_to_date = false;
@@ -41,7 +41,7 @@ public class ServerCommunicator {
 		
 		if (is_connected && GuiManager.is_logged_in){
 			//getKathleenSession();
-			getDemoSession(0);
+			getDemoSession(330);
 		}
 
 		/*

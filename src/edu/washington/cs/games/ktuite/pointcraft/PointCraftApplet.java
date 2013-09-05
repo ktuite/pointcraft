@@ -53,7 +53,7 @@ public class PointCraftApplet extends Applet {
 
 				main.current_level = new CubeLevel(main);
 
-				ModelingGun.useLaser();
+				ModelingGun.useLaser(main);
 
 				main.run();
 			}
